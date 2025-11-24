@@ -8,7 +8,6 @@ export default function CreateForm(){
     return(
         <DialogForm
         id="create-trigger"
-        title="Create Member"
         Trigger = {
             <Button
             className="

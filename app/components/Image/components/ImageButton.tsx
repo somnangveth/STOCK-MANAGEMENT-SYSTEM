@@ -36,7 +36,7 @@ export default function UploadImageButton({ imageUrls, setImageUrls }: UploadIma
       <Button
         type="button"
         onClick={() => imageInputRef.current?.click()}
-        className="w-35 h-50 p-2 bg-gray-300 flex items-center justify-center hover:bg-gray-400 transition-colors"
+        className="w-35 h-35 p-2 bg-gray-300 flex items-center justify-center hover:bg-gray-400 transition-colors"
       >
         <FaPlus className="text-gray-700 text-5xl" />
       </Button>
@@ -46,8 +46,8 @@ export default function UploadImageButton({ imageUrls, setImageUrls }: UploadIma
           <Image
             src={imageUrls[0]}
             className="border border-gray-500 rounded-md"
-            width={150}
-            height={250}
+            width={100}
+            height={100}
             alt="uploaded-image"
           />
         )}

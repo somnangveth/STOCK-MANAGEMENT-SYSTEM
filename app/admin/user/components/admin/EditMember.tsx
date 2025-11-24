@@ -9,15 +9,14 @@ export default function EditMember({admin}: {admin: Admin}){
     return(
         <DialogForm
         id="trigger"
-        title="Create Member"
         Trigger = {
             <Button
             className="
+            font-semibold
             text-blue-700
-            border border-blue-500
             bg-blue-100
-            px-5
-            rounded-xl p-1
+            px-10
+            rounded-xl
             hover:bg-blue-500 hover:text-white"
             >
                 Edit

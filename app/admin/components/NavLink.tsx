@@ -12,12 +12,28 @@ export default function NavLinks(){
             text: "Dashboard"
         },
         {
-            href: "/products",
+            href: "/admin/products",
             text: "Products",
         },
         {
             href: "/admin/user",
-            text: "User management"
+            text: "Users"
+        },
+        {
+            href: "admin/price",
+            text: "Price"
+        },
+        {
+            href: "admin/sales",
+            text: "Sales"
+        },
+        {
+            href: "/admin/stock",
+            text: "Stocks"
+        },
+        {
+            href: "/admin/vendors",
+            text: "Suppliers"
         }
     ];
 
@@ -34,7 +50,7 @@ export default function NavLinks(){
                     className={cn(
                         "flex items-center gap-2 p-2 justify-center",
                         {
-                            "bg-blue-100 dark:bg-blue-700 text-black":
+                            "bg-blue-100 dark:bg-blue-50 text-blue-700":
                             pathname === link.href,
                         }
                     )}>

@@ -14,7 +14,7 @@ export default function DialogForm({
     title,
     form,
 }: {
-    title: string,
+    title?: string,
     id: string,
     form: ReactNode,
     Trigger: ReactNode,

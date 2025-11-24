@@ -31,7 +31,8 @@ import ProfileButton from "@/app/components/Image/components/ProfileButton";
 
 const FormSchema = z.object({
     id: z.string().nonempty("ID is required"),
-    name: z.string().nonempty("Name is required"),
+    first_name: z.string().nonempty("Firstname is required"),
+    last_name: z.string().nonempty("Lastname is required"),
     profile_image: z.string(),
     email: z.string().email("Invalid email format"),
     password: z.string()
@@ -39,33 +40,77 @@ const FormSchema = z.object({
     confirm: z.string()
         .min(6, { message: "Password must be more than 6 characters" }),
     role: z.enum(["staff", "admin"]),
-    status: z.enum(["active", "resigned"]),
+    nationality: z.string().nonempty("Nationality must included"),
+    date_of_birth: z.date(),
+    martial_status: z.string(),
+    gender: z.enum(['Male', 'Female']),
+    primary_email_address: z.string(),
+    personal_email_address: z.string(),
+    primary_phone_number: z.string(),
 }).refine((data) => data.confirm === data.password, {
     message: "Password does not match",
     path: ["confirm"],
 });
 
 export default function MemberForm() {
-
+    //Hooks
+    const [currentStep, setCurrentStep] = useState(1);
     const [imageUrls, setImageUrls] = useState<string[]>([]);
     const [isPending, startTransition] = useTransition();
 
     const roles = ["admin", "staff"];
-    const statuses = ["active", "resigned"];
+    const genders = ['Male', 'Female'];
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             id: "",
-            name: "",
+            first_name: "",
+            last_name: "",
             profile_image: "",
             email: "",
             password: "",
             confirm: "",
             role: "staff",
-            status: "active",
+            gender: "Male",
+            nationality: "",
+            martial_status: "",
         },
     });
+
+    // Styling
+    const text = 'text-sm text-gray-500'
+
+    //Validate step 1 fields
+    async function validateStep1(){
+        const fieldsToValidate = [
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'password',
+            'confirm',
+            'role',
+            'nationality',
+            'date_of_birth',
+            'martial_status',
+            'gender',
+        ] as const;
+        const isValid = await form.trigger(fieldsToValidate);
+        return isValid;
+    }
+
+    async function handleNext(){
+        const isValid = await validateStep1();
+
+        if(isValid){
+            setCurrentStep(2);
+        }
+    }
+
+    function handBack(){
+        setCurrentStep(1)
+    }
 
     // Upload all images
     async function uploadAllImages() {
@@ -103,9 +148,10 @@ export default function MemberForm() {
                 if (error?.message) {
                     toast.error("Failed to create member!");
                 } else {
-                    document.getElementById("create-trigger")?.click(); // ✅ fixed missing ()
+                    document.getElementById("create-trigger")?.click(); 
                     toast.success("Member created successfully!");
                     form.reset(); 
+                    setCurrentStep(1);
                     setImageUrls([]);
                 }
             } catch (error: any) {
@@ -117,179 +163,353 @@ export default function MemberForm() {
     }
 
     return (
+        <div>
+            <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold">
+                    {currentStep === 1 ? "Personal Information" : "Contact Information"}
+                </h3>
+            </div>
+
         <Form {...form}>
             <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-2"
-            >
-                {/* Profile Image */}
-                <ProfileButton
-                    imageUrls={imageUrls}
-                    setImageUrls={setImageUrls}
-                />
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-2">
 
-                {/* ID + Name */}
-                <div className="flex gap-2">
-                    <FormField
+                {/* Personal Information */}
+                {currentStep === 1 && (
+                    <div className="space-y-1">
+                        <ProfileButton
+                        imageUrls={imageUrls}
+                        setImageUrls={setImageUrls}
+                        />
+
+                        {/* ID  */}
+                        <FormField
                         control={form.control}
                         name="id"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
-                                <FormLabel className="text-sm text-gray-500">ID</FormLabel>
+                                <FormLabel className={text}>ID: </FormLabel>
                                 <FormControl>
-                                    <Input type="text" {...field} />
+                                    <Input 
+                                    type="text"
+                                    {...field}
+                                    onChange={field.onChange}
+                                    />
                                 </FormControl>
-                                <FormMessage />
                             </FormItem>
                         )}
-                    />
+                        />
 
-                    <FormField
+                        {/* FirstName + LastName */}
+                        <div className="flex gap-2">
+                            {/* Firstname */}
+                        <FormField
                         control={form.control}
-                        name="name"
-                        render={({ field }) => (
+                        name="first_name"
+                        render={({field}) => (
                             <FormItem>
-                                <FormLabel className="text-sm text-gray-500">Name</FormLabel>
+                                <FormLabel className={text}>Firstname: </FormLabel>
                                 <FormControl>
-                                    <Input type="text" {...field} />
+                                    <Input
+                                    placeholder="Firstname"
+                                    type="text"
+                                    {...field}
+                                    onChange={field.onChange}/>
                                 </FormControl>
-                                <FormMessage />
                             </FormItem>
-                        )}
-                    />
-                </div>
+                        )}/>
 
-                {/* Email */}
-                <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-sm text-gray-500">Email</FormLabel>
-                            <FormControl>
-                                <Input type="email" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                        {/* Lastname */}
+                        <FormField
+                        control={form.control}
+                        name="last_name"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel className={text}>Lastname: </FormLabel>
+                                <FormControl>
+                                    <Input
+                                    placeholder="Lastname"
+                                    type="text"
+                                    {...field}
+                                    onChange={field.onChange}
+                                    />
+                                </FormControl>
+                            </FormItem>
+                        )}/>
+                        </div>
 
-                {/* Password */}
-                <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-sm text-gray-500">Password</FormLabel>
-                            <FormControl>
-                                <Input type="password" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                        {/* Nationality and Date of Birth */}
+                        <div>
+                            {/* Nationality */}
+                            <FormField
+                            control={form.control}
+                            name="nationality"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel className={text}>Nationality: </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                        placeholder="Nationality"
+                                        type="text"
+                                        {...field}
+                                        onChange={field.onChange}/>
+                                    </FormControl>
+                                </FormItem>
+                            )}/>
 
-                {/* Confirm Password */}
-                <FormField
-                    control={form.control}
-                    name="confirm"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-sm text-gray-500">Confirm Password</FormLabel>
-                            <FormControl>
-                                <Input type="password" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                            {/* Date of Birth */}
+                            <FormField
+                            control={form.control}
+                            name="date_of_birth"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel className={text}>Date of Birth: </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                        type="date"
+                                        placeholder="Date of Birth"
+                                        onChange={(e) => field.onChange(new Date(e.target.value))}
+                                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                                        />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}/>
+                        </div>
 
-                {/* Role */}
-                <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-sm text-gray-500">Role</FormLabel>
-                            <FormControl>
-                                <Select
-                                    onValueChange={field.onChange}
-                                    value={field.value}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a role" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {roles.map((role) => (
-                                            <SelectItem key={role} value={role}>
-                                                {role}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                        {/* Martial Status and Gender */}
+                        <div className="flex gap-2">
+                            {/* Martial Status */}
+                            <FormField
+                            control={form.control}
+                            name="martial_status"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel className={text}>Martial Status</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                        type="text"
+                                        {...field}
+                                        onChange={field.onChange}/>
+                                    </FormControl>
+                                </FormItem>
+                            )}/>
 
-                {/* Status */}
-                <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-sm text-gray-500">Status</FormLabel>
-                            <FormControl>
-                                <Select
-                                    onValueChange={field.onChange}
-                                    value={field.value}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {statuses.map((status) => (
-                                            <SelectItem key={status} value={status}>
-                                                {status}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                            {/* Gender */}
+                            <FormField
+                            control={form.control}
+                            name="gender"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel className={text}>Gender: </FormLabel>
+                                    <FormControl>
+                                        <Select
+                                        value={field.value}
+                                        onValueChange={field.onChange}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder=""/>
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {genders.map((gender) => (
+                                                   <SelectItem key={gender} value={gender}>
+                                                    {gender}
+                                                   </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                </FormItem>
+                            )}/>
+                        </div>
 
-                {/* Buttons */}
-                <div className="flex w-full justify-end gap-2">
-                    <Button
+                        {/* Role and Email */}
+                        <div className="flex gap-2">
+                            {/* Email */}
+                            <FormField
+                            control={form.control}
+                            name="email"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel className={text}>
+                                        Email: 
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                        type="text"
+                                        placeholder="example@gmail.com"
+                                        {...field}
+                                        onChange={field.onChange}/>
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}/>
+
+                            {/* Role */}
+                            <FormField
+                            control={form.control}
+                            name="role"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel className={text}>Role: </FormLabel>
+                                    <FormControl>
+                                        <Select
+                                        value={field.value}
+                                        onValueChange={field.onChange}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder=""/>
+                                                </SelectTrigger>
+                                            <SelectContent>
+                                                {roles.map((role) => (
+                                                    <SelectItem key={role} value={role}>
+                                                        {role}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                </FormItem>
+                            )}/>
+                        </div>
+
+                        {/* Password and Confirm */}
+                        <div className="flex gap-2">
+                            {/* Password */}
+                            <FormField
+                            control={form.control}
+                            name="password"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel className={text}>Password: </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                        type="password"
+                                        {...field}
+                                        onChange={field.onChange}/>
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}/>
+
+                            {/* Confirm */}
+                            <FormField
+                            control={form.control}
+                            name="confirm"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel className={text}>Confirm: </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                        type="password"
+                                        placeholder="confirm"
+                                        {...field}
+                                        onChange={field.onChange}/>
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}/>
+                        </div>
+                    </div>
+                )}
+
+                {currentStep === 2 && (
+                    <div className="space-y-2">
+                        {/* Primary Email */}
+                        <FormField
+                        control={form.control}
+                        name="primary_email_address"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel className={text}>Primary email address: </FormLabel>
+                                <FormControl>
+                                    <Input
+                                    placeholder="primary email address"
+                                    {...field}/>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}/>
+
+                        {/* Personal Email Address */}
+                        <FormField
+                        control={form.control}
+                        name="personal_email_address"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel className={text}>Personal email address: </FormLabel>
+                                <FormControl>
+                                    <Input
+                                    placeholder="Personal email address"
+                                    {...field}/>
+                                </FormControl>
+                            </FormItem>
+                        )}/>
+
+                        {/* Primary Phone Number */}
+                        <FormField
+                        control={form.control}
+                        name="primary_phone_number"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel className={text}>Primary phone number:</FormLabel>
+                                <FormControl>
+                                    <Input
+                                    placeholder="primary phone number"
+                                    {...field}/>
+                                </FormControl>
+                            </FormItem>
+                        )}/>
+                    </div>
+                )}
+
+                <div className="flex w-full justify-end gap-2 pt-4">
+                    {currentStep === 1 ? (
+                        <>
+                        <Button
                         type="button"
                         className="bg-white border border-gray-500 rounded-xl text-black hover:text-white"
-                        onClick={() => document.getElementById("create-trigger")?.click()}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
+                        onClick={() => document.getElementById('create-trigger')?.click()}>
+                            Cancel
+                        </Button>
+                        <Button
+                        type="button"
+                        onClick={handleNext}
+                        className={cn(
+                            "border border-blue-700 text-blue-700 bg-blue-100 rounded-xl",
+                            "hover:bg-blue-500 hover:text-white"
+                        )}>
+                            Next
+                        </Button>
+                        </>
+                    ): (
+                        <>
+                        <Button
+                        type="button"
+                        onClick={handBack}>
+                            Back
+                        </Button>
+                        <Button
                         type="submit"
-                        disabled={isPending}
+                        disabled= {isPending}
                         className={cn(
                             "border border-blue-700 text-blue-700 bg-blue-100 rounded-xl",
                             "hover:bg-blue-500 hover:text-white"
                         )}
-                    >
-                        {isPending ? (
-                            <>
-                                <AiOutlineLoading3Quarters className="inline-block animate-spin mr-2" />
+                        >
+                            {isPending ? (
+                                <>
+                                <AiOutlineLoading3Quarters className="inline-block animate-spin mr-2"/>
                                 Creating...
-                            </>
-                        ) : (
-                            "Create Member"
-                        )}
-                    </Button>
+                                </>
+                            ): (
+                                "Create Member"
+                            )}
+                        </Button>
+                        </>
+                    )}
                 </div>
             </form>
         </Form>
+        </div>
     );
 }
