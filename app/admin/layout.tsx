@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { SideBar } from "./components/SideNav";
+import { SideBar } from "../components/sidebar/SideNav";
 import { checkUserRole } from "@/lib/auth/roles";
 
 

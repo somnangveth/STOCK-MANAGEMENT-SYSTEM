@@ -1,0 +1,13 @@
+export type ProductBatch = {
+    batch_number?: string;
+    manufacture_date?: Date;
+    expiry_date?:Date;
+    cost_price?: number;
+    recieved_date?: Date;
+    status?: 'active' | 'expired' | 'dispose' | 'returned';
+    note?: string;
+    quantity?: number;
+    quantity_remaining?: number;
+    packages_recieved?: number;
+    units_per_package?: number;
+}

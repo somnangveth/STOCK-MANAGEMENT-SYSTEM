@@ -1,0 +1,143 @@
+'use client';
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
+
+export default function NavLinks(){
+    const pathname = usePathname();
+    const [isProductsOpen, setIsProductsOpen] = useState(
+        pathname.startsWith('/admin/products') ||
+        pathname.startsWith('/admin/association') ||
+        pathname.startsWith('/admin/stock')
+    );
+
+    const links =[
+        {
+            href: '/admin',
+            text: 'Dashboard'
+        },
+        {
+            href: '/admin/user',
+            text: 'Users'
+        },
+        {
+            href: '/admin/price',
+            text: 'Price',
+        },
+        {
+            href: '/admin/sales',
+            text: 'Sales',
+        },
+        {
+            href: '/admin/vendors',
+            text: 'Suppliers',
+        }
+    ];
+
+    const productLinks = [
+        {
+            href: '/admin/products',
+            text: 'Products'
+        },
+        {
+            href: '/admin/categories',
+            text: 'Category'
+        },
+        {
+            href: '/admin/association',
+            text: 'Association'
+        },
+        {
+            href: '/admin/stock',
+            text: 'Stocks'
+        }
+    ];
+
+    const isProductsActive = pathname.startsWith('/admin/products') || pathname.startsWith('/admin/association') || pathname.startsWith('/admin/stock');
+
+    return (
+        <div className="space-y-1">
+            {links.slice(0,1).map((link, index)=> (
+                <Link
+                onClick={() => document.getElementById('sidebar-close')?.click()}
+                    href = {link.href}
+                    key={index}
+                    className={cn(
+                        "flex items-center gap-2 p-2 justify-center hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
+                        {
+                            "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300":
+                            pathname === link.href
+                        }
+                    )}>
+                        {link.text}
+                </Link>
+            ))}
+
+            {/* Product Parents Menu */}
+            <div>
+                <button
+                onClick={() => setIsProductsOpen(!isProductsOpen)}
+                className={cn(
+                    "w-full flex justify-center items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
+                    {
+                        "bg-blue-50 dark:bg-blue-950": isProductsActive
+                    }
+                )}>
+                    <span className={cn(
+                        "flex-1 text-center",
+                        {
+                            "text-blue-700 dark:text-blue-300 font-medium": isProductsActive
+                        }
+                    )}>
+                        Products
+                    </span>
+                    {isProductsOpen ? (
+                        <ChevronDown className="w-4 h-4"/>
+                    ) : (
+                        <ChevronRight className="w-4 h-4"/>
+                    )}
+                </button>
+
+                {/* Sub-navigation */}
+                {isProductsOpen && (
+                    <div>
+                        {productLinks.map((link, index) => (
+                            <Link
+                            onClick={() => document.getElementById('sidebar-close')?.click()}
+                            href={link.href}
+                            key={index}
+                            className={cn(
+                                "flex items-center justify-center gap-2 p-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
+                                {
+                                    "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300":
+                                    pathname === link.href
+                                }
+                            )}>
+                            {link.text}
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Remaining Links */}
+            {links.slice(1).map((link, index) => (
+                <Link
+                onClick={() => document.getElementById('sidebar-close')?.click()}
+                href={link.href}
+                key={index}
+                className={cn(
+                    "flex items-center gap-2 p-2 justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+                    {
+                        "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300":
+                        pathname === link.href
+                    }
+                )}>
+                    {link.text}
+                </Link>
+            ))}
+        </div>
+    )
+}

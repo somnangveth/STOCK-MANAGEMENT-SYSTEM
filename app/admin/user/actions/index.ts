@@ -26,6 +26,8 @@ export async function createMember(data: {
 
   try {
     const display_name = data.first_name + "" +data.last_name;
+
+    //1. Create Auth user
     const { data: userData, error: userError } = await supabase.auth.admin.createUser({
       email: data.email,
       password: data.password,
@@ -44,7 +46,7 @@ export async function createMember(data: {
 
     const authId = userData.user.id;
 
-    //Insert into contact_info table
+    //2.Insert into contact_info table
     const {data: contactData, error: contactError} = await supabase
       .from("contact_info")
       .insert({
@@ -55,12 +57,19 @@ export async function createMember(data: {
       .select('contact_id')
       .single();
 
+      if(contactError){
+        console.error('Contact insert error', contactError);
+        throw contactError;
+      }
+
       const contactId = contactData?.contact_id;
 
+      if(!contactId){
+        throw new Error("Contact ID is undefined after creation");
+      }
 
+    //3.Insert base on role
     if (data.role === "admin") {
-
-      //Insert into admin table
       const { data: adminData, error: adminError } = await supabase
         .from("admin")
         .insert({
@@ -80,7 +89,10 @@ export async function createMember(data: {
         .select("admin_id")
         .single();
 
-      if (adminError) throw adminError;
+      if(adminError){
+        console.error('Admin insert error: ', adminError);
+        throw adminError;
+      }
       const adminId = adminData.admin_id;
 
       // 3️. Insert into member table
@@ -91,11 +103,13 @@ export async function createMember(data: {
           admin_id: adminId,
         });
 
-      if (memberError) throw memberError;
+      if (memberError){ 
+        console.error('Member insert error: ', memberError);
+        throw memberError;
+      }
       return memberData;
 
     } 
-    //Insert into staff table
     else if (data.role === "staff") {
 
       const { data: staffData, error: staffError } = await supabase
@@ -117,7 +131,10 @@ export async function createMember(data: {
         .select("staff_id")
         .single();
 
-      if (staffError) throw staffError;
+      if (staffError){
+        console.error("Failed to insert Staff", staffError);
+        throw staffError;
+      }
       const staffId = staffData.staff_id;
 
       const { data: memberData, error: memberError } = await supabase
@@ -127,7 +144,11 @@ export async function createMember(data: {
           staff_id: staffId,
         });
 
-      if (memberError) throw memberError;
+      if (memberError){ 
+      console.error('Failed to insert member', memberError);
+      throw memberError;
+    }
+
       return memberData;
     }
 

@@ -1,5 +1,5 @@
 "use client";
-import ProfileDialog from "../user/components/profile/ProfileDialog";
+import ProfileDialog from "../profile/ProfileDialog";
 import NavLinks from "./NavLink";
 import { cn } from "@/lib/utils";
 
