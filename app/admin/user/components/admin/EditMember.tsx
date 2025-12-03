@@ -3,7 +3,7 @@ import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import { Admin } from "@/type/membertype";
 import EditAdmin from "./EditForm";
-
+import { FaPen } from "react-icons/fa";
 
 export default function EditMember({admin}: {admin: Admin}){
     return(
@@ -12,14 +12,9 @@ export default function EditMember({admin}: {admin: Admin}){
         Trigger = {
             <Button
             className="
-            font-semibold
-            text-blue-700
-            bg-blue-100
-            px-10
-            rounded-xl
-            hover:bg-blue-500 hover:text-white"
+            w-10 h-5 text-sm bg-transparent text-blue-500 rounded-xl"
             >
-                Edit
+                <FaPen/>
             </Button>
         }
         form = {<EditAdmin admin={admin}/>}

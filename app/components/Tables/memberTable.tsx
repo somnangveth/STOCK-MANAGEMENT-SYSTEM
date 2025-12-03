@@ -10,6 +10,7 @@ import {
 import { ReactNode } from "react";
 
 type ColumnKey =
+//Users
   | "admin_id"
   | "staff_id"
   | "profile_image"
@@ -18,17 +19,49 @@ type ColumnKey =
   | "email"
   | "role"
   | "gender"
-  | "action";
+  | "action"
+//Vendors
+  | "vendor_id"
+  | "vendor_name"
+  | "contact_person"
+  | "phone_number1"
+  | "phone_number2"
+  | "vendor_email"
+  | "vendor_image"
+  | "souce_link"
+  | "vendor_type"
+  | "address"
+  | "city"
+  | "country"
+  | "payment_terms"
+  | "notes";
 
 type Member = {
-  admin_id?: number | string;
-  staff_id?: number | string;
+  //Users
+  admin_id?: string;
+  staff_id?: string;
   profile_image?: string;
   first_name?: string;
   last_name?: string;
   email?: string;
   role?: string;
   gender?: string;
+
+  //Vendors
+  vendor_id?: string;
+  vendor_name?: string;
+  contact_person?: string;
+  phone_number1?: string;
+  phone_number2?: string;
+  vendor_email?: string;
+  vendor_image?: string;
+  source_link?: string;
+  vendortype?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  payment_terms?: string;
+  note?: string;
 };
 
 type MemberTableProps = {
@@ -43,6 +76,7 @@ export default function MemberTable({ members, columns, form }: MemberTableProps
     <Table className="w-full border border-gray-300 rounded-xl">
       <TableHeader className="bg-gray-100">
         <TableRow>
+          {/* Users */}
           {columns.includes("admin_id") && <TableHead>ID</TableHead>}
           {columns.includes("staff_id") && <TableHead>ID</TableHead>}
           {columns.includes("profile_image") && <TableHead>Image</TableHead>}
@@ -52,6 +86,16 @@ export default function MemberTable({ members, columns, form }: MemberTableProps
           {columns.includes("role") && <TableHead>Role</TableHead>}
           {columns.includes("gender") && <TableHead>Gender</TableHead>}
           {columns.includes("action") && <TableHead>Action</TableHead>}
+
+          {/* Vendors */}
+          {columns.includes("vendor_id") && <TableHead>Vendor ID: </TableHead>}
+          {columns.includes("vendor_image") && <TableHead>Logo: </TableHead>}
+          {columns.includes("vendor_name") && <TableHead>Vendor Name: </TableHead>}
+          {columns.includes("contact_person") && <TableHead>Contact Person</TableHead>}
+          {columns.includes("vendor_type") && <TableHead>Vendor Type:</TableHead>}
+          {columns.includes("phone_number1") && <TableHead>Phone Number 1: </TableHead>}
+          {columns.includes("phone_number2") && <TableHead>Phone Number 2: </TableHead>}
+          
         </TableRow>
       </TableHeader>
 
@@ -85,6 +129,27 @@ export default function MemberTable({ members, columns, form }: MemberTableProps
               {columns.includes("email") && <TableCell>{member.email}</TableCell>}
               {columns.includes("role") && <TableCell>{member.role}</TableCell>}
               {columns.includes("gender") && <TableCell>{member.gender}</TableCell>}
+
+              {/* Vendors */}
+              {columns.includes("vendor_id") && <TableCell>{member.vendor_id}</TableCell>}
+              {columns.includes("vendor_image") && <TableCell>
+                {member.vendor_image ?
+                (<img 
+                src={member.vendor_image}
+                alt=""
+                className="w-10 h-10 rounded-lg object-cover"
+                />):(
+                  <img 
+                src="/assets/default.jpg"
+                alt=""
+                className="w-10 h-10 rounded-lg"/>
+                )}
+                </TableCell>}
+              {columns.includes("vendor_name") && <TableCell>{member.vendor_name}</TableCell>}
+              {columns.includes("contact_person") && <TableCell>{member.contact_person || "_"}</TableCell>}
+              {columns.includes("vendor_type") && <TableCell>{member.vendortype}</TableCell>}
+              {columns.includes("phone_number1") && <TableCell>{member.phone_number1}</TableCell>}
+
 
               {columns.includes("action") && <TableCell>{actionContent}</TableCell>}
             </TableRow>

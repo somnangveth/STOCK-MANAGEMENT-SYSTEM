@@ -3,6 +3,7 @@
 import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import AddCategory from "./AddCategory";
+import { RxPlusCircled } from "react-icons/rx";
 
 export default function AddCategoryForm(){
     return(
@@ -12,7 +13,7 @@ export default function AddCategoryForm(){
         Trigger={
             <Button
             className="bg-blue-100 border border-blue-500 text-blue-500">
-                + Add Category
+                <RxPlusCircled/> Category
             </Button>
         }
         form={<AddCategory/>}

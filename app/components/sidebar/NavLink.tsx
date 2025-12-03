@@ -58,14 +58,14 @@ export default function NavLinks(){
     const isProductsActive = pathname.startsWith('/admin/products') || pathname.startsWith('/admin/association') || pathname.startsWith('/admin/stock');
 
     return (
-        <div className="space-y-1">
+        <div className="space-y-1 flex flex-col">
             {links.slice(0,1).map((link, index)=> (
                 <Link
                 onClick={() => document.getElementById('sidebar-close')?.click()}
                     href = {link.href}
                     key={index}
                     className={cn(
-                        "flex items-center gap-2 p-2 justify-center hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
+                        "flex items-center gap-2 p-2 justify-start hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
                         {
                             "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300":
                             pathname === link.href
@@ -80,18 +80,18 @@ export default function NavLinks(){
                 <button
                 onClick={() => setIsProductsOpen(!isProductsOpen)}
                 className={cn(
-                    "w-full flex justify-center items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
+                    "w-full flex justify-start items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
                     {
                         "bg-blue-50 dark:bg-blue-950": isProductsActive
                     }
                 )}>
                     <span className={cn(
-                        "flex-1 text-center",
+                        "flex-1 text-left",
                         {
                             "text-blue-700 dark:text-blue-300 font-medium": isProductsActive
                         }
                     )}>
-                        Products
+                        Inventory
                     </span>
                     {isProductsOpen ? (
                         <ChevronDown className="w-4 h-4"/>
@@ -109,7 +109,7 @@ export default function NavLinks(){
                             href={link.href}
                             key={index}
                             className={cn(
-                                "flex items-center justify-center gap-2 p-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
+                                "flex items-center justify-start gap-2 p-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
                                 {
                                     "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300":
                                     pathname === link.href
@@ -129,7 +129,7 @@ export default function NavLinks(){
                 href={link.href}
                 key={index}
                 className={cn(
-                    "flex items-center gap-2 p-2 justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+                    "flex items-center gap-2 p-2 justify-start hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
                     {
                         "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300":
                         pathname === link.href

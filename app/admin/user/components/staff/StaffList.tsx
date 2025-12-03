@@ -1,7 +1,7 @@
 "use client";
 import { Staff } from "@/type/membertype";
 import { useEffect, useState } from "react";
-import { fetchAdmins, fetchStaffs } from "../../actions";
+import { fetchStaffs } from "../../actions";
 import MemberTable from "@/app/components/Tables/memberTable";
 import EditStaff from "./EditStaff";
 

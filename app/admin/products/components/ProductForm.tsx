@@ -2,6 +2,7 @@
 import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import CreateProduct from "./CreateProduct";
+import { RxPlusCircled } from "react-icons/rx";
 
 export default function ProductForm({ 
   onProductAdded 
@@ -19,7 +20,7 @@ export default function ProductForm({
             bg-blue-100 text-blue-700
             hover:bg-blue-700 hover:text-blue-50"
         >
-          + Add Product
+          <RxPlusCircled/> Add Product
         </Button>
       }
       form={<CreateProduct onSuccess={onProductAdded} />}
