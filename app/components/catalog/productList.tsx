@@ -223,9 +223,6 @@ export default function SelectProductList({
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">
-          {multiple ? "Select Products" : "Select a Product"}
-        </h2>
         {multiple && selectedProducts.length > 0 && (
           <span className="text-sm text-slate-600 bg-blue-100 px-3 py-1 rounded-full">
             {selectedProducts.length} selected

@@ -24,7 +24,6 @@ export default function AddAssociation({onClose}:{onClose: () => void}) {
   // Hooks
   const [isPending, startTransition] = useTransition();
   
-  // Popup states
   const [openMainSelector, setOpenMainSelector] = useState(false);
   const [openAssociatedSelector, setOpenAssociatedSelector] = useState(false);
   
@@ -91,7 +90,7 @@ export default function AddAssociation({onClose}:{onClose: () => void}) {
       <h1 className="flex justify-center text-2xl font-bold">Add Product Association</h1>
 
       {/* ----------  Main Product Selection  ---------- */}
-      <div className="space-y-2">
+      <div className="space-y-2 flex-1 overflow-y-auto">
         <label className="font-semibold text-sm text-gray-500">Main Product *</label>
         <button
           type="button"
@@ -141,7 +140,7 @@ export default function AddAssociation({onClose}:{onClose: () => void}) {
       <div className="space-y-2">
         <label className="font-semibold text-sm text-gray-500">Association Type *</label>
         <div className="flex gap-2">
-          <div className="w-1/3 border p-2 rounded-lg ">
+          <div className="w-1/4 border p-2 rounded-lg flex items-center justify-center">
             <FaLink/>
           </div>
           <Select
@@ -226,14 +225,14 @@ export default function AddAssociation({onClose}:{onClose: () => void}) {
         <button
         className="
         border border-gray-500 rounded-lg p-2
-        hover:bg-gray-500 hover:text-gray-500"
+        hover:bg-gray-100 hover:text-gray-500"
         onClick={() => onClose()}>
           Cancel
         </button>
         <button
         type="button"
         disabled={isPending || !selectedMainProduct || selectedAssociatedProducts.length === 0}
-        className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="p-3 border border-amber-800 bg-amber-100 hover:bg-amber-700 text-amber-700 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         onClick={form.handleSubmit(onSubmit)}
       >
         {isPending ? "Saving..." : "Save Association"}

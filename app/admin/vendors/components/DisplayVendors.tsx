@@ -1,7 +1,10 @@
 "use client";
+import { view } from "@/app/components/Icons";
 import MemberTable from "@/app/components/Tables/memberTable";
 import { Vendors } from "@/type/productType";
 import { useQuery } from "@tanstack/react-query";
+import { Divide } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 export default function DisplayVendors({
@@ -70,16 +73,27 @@ export default function DisplayVendors({
   return (
     <div className="mt-10">
       <MemberTable
+      itemsPerPage={5}
         members={displayVendors}
         columns={[
           "vendor_id",
           "vendor_image",
           "vendor_name",
-          "vendor_email",
-          "country",
           "contact_person",
-          "vendor_type"
+          "action"
         ]}
+
+        form={(vendor) =>{
+          const v = vendor as Vendors;
+          return(
+            <div>
+              <Link href={`/admin/vendors/components/vendordetails/${v.vendor_id}`}>
+              {view}
+              </Link>
+            </div>
+          )
+        }
+        }
       />
     </div>
   );

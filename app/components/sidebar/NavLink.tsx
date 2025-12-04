@@ -3,7 +3,14 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight} from "lucide-react";
+import { LuLayoutDashboard } from "react-icons/lu";
+import { LuUserRoundCog } from "react-icons/lu";
+import { LuDollarSign } from "react-icons/lu";
+import { LuTrendingUp } from "react-icons/lu";
+import { LuUsers } from "react-icons/lu";
+import { LuBoxes } from "react-icons/lu";
+
 
 export default function NavLinks(){
     const pathname = usePathname();
@@ -13,25 +20,31 @@ export default function NavLinks(){
         pathname.startsWith('/admin/stock')
     );
 
+    const dashboard = <LuLayoutDashboard/>;
     const links =[
         {
             href: '/admin',
+            icon: <LuLayoutDashboard/>,
             text: 'Dashboard'
         },
         {
             href: '/admin/user',
+            icon: <LuUserRoundCog/>,
             text: 'Users'
         },
         {
             href: '/admin/price',
+            icon: <LuDollarSign/>,
             text: 'Price',
         },
         {
             href: '/admin/sales',
+            icon: <LuTrendingUp/>,
             text: 'Sales',
         },
         {
             href: '/admin/vendors',
+            icon: <LuUsers/>,
             text: 'Suppliers',
         }
     ];
@@ -67,11 +80,11 @@ export default function NavLinks(){
                     className={cn(
                         "flex items-center gap-2 p-2 justify-start hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
                         {
-                            "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300":
+                            "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300":
                             pathname === link.href
                         }
                     )}>
-                        {link.text}
+                       {link.icon} {link.text}
                 </Link>
             ))}
 
@@ -82,16 +95,16 @@ export default function NavLinks(){
                 className={cn(
                     "w-full flex justify-start items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
                     {
-                        "bg-blue-50 dark:bg-blue-950": isProductsActive
+                        "bg-amber-50 dark:bg-amber-950": isProductsActive
                     }
                 )}>
                     <span className={cn(
                         "flex-1 text-left",
                         {
-                            "text-blue-700 dark:text-blue-300 font-medium": isProductsActive
+                            "text-amber-700 dark:text-amber-300 font-medium": isProductsActive
                         }
                     )}>
-                        Inventory
+                       <p className="flex items-center gap-2"><LuBoxes/> Inventory</p>
                     </span>
                     {isProductsOpen ? (
                         <ChevronDown className="w-4 h-4"/>
@@ -109,9 +122,9 @@ export default function NavLinks(){
                             href={link.href}
                             key={index}
                             className={cn(
-                                "flex items-center justify-start gap-2 p-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
+                                "flex items-center justify-start gap-2 p-2 text-sm hover:bg-amber-100 dark:hover:bg-amber-800 rounded transition-colors",
                                 {
-                                    "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300":
+                                    "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300":
                                     pathname === link.href
                                 }
                             )}>
@@ -129,9 +142,9 @@ export default function NavLinks(){
                 href={link.href}
                 key={index}
                 className={cn(
-                    "flex items-center gap-2 p-2 justify-start hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+                    "flex items-center gap-2 p-2 justify-start hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors",
                     {
-                        "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300":
+                        "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300":
                         pathname === link.href
                     }
                 )}>

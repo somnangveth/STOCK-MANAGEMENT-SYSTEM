@@ -27,7 +27,7 @@ const AddAssociatedForm = forwardRef<AddAssociatedFormRef, {
       ) : (
         <button 
           onClick={() => setOpen(true)}
-          className="flex items-center gap-1 border border-blue-500 bg-blue-100 text-blue-500 p-2 rounded-lg text-sm"
+          className="flex items-center gap-1 border border-amber-800 bg-yellow-100 text-amber-600 p-2 rounded-lg text-sm"
         >
          {plusCircle} Add Association
         </button>

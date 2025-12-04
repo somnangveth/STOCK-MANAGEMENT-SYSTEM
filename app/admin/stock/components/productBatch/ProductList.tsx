@@ -3,8 +3,11 @@ import ProductTable from "@/app/components/Tables/productTable";
 import { Product } from "@/type/productType";
 import { useEffect, useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Categories, Subcategories } from "@/type/productType";
 import AddFormBatch from "./AddFormBatch";
+import { view } from "@/app/components/Icons";
+import Link from "next/link";
+
+
 
 // Define enhanced product type
 export interface EnhancedProduct extends Product {
@@ -25,13 +28,14 @@ export default function ProductList({
 }) {
   const [displayProducts, setDisplayProducts] = useState<EnhancedProduct[]>([]);
 
+
   // Memoized search handler
   const handleSearchResults = useCallback((results: EnhancedProduct[]) => {
     setDisplayProducts(results);
   }, []);
 
   // Fetch products data
-  async function fetchProductData() {
+  async function fetchCategoryAndSubcategoryData() {
     const res = await fetch('/api/admin/fetchCategoryAndSubcategory');
     if (!res.ok) throw new Error("Failed to fetch product data");
     return res.json();
@@ -39,7 +43,7 @@ export default function ProductList({
 
   const { data: productData, isLoading, error } = useQuery({
     queryKey: ["products", refreshKey],
-    queryFn: fetchProductData,
+    queryFn: fetchCategoryAndSubcategoryData,
   });
 
   // Process and enhance products when data changes
@@ -120,15 +124,21 @@ export default function ProductList({
           'sku-code',     
           'product_name',
           'base_unit',
-          'category_id',
-          'subcategory_id',
+          'manufacture_date',
+          'quantity_remaining',
           'action'
         ]}
-        form={(product) => (
-          <>
-          <AddFormBatch product={product as Product}/>
-          </>
-        )}
+        form={(product) => {
+        const p = product as EnhancedProduct;
+        return (
+        <div className="flex items-center gap-2">
+        <AddFormBatch product={p} />
+        <Link href={`/admin/stock/components/batchdetail/${p.product_id}`}>
+        {view}
+        </Link>
+        </div>
+        );
+        }}
       />
     </div>
   );

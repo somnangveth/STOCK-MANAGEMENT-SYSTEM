@@ -43,7 +43,9 @@ export default function ProductManagement() {
   return (
     <div className="space-y-6 p-6">
 
-      {/* Search bar shows only after ProductList registers keys */}
+      <div className="flex justify-end">
+      <div className="w-1/3">
+        {/* Search bar shows only after ProductList registers keys */}
       {searchConfig && (
         <SearchBar
           data={products}
@@ -52,6 +54,8 @@ export default function ProductManagement() {
           placeholder="Search products by name, SKU, or category..."
         />
       )}
+    </div>
+      </div>
 
       {/* Add product form */}
       <div className="flex justify-end">

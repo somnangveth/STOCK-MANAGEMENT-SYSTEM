@@ -9,7 +9,7 @@ export const SideBar = () => {
                 <div className="
                 flex items-center 
                 gap-2 flex-1 justify-center 
-                p-3 text-amber-500 font-bold">
+                p-3 text-amber-50 bg-amber-800 font-bold">
                     <h1>Admin Dashboard</h1>
                 </div>
                 <NavLinks/>

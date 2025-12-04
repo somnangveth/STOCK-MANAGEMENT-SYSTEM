@@ -64,7 +64,7 @@ export default function TotalUsersCatalog(){
         <CircleGraph
         data={chartData}
         dataKeys={["admin", "staff"]}
-        circleColor={["#3a82f6", "#21a241"]}
+        circleColor={["#D7C097", "#B87C4C"]}
         />
         </div>
     )

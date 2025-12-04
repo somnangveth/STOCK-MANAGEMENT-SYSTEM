@@ -25,7 +25,7 @@ export default function TotalStockPanel(){
     return(
         <div className="w-full h-30 border rounded p-3">
             <span className="font-bold text-xl">Total:</span>
-            <h1 className="text-blue-500 text-5xl flex justify-end">{String(getTotalProduct())}</h1>
+            <h1 className="text-amber-700 text-5xl flex justify-end">{String(getTotalProduct())}</h1>
         </div>
     )
 }

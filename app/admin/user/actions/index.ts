@@ -192,6 +192,7 @@ export async function fetchAuthUsers(id: string,){
   return data.user;
 }
 
+
 export async function updateAdmin(
   admin_id: string,
   data: Partial<{
@@ -347,4 +348,21 @@ export async function updateStaff(
 
     return JSON.stringify(staffData);
 
+}
+
+
+//Fetch Contact Info
+export async function fetchContacts(){
+  const supabase = await createSupabaseAdmin();
+
+  const { data: contactData, error: contactError } = await supabase
+  .from("contact_info")
+  .select("*");
+
+  if(contactError || !contactData){
+    console.error("Failed to fetch data", contactError);
+    throw new Error("Failed to fetch");
+  }
+
+  return contactData;
 }

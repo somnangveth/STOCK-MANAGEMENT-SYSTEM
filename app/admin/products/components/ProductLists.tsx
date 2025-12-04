@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import UpdateForm from "./UpdateForm";
 import DeleteProduct from "./DeleteProduct";
 import { Categories, Subcategories } from "@/type/productType";
+import Link from "next/link";
+import { view } from "@/app/components/Icons";
 
 // Define enhanced product type
 export interface EnhancedProduct extends Product {
@@ -125,12 +127,16 @@ export default function ProductList({
           'subcategory_id',
           'action'
         ]}
-        form={(product) => (
-          <>
+        form={(product) => {
+          const p = product as Product;
+          return(
+            <div className="flex items-center">
             <UpdateForm product={product as Product} />
             <DeleteProduct product={product as Product} />
-          </>
-        )}
+            <Link href={`/admin/products/components/productdetail/${p.product_id}`}>{view}</Link>
+            </div>
+          )
+        }}
       />
     </div>
   );

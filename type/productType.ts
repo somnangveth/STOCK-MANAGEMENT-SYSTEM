@@ -40,6 +40,12 @@ export type Product = {
   created_at: string;
   updated_at: string;
   created_by: string;
+
+  //Expiry
+  manufacture_date: Date;
+  expiry_date: Date;
+  received_date: Date;
+  quantity_remaining: number;
 };
 
 // Batch fields (if you need them separately)

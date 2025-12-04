@@ -66,10 +66,9 @@ export default function AssociatedCatalog() {
   });
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold mb-4">Product Associations</h1>
+    <>
       {productAssociations.map(({ product, related, bundle, alternative, total }) => (
-        <div key={product.product_id} className="border border-gray-300 rounded-xl p-4">
+        <div key={product.product_id} className="border border-gray-300 rounded-xl p-4 bg-white">
           <div className="flex items-center gap-4 mb-3">
             {product.product_image && (
               <img 
@@ -103,6 +102,6 @@ export default function AssociatedCatalog() {
           </div>
         </div>
       ))}
-    </div>
+    </>
   );
 }

@@ -4,6 +4,7 @@ import { Product } from "@/type/productType";
 import { useQuery } from "@tanstack/react-query";
 
 export default function IssuedStockPanel(){
+    
 
     return(
         <div className="w-full h-30 border rounded p-3">
