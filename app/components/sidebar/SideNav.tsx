@@ -1,5 +1,5 @@
 "use client";
-import ProfileDialog from "../user/components/profile/ProfileDialog";
+import ProfileDialog from "../profile/ProfileDialog";
 import NavLinks from "./NavLink";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,7 @@ export const SideBar = () => {
             </div>
             <div className="flex justify-end mt-80">
                 <ProfileDialog/>
+                
             </div>
         </div>
     )

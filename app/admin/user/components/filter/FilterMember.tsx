@@ -23,7 +23,13 @@ return(
         <CreateForm/>
         </div>
 
-        {selected === "admin" ? <AdminList admin={admin}/> : <StaffList staff={staff}/>}
+        {selected === "admin" ? 
+        <div className="mt-10">
+            <AdminList/> 
+        </div> : 
+        <div className="mt-10">
+            <StaffList/>
+        </div>}
     </div>
 )
 }

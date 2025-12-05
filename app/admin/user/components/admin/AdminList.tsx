@@ -5,7 +5,7 @@ import { fetchAdmins } from "../../actions";
 import MemberTable from "@/app/components/Tables/memberTable";
 import EditMember from "./EditMember";
 
-export default function AdminList({admin}: {admin: Admin}) {
+export default function AdminList() {
   const [admins, setAdmins] = useState<Admin[]>([]);
 
   useEffect(() => {

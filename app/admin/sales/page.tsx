@@ -1,27 +1,76 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Filters from "../components/Filters";
-import PriceTabs from "../components/PriceTabs";
-import PriceTable from "../components/PriceTable";
-import CustomerSalesTable from "../components/CustomerSalesTable";
+import React, { useState, useEffect, useRef } from "react";
+import Filters from "./components/Filters";
+import PriceTabs from "./components/PriceTabs";
+import PriceTable from "./components/PriceTable";
+import CustomerSalesTable from "./components/CustomerSalesTable";
+import Receipt from "./components/receipt";
+import { useReactToPrint, UseReactToPrintOptions } from "react-to-print";
+import { Sale } from "./type";
 
-const allProducts = [
-  { name: "Lay's", category: "膨化食品", subCategory: "Spacy", date: "2025-12-01", wholesalePrice: "$1.2", retailPrice: "$1.5", status: "已发货" },
-  { name: "柬埔寨原味虾片", category: "膨化食品", subCategory: "不辣", date: "2025-12-02", wholesalePrice: "$1.0", retailPrice: "$1.3", status: "未付款" },
-  { name: "Strawberry milk", category: "Drink", subCategory: "Milk", date: "2025-12-04", wholesalePrice: "$0.8", retailPrice: "$1.0", status: "未发货" },
-  { name: "可乐", category: "饮料", subCategory: "原味", date: "2025-12-05", wholesalePrice: "$0.9", retailPrice: "$1.1", status: "已发货" },
-];
+export default function Sales() {
+  const [selectedTab, setSelectedTab] = useState<"Product" | "Customer">("Product");
+  const [products, setProducts] = useState<any[]>([]);
+  const [customerSales, setCustomerSales] = useState<Sale[]>([]);
+  const [currentSaleData, setCurrentSaleData] = useState<Sale | null>(null); // 当前销售单完整数据
+  const receiptRef = useRef<HTMLDivElement>(null);
 
-const allCustomerSales = [
-  { customer: "客户A", type: "批发客户", product: "柬埔寨辣虾片", quantity: 10, amount: 12, status: "已发货", date: "2025-12-01" },
-  { customer: "客户B", type: "零售客户", product: "草莓牛奶", quantity: 5, amount: 4, status: "未付款", date: "2025-12-02" },
-  { customer: "客户C", type: "批发客户", product: "柬埔寨原味虾片", quantity: 3, amount: 3.9, status: "已发货", date: "2025-12-03" },
-  { customer: "客户D", type: "零售客户", product: "可乐", quantity: 2, amount: 2.2, status: "未发货", date: "2025-12-04" },
-];
+  // 控制是否显示“添加销售”按钮的表单（现在用不到表单，直接生成销售单）
+  const [showAddForm, setShowAddForm] = useState(false);
 
-function Sales() {
-  const [selectedTab, setSelectedTab] = useState<"All" | "Product" | "Customer">("Product");
+  // 加载销售数据
+  const loadSales = async () => {
+    const res = await fetch("/api/sales/get").then(r => r.json());
+    const items = res.items || [];
+    const sales = res.sales || [];
+
+    setProducts(
+      items.map((i: any) => ({
+        id: i.sale_item_id,
+        name: i.product?.product_name,
+        category: i.product?.category,
+        subCategory: i.product?.sub_category,
+        status: i.sale?.process_status,
+        date: i.sale?.sale_date,
+        quantity: i.quantity,
+        price: i.unit_price,
+        total: i.total,
+        sale_id: i.sale_id,
+      }))
+    );
+
+    setCustomerSales(
+      sales.map((s: any) => ({
+        sale_id: s.sale_id,
+        sales_number: s.sales_number ?? "",
+        sale_date: s.sale_date,
+        customer_name: s.customer_name,
+        customer_email: s.customer_email ?? "",
+        customer_phone: s.customer_phone,
+        payment_method: s.payment_method ?? "",
+        payment_status: s.payment_status ?? "",
+        process_status: s.process_status ?? "",
+        subtotal: s.subtotal ?? 0,
+        tax_amount: s.tax_amount ?? 0,
+        discount_amount: s.discount_amount ?? 0,
+        total_amount: s.total_amount ?? 0,
+        note: s.note ?? "",
+        items: items
+          .filter((i: any) => i.sale_id === s.sale_id)
+          .map((i: any) => ({
+            product_name: i.product?.product_name ?? "",
+            quantity: i.quantity ?? 0,
+            unit_price: i.unit_price ?? 0,
+            total: i.total ?? 0,
+          })),
+      }))
+    );
+  };
+
+  useEffect(() => {
+    loadSales();
+  }, []);
 
   // Filters
   const [categoryFilter, setCategoryFilter] = useState("Select");
@@ -31,107 +80,109 @@ function Sales() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
 
-  // Statistics
-  const [todayTotal, setTodayTotal] = useState(0);
-  const [weekTotal, setWeekTotal] = useState(0);
-
-  useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
-    setTodayTotal(allProducts.filter(p => p.date === today).length);
-    setWeekTotal(allProducts.length);
-  }, []);
-
-  // Tab 切换时重置 Filters（保留状态筛选）
-  useEffect(() => {
-    setCategoryFilter("Select");
-    setSubCategoryFilter("Select");
-    setProductFilter("Select");
-    setFromDate("");
-    setToDate("");
-  }, [selectedTab]);
-
-  // 筛选商品
-  const filteredProducts = allProducts.filter((item) => {
-    if (selectedTab === "Customer") return false;
-
+  const filteredProducts = products.filter(item => {
     if (categoryFilter !== "Select" && item.category !== categoryFilter) return false;
     if (subCategoryFilter !== "Select" && item.subCategory !== subCategoryFilter) return false;
     if (productFilter !== "Select" && item.name !== productFilter) return false;
     if (stateFilter !== "Select" && item.status !== stateFilter) return false;
     if (fromDate && item.date < fromDate) return false;
     if (toDate && item.date > toDate) return false;
-
     return true;
   });
 
-  // 筛选客户销售
-  const filteredCustomerSales = allCustomerSales.filter((sale) => {
-    if (selectedTab !== "Customer") return false;
-
-    if (categoryFilter !== "Select" && sale.type !== categoryFilter) return false;
-    if (stateFilter !== "Select" && sale.status !== stateFilter) return false;
-    if (fromDate && sale.date < fromDate) return false;
-    if (toDate && sale.date > toDate) return false;
-
+  const filteredCustomerSales = customerSales.filter(sale => {
+    if (stateFilter !== "Select" && sale.process_status !== stateFilter) return false;
+    if (fromDate && sale.sale_date < fromDate) return false;
+    if (toDate && sale.sale_date > toDate) return false;
     return true;
   });
+
+  // 打印收据
+  const handlePrint = useReactToPrint({
+    content: () => receiptRef.current,
+    documentTitle: `Receipt-${currentSaleData?.sales_number ?? "Unknown"}`,
+  } as UseReactToPrintOptions);
+
+  // 点击按钮直接生成空销售单
+  const handleAddSaleClick = async () => {
+    // ⚡ 调用后端接口创建新销售单，假设返回 newSaleId
+    const res = await fetch("/api/sales/create", { method: "POST" }).then(r => r.json());
+    const newSaleId = res.sale_id;
+
+    const newSale: Sale = {
+      sale_id: newSaleId,
+      sales_number: "",
+      sale_date: "",
+      customer_name: "",
+      customer_email: "",
+      customer_phone: "",
+      payment_method: "",
+      payment_status: "",
+      process_status: "draft",
+      subtotal: 0,
+      tax_amount: 0,
+      discount_amount: 0,
+      total_amount: 0,
+      items: [],
+      note: "",
+    };
+
+    setCurrentSaleData(newSale);
+    loadSales(); // 刷新列表
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       <main className="flex-1 p-6 space-y-6">
-
-        {/* 上半部分卡片 */}
+        {/* 卡片 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {/* 今日销售趋势 */}
-          <div className="bg-linear-to-r from-indigo-300 via-purple-200 to-pink-500 text-violet-600 p-6 rounded-3xl shadow-xl flex flex-col items-start justify-between border-3 border-black/70">
-            <h2 className="text-sm font-semibold uppercase tracking-wide opacity-80">今日销售趋势</h2>
-            <p className="text-5xl font-bold mt-4">${todayTotal}</p>
-            <span className="mt-2 text-sm opacity-70">比昨日 +15%</span>
-            <div className="mt-4 w-full h-1 bg-white/30 rounded-full"></div>
+          <div className="bg-linear-to-r from-indigo-300 via-purple-200 to-pink-500 text-violet-600 p-6 rounded-3xl shadow-xl border-2 border-black/70">
+            <h2 className="text-sm font-semibold">Today Sale</h2>
+            <p className="text-5xl font-bold mt-4">{products.length}</p>
           </div>
 
-          {/* 本周销售总额 */}
-          <div className="bg-linear-to-r from-indigo-300 via-purple-200 to-pink-500 text-violet-600 p-6 rounded-3xl shadow-xl flex flex-col items-start justify-between border-3 border-black/70">
-            <h2 className="text-sm font-semibold text-gray-500 mb-4">本周销售总额</h2>
-            <div className="flex-1 w-full flex items-center justify-center">
-              <canvas id="salesChart"></canvas>
-            </div>
-            <div className="mt-4 text-xs text-gray-400 text-right">单位: USD</div>
+          <div className="bg-linear-to-r from-indigo-300 via-purple-200 to-pink-500 text-violet-600 p-6 rounded-3xl shadow-xl border-2 border-black/70">
+            <h2 className="text-sm font-semibold">This Week's Sales Total</h2>
+            <canvas id="salesChart"></canvas>
           </div>
         </div>
 
         {/* Filters */}
         <Filters
-          category={categoryFilter}
-          setCategory={setCategoryFilter}
-          subCategory={subCategoryFilter}
-          setSubCategory={setSubCategoryFilter}
-          product={productFilter}
-          setProduct={setProductFilter}
-          state={stateFilter}
-          setState={setStateFilter}
-          fromDate={fromDate}
-          setFromDate={setFromDate}
-          toDate={toDate}
-          setToDate={setToDate}
+          category={categoryFilter} setCategory={setCategoryFilter}
+          subCategory={subCategoryFilter} setSubCategory={setSubCategoryFilter}
+          product={productFilter} setProduct={setProductFilter}
+          state={stateFilter} setState={setStateFilter}
+          fromDate={fromDate} setFromDate={setFromDate}
+          toDate={toDate} setToDate={setToDate}
           categoryType={selectedTab === "Customer" ? "customer" : "product"}
         />
+
+        {/* 添加销售按钮 */}
+        <button
+          onClick={handleAddSaleClick}
+          className="mb-4 px-4 py-2 bg-green-500 text-white rounded"
+        >
+          Add New Sale
+        </button>
 
         {/* Tabs */}
         <PriceTabs selectedTab={selectedTab} onTabChange={setSelectedTab} tabs={["Product", "Customer"]} />
 
-        {/* 表格 */}
-        <div className="space-y-4">
-          {selectedTab === "Customer" && <CustomerSalesTable sales={filteredCustomerSales} />}
-          {(selectedTab === "All" || selectedTab === "Product") && (
-            <div className="overflow-y-auto max-h-96 border rounded">
-              <PriceTable products={filteredProducts} />
-            </div>
-          )}
-        </div>
+        {/* Tables */}
+        {selectedTab === "Product" && <PriceTable products={filteredProducts} setProducts={setProducts} />}
+        {selectedTab === "Customer" && <CustomerSalesTable sales={filteredCustomerSales} setCustomerSales={setCustomerSales} />}
+
+        {/* 收据单 */}
+        {currentSaleData && (
+          <div className="mt-6" ref={receiptRef}>
+            <Receipt sale={currentSaleData} />
+            <button onClick={handlePrint} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
+              Print / Download Receipt
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );
 }
-
-export default Sales;

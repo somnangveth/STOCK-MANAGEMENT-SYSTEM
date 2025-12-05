@@ -1,6 +1,6 @@
 "use client";
 
-import ProfileWelcome from "./user/components/profile/ProfileWelcome";
+import ProfileWelcome from "../components/profile/ProfileWelcome";
 
 export default function AdminPage() {
 

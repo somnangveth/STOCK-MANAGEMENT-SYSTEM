@@ -1,0 +1,107 @@
+'use client';
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Categories } from "@/type/productType";
+import { useTransition } from "react";
+import { updateCategory } from "@/app/functions/stock/category/category";
+import { toast } from "sonner";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { cn } from "@/lib/utils";
+
+const UpdateSchema = z.object({
+    category_name: z.string().optional(),
+    slug: z.string().optional(),
+});
+
+export default function UpdateCategory({category}:{category: Categories}){
+
+    //-- Hooks --
+    const [isPending, startTransition] = useTransition();
+
+
+    const form = useForm<z.infer<typeof UpdateSchema>>({
+        resolver: zodResolver(UpdateSchema),
+        defaultValues: {
+            category_name: category.category_name,
+            slug: category.slug,
+        }
+    });
+
+    function onSubmit(data: z.infer<typeof UpdateSchema>){
+        startTransition(async()=> {
+            try{
+                const result = await updateCategory(category.category_id, data);
+                const parsed = typeof result === 'string' ? JSON.parse(result) : result;
+                const {error} = parsed;
+
+                if(error){
+                    console.error('Failed to update category');
+                    toast.error('Failed to update Category', )
+                }
+
+                toast.success('Category updated successfully!')
+                document.getElementById('category-update-trigger')?.click();
+            }catch(error){
+                console.error('Failed to update category', error);
+            }
+        })
+    }
+
+    return(
+        <Form {...form}>
+            <form
+            className="space-y-4"
+            onSubmit={form.handleSubmit(onSubmit)}>
+
+                {/* Category Name */}
+                <FormField
+                control={form.control}
+                name="category_name"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Category Name: </FormLabel>
+                        <FormControl>
+                            <Input
+                            type="text"
+                            {...field}
+                            onChange={(e) => field.onChange(String(e.target.value))}
+                            />
+                        </FormControl>
+                    </FormItem>
+                )}/>
+
+                {/* Slug */}
+                <FormField
+                control={form.control}
+                name="slug"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Slug: </FormLabel>
+                        <FormControl>
+                            <Input
+                            type="text"
+                            {...field}
+                            onChange={(e) => field.onChange(String(e.target.value))}/>
+                        </FormControl>
+                    </FormItem>
+                )}/>
+
+                <Button
+                onClick={() => document.getElementById('category-update-trigger')?.click()}
+                type="submit"
+                variant="outline">
+                    {isPending ?
+                    (
+                        <AiOutlineLoading3Quarters className={cn("animate-spin")}/>
+                    ):(
+                        "Update Category"
+                    )}
+                </Button>
+            </form>
+        </Form>
+    )
+}

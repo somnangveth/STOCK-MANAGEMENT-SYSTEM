@@ -1,7 +1,5 @@
-import Image from "next/image";
+import AuthForm from "./auth/components/AuthForm";
 
-export default function Home() {
-  return (
-    <div></div>
-  )
+export default function Page() {
+  return <div><AuthForm/></div>;
 }

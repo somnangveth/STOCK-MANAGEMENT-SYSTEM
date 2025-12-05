@@ -5,7 +5,7 @@ import { fetchAdmins, fetchStaffs } from "../../actions";
 import MemberTable from "@/app/components/Tables/memberTable";
 import EditStaff from "./EditStaff";
 
-export default function StaffList({staff}:{staff:Staff}) {
+export default function StaffList() {
   const [staffs, setStaffs] = useState<Staff[]>([]);
 
   useEffect(() => {
