@@ -1,16 +1,18 @@
 'use client';
 import { addSubcategory } from "@/app/functions/stock/category/subcategory";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Categories } from "@/type/productType";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner"; // or your preferred toast library
+import { toast } from "sonner";
 import * as z from "zod";
+import { btnStyle } from "@/app/components/Icons";
+import { Input } from "@/components/ui/input";
+import { styledToast } from "@/app/components/Toast";
+import { Button } from "@/components/ui/button";
 
 const FormSchema = z.object({
   category_id: z.string().min(1, "Please select a category"),
@@ -34,7 +36,6 @@ export default function AddSubcategory() {
     const res = await fetch('/api/admin/fetchCategory');
     if (!res.ok) throw new Error('Failed to fetch category');
     const jsonData = await res.json();
-    console.log('API Response:', jsonData); // Debug log
     return jsonData;
   }
 
@@ -44,35 +45,16 @@ export default function AddSubcategory() {
     queryFn: fetchCategory,
   });
 
-  console.log('Query State:', { data, isLoading, error }); // Debug log
-
-  if (isLoading) return <p>Loading Categories...</p>;
-  if (error) {
-    console.error('Query Error:', error);
-    return <p>Failed to load Categories: {error.message}</p>;
-  }
-  if (!data) return <p>No data returned</p>;
-  
-  // Handle different possible response structures
-  const categories = data.categories || (Array.isArray(data) ? data : []);
-  
-  if (categories.length === 0) {
-    return <p>No categories available</p>;
-  }
-
   function onSubmit(formData: z.infer<typeof FormSchema>) {
     startTransition(async () => {
       try {
         const result = await addSubcategory(formData);
-        const parsed = typeof result === 'string' ? JSON.parse(result) : result;
-        const res = parsed;
-
-        if (res.error) {
-          toast.error(parsed.error);
+        if (!result) {
+          styledToast.error("Failed to create subcategory");
           return;
         }
 
-        toast.success("Subcategory created successfully!");
+        toast.success("Create Subcategory Successfully!");
         
         // Invalidate queries to refresh data
         queryClient.invalidateQueries({ queryKey: ["categories"] });
@@ -90,6 +72,45 @@ export default function AddSubcategory() {
     });
   }
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-6">
+        <p className="text-gray-500">Loading Categories...</p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center p-6">
+        <p className="text-red-500">Failed to load Categories: {error.message}</p>
+      </div>
+    );
+  }
+
+  // No data state
+  if (!data) {
+    return (
+      <div className="flex items-center justify-center p-6">
+        <p className="text-gray-500">No data returned</p>
+      </div>
+    );
+  }
+  
+  // Handle different possible response structures
+  const categories = data.categories || (Array.isArray(data) ? data : []);
+  
+  // No categories available
+  if (categories.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-6">
+        <p className="text-gray-500">No categories available. Please create a category first.</p>
+      </div>
+    );
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -102,7 +123,7 @@ export default function AddSubcategory() {
               <FormLabel>Category</FormLabel>
               <Select 
                 onValueChange={field.onChange} 
-                defaultValue={field.value}
+                value={field.value}
                 disabled={isPending}
               >
                 <FormControl>
@@ -112,7 +133,7 @@ export default function AddSubcategory() {
                 </FormControl>
                 <SelectContent>
                   {categories.map((category) => (
-                    <SelectItem key={category.category_id} value={category.category_id}>
+                    <SelectItem key={category.category_id} value={String(category.category_id)}>
                       {category.category_name}
                     </SelectItem>
                   ))}
@@ -131,7 +152,8 @@ export default function AddSubcategory() {
             <FormItem>
               <FormLabel>Subcategory Name</FormLabel>
               <FormControl>
-                <Input 
+                <Input
+                  type="text" 
                   placeholder="Enter subcategory name" 
                   {...field}
                   disabled={isPending}
@@ -143,7 +165,11 @@ export default function AddSubcategory() {
         />
 
         {/* Submit Button */}
-        <Button type="submit" disabled={isPending} className="w-full">
+        <Button
+          type="submit" 
+          disabled={isPending} 
+          className={btnStyle}
+        >
           {isPending ? "Creating..." : "Create Subcategory"}
         </Button>
       </form>

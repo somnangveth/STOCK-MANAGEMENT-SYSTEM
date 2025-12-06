@@ -1,5 +1,6 @@
 "use client";
 
+import DeleteMember from "@/app/admin/user/components/admin/DeleteMember";
 import { Admin, Contact, Staff } from "@/type/membertype";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
@@ -93,6 +94,10 @@ export default function MemberDetailCatalog({
             <p className="text-gray-500 text-sm ">ID: {admin?.admin_id || staff?.staff_id}</p>
             <p className="text-gray-500 text-sm ">{admin?.role || staff?.role}</p>
             <p className="text-gray-500 text-sm ">Email: {admin?.email || staff?.email}</p>
+            </div>
+
+            <div>
+                
             </div>
 
         </div>

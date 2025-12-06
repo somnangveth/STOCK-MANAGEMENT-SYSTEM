@@ -4,6 +4,7 @@ import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import AddSubcategory from "./AddSubcategory";
 import { RxPlusCircled } from "react-icons/rx";
+import { btnStyle } from "@/app/components/Icons";
 
 export default function AddSubcategoryForm(){
     return(
@@ -11,10 +12,10 @@ export default function AddSubcategoryForm(){
         id="create-sub-trigger"
         title="Create Subcategory"
         Trigger={
-            <Button
-            className="border border-blue-500 text-blue-500 bg-blue-100">
+            <button
+            className={btnStyle}>
                 <RxPlusCircled/> Subcategory
-            </Button>
+            </button>
         }
         form={<AddSubcategory/>}/>
     )

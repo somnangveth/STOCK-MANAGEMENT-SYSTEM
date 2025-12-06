@@ -11,39 +11,47 @@ import { LuTrendingUp } from "react-icons/lu";
 import { LuUsers } from "react-icons/lu";
 import { LuBoxes } from "react-icons/lu";
 
+interface NavLinksProps {
+    isAdmin: boolean;
+}
 
-export default function NavLinks(){
+export default function NavLinks({ isAdmin }: NavLinksProps){
     const pathname = usePathname();
     const [isProductsOpen, setIsProductsOpen] = useState(
         pathname.startsWith('/admin/products') ||
         pathname.startsWith('/admin/association') ||
-        pathname.startsWith('/admin/stock')
+        pathname.startsWith('/admin/stock') ||
+        pathname.startsWith('/admin/categories') ||
+        pathname.startsWith('/staff/products') ||
+        pathname.startsWith('/staff/association') ||
+        pathname.startsWith('/staff/stock') ||
+        pathname.startsWith('/staff/categories')
     );
 
-    const dashboard = <LuLayoutDashboard/>;
     const links =[
         {
-            href: '/admin',
+            href: isAdmin ? '/admin' : '/staff',
             icon: <LuLayoutDashboard/>,
             text: 'Dashboard'
         },
         {
             href: '/admin/user',
             icon: <LuUserRoundCog/>,
-            text: 'Users'
+            text: 'Users',
+            adminOnly: true
         },
         {
-            href: '/admin/price',
+            href: isAdmin ? '/admin/price' : '/staff/price',
             icon: <LuDollarSign/>,
             text: 'Price',
         },
         {
-            href: '/admin/sales',
+            href: isAdmin ? '/admin/sales' : '/staff/sales',
             icon: <LuTrendingUp/>,
             text: 'Sales',
         },
         {
-            href: '/admin/vendors',
+            href: isAdmin ? '/admin/vendors' : '/staff/vendors',
             icon: <LuUsers/>,
             text: 'Suppliers',
         }
@@ -68,11 +76,21 @@ export default function NavLinks(){
         }
     ];
 
-    const isProductsActive = pathname.startsWith('/admin/products') || pathname.startsWith('/admin/association') || pathname.startsWith('/admin/stock');
+    const isProductsActive = pathname.startsWith('/admin/products') || 
+        pathname.startsWith('/admin/association') || 
+        pathname.startsWith('/admin/stock') ||
+        pathname.startsWith('/admin/categories') ||
+        pathname.startsWith('/staff/products') || 
+        pathname.startsWith('/staff/association') || 
+        pathname.startsWith('/staff/stock') ||
+        pathname.startsWith('/staff/categories');
+
+    // Filter links based on admin status
+    const filteredLinks = links.filter(link => !link.adminOnly || isAdmin);
 
     return (
         <div className="space-y-1 flex flex-col">
-            {links.slice(0,1).map((link, index)=> (
+            {filteredLinks.slice(0,1).map((link, index)=> (
                 <Link
                 onClick={() => document.getElementById('sidebar-close')?.click()}
                     href = {link.href}
@@ -136,19 +154,19 @@ export default function NavLinks(){
             </div>
 
             {/* Remaining Links */}
-            {links.slice(1).map((link, index) => (
+            {filteredLinks.slice(1).map((link, index) => (
                 <Link
                 onClick={() => document.getElementById('sidebar-close')?.click()}
                 href={link.href}
                 key={index}
                 className={cn(
-                    "flex items-center gap-2 p-2 justify-start hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors",
+                    "flex items-center gap-2 p-2 justify-start hover:bg-amber-100 dark:hover:bg-amber-800 rounded transition-colors",
                     {
                         "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300":
                         pathname === link.href
                     }
                 )}>
-                    {link.text}
+                    {link.icon} {link.text}
                 </Link>
             ))}
         </div>

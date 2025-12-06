@@ -2,7 +2,7 @@
 import ProfileDialog from "../profile/ProfileDialog";
 import NavLinks from "./NavLink";
 
-export const SideBar = () => {
+export const StaffSideBar = () => {
     return(
         <div className="sm:w-52 xl:w-64 space-y-5 flex flex-col bg-[#e9dbbc]">
             <div className="flex-1 space-y-5">
@@ -12,7 +12,7 @@ export const SideBar = () => {
                 p-3 text-amber-50 bg-amber-800 font-bold">
                     <h1>Admin Dashboard</h1>
                 </div>
-                <NavLinks isAdmin={true}/>
+                <NavLinks isAdmin={false}/>
             </div>
             <div className="flex justify-end mt-80">
                 <ProfileDialog/>

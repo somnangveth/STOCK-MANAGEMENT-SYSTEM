@@ -6,6 +6,7 @@ import MemberTable from "@/app/components/Tables/memberTable";
 import EditMember from "./EditMember";
 import Link from "next/link";
 import { view } from "@/app/components/Icons";
+import DeleteMember from "./DeleteMember";
 
 export default function AdminList() {
   const [admins, setAdmins] = useState<Admin[]>([]);
@@ -36,6 +37,7 @@ export default function AdminList() {
             <Link href={`/admin/user/components/admin/admindetail/${a.admin_id}`}>
             {view}
             </Link>
+            <DeleteMember user_id={a.auth_id}/>
             </div>
           )
         }

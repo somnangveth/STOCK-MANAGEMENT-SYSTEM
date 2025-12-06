@@ -24,17 +24,15 @@ type ColumnKey =
   | "quantity"
   | "date"
   | "description"
-
-  //Expired Batch
+  // Expired Batch
   | "manufacture_date"
   | "expiry_date"
   | "recieved_date"
   | "quantity_remaining"
-
-  //Action
+  // Action
   | "action";
 
-// 2️. Product type
+// 2️. Product type - UPDATED TO MATCH
 type Product = {
   sku_code?: number | string;
   product_image?: string;
@@ -48,19 +46,22 @@ type Product = {
   quantity?: number;
   date?: string;
   description?: string;
-
-  manufacture_date?: Date;
-  expiry_date?: Date;
-  received_date?: Date;
+  // Changed from Date to string to match your data
+  manufacture_date?: string;
+  expiry_date?: string;
+  received_date?: string;
   quantity_remaining?: number;
+
+  batch_count?: number;
+  batches?: any[];
 };
 
 const formatDate = (value: string | Date | undefined) => {
-  if(!value) return "-";
+  if (!value) return "—";
   const d = new Date(value);
-  if(isNaN(d.getTime())) return "-";
-  return d.toISOString().split('T')[0]; 
-}
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString(); 
+};
 
 // 3️. Component props type
 interface ProductTableProps {
@@ -71,7 +72,12 @@ interface ProductTableProps {
 }
 
 // 4️. Table component
-export default function ProductTable({ product, columns, form, itemsPerPage}: ProductTableProps) {
+export default function ProductTable({ 
+  product, 
+  columns, 
+  form, 
+  itemsPerPage 
+}: ProductTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   if (!product || !Array.isArray(product)) {
@@ -88,11 +94,11 @@ export default function ProductTable({ product, columns, form, itemsPerPage}: Pr
   const currentProducts = product.slice(startIndex, endIndex);
 
   const goToNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev+1, totalPages));
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
   const goToPreviousPage = () => {
-    setCurrentPage((prev) => Math.max(prev-1, 1));
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
 
   const goToPage = (page: number) => {
@@ -117,11 +123,10 @@ export default function ProductTable({ product, columns, form, itemsPerPage}: Pr
             {columns.includes("quantity") && <TableHead>Qty</TableHead>}
             {columns.includes("date") && <TableHead>Date</TableHead>}
             {columns.includes("description") && <TableHead>Description</TableHead>}
-
             {/* Expired Batch */}
-            {columns.includes("manufacture_date") && <TableHead>Manufacture Date: </TableHead>}
-            {columns.includes("recieved_date") && <TableHead>Recieved Date</TableHead>}
-            {columns.includes("expiry_date") && <TableHead>Expiry Date: </TableHead>}
+            {columns.includes("manufacture_date") && <TableHead>Manufacture Date</TableHead>}
+            {columns.includes("recieved_date") && <TableHead>Received Date</TableHead>}
+            {columns.includes("expiry_date") && <TableHead>Expiry Date</TableHead>}
             {columns.includes("quantity_remaining") && <TableHead>In Stock</TableHead>}
             {columns.includes("action") && <TableHead>Action</TableHead>}
           </TableRow>
@@ -134,15 +139,31 @@ export default function ProductTable({ product, columns, form, itemsPerPage}: Pr
               {columns.includes("product_image") && (
                 <TableCell>
                   {products.product_image ? (
-                    <img src={products.product_image} alt={products.product_name} className="w-10 h-10 rounded-lg object-cover" />
+                    <img 
+                      src={products.product_image} 
+                      alt={products.product_name} 
+                      className="w-10 h-10 rounded-lg object-cover" 
+                    />
                   ) : (
                     "—"
                   )}
                 </TableCell>
               )}
               {columns.includes("product_name") && <TableCell>{products.product_name || "—"}</TableCell>}
-              {columns.includes("category_id") && <TableCell className="text-center"><p className="bg-amber-100 text-amber-700 rounded-lg">{products.category_name || "—"}</p></TableCell>}
-              {columns.includes("subcategory_id") && <TableCell className="text-center"><p className="bg-purple-100 text-purple-700 rounded-lg">{products.subcategory_name || "—"}</p></TableCell>}
+              {columns.includes("category_id") && (
+                <TableCell className="text-center">
+                  <p className="bg-amber-100 text-amber-700 rounded-lg px-2 py-1">
+                    {products.category_name || "—"}
+                  </p>
+                </TableCell>
+              )}
+              {columns.includes("subcategory_id") && (
+                <TableCell className="text-center">
+                  <p className="bg-purple-100 text-purple-700 rounded-lg px-2 py-1">
+                    {products.subcategory_name || "—"}
+                  </p>
+                </TableCell>
+              )}
               {columns.includes("base_unit") && <TableCell>{products.base_unit || "—"}</TableCell>}
               {columns.includes("baseprice") && <TableCell>{products.baseprice ?? "—"}</TableCell>}
               {columns.includes("taxes") && <TableCell>{products.taxes ?? "—"}</TableCell>}
@@ -150,12 +171,25 @@ export default function ProductTable({ product, columns, form, itemsPerPage}: Pr
               {columns.includes("quantity") && <TableCell>{products.quantity ?? "—"}</TableCell>}
               {columns.includes("date") && <TableCell>{products.date || "—"}</TableCell>}
               {columns.includes("description") && <TableCell>{products.description || "—"}</TableCell>}
-
+              
               {/* Expiry Products */}
-            {columns.includes("manufacture_date") && <TableCell>{formatDate(products.manufacture_date)}</TableCell>}
-            {columns.includes("recieved_date") && <TableCell>{formatDate(products.received_date)}</TableCell>}
-            {columns.includes("expiry_date") && <TableCell>{formatDate(products.expiry_date)}</TableCell>}
-            {columns.includes("quantity_remaining") && <TableCell>{products.quantity_remaining}</TableCell>}
+              {columns.includes("manufacture_date") && (
+                <TableCell>{formatDate(products.manufacture_date)}</TableCell>
+              )}
+              {columns.includes("recieved_date") && (
+                <TableCell>{formatDate(products.received_date)}</TableCell>
+              )}
+              {columns.includes("expiry_date") && (
+                <TableCell>{formatDate(products.expiry_date)}</TableCell>
+              )}
+              {columns.includes("quantity_remaining") && (
+                <TableCell>
+                  <span className={products.quantity_remaining === 0 ? 'text-red-600 font-bold' : ''}>
+                    {products.quantity_remaining ?? "—"}
+                  </span>
+                </TableCell>
+              )}
+              
               {columns.includes("action") && (
                 <TableCell>
                   {typeof form === "function" ? form(products) : form}
@@ -176,12 +210,13 @@ export default function ProductTable({ product, columns, form, itemsPerPage}: Pr
             <button
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <ChevronLeft className="w-4 h-4" />
             </button>
 
             <div className="flex gap-1">
-              {Array.from({length: totalPages}, (_, i) => i + 1).map((page) => (
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                 <button
                   key={page}
                   onClick={() => goToPage(page)}
@@ -189,7 +224,8 @@ export default function ProductTable({ product, columns, form, itemsPerPage}: Pr
                     currentPage === page
                       ? "bg-amber-600 text-white"
                       : "border border-gray-300 hover:bg-gray-100"
-                  }`}>
+                  }`}
+                >
                   {page}
                 </button>
               ))}
@@ -198,8 +234,9 @@ export default function ProductTable({ product, columns, form, itemsPerPage}: Pr
             <button
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-              <ChevronRight className="w-4 h-4"/>
+              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>

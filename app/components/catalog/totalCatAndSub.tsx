@@ -34,11 +34,11 @@ export default function TotalSubcategoryCatalog(){
     return (
         <div className="flex w-full gap-2 h-30 mt-5">
             {/* Category */}
-            <div className="w-1/2 border border-gray-300 rounded-lg  text-gray-600 p-3 bg-[#E7DEAF]">
+            <div className="w-1/2 border border-gray-300 rounded-lg  text-gray-600 p-3 bg-[#FAF3E1]">
                 <span className="font-bold text-lg">Category Total</span>
                 <h1 className="flex items-end justify-end text-amber-700 text-5xl">{totalCategory}</h1>
             </div>
-            <div className="w-1/2 border border-gray-300 rounded-lg text-gray-600 p-3 bg-[#E7DEAF]">
+            <div className="w-1/2 border border-gray-300 rounded-lg text-gray-600 p-3 bg-[#FAF3E1]">
                 <span className="font-bold text-lg">Subategory Total</span>
                 <h1 className="flex justify-end text-amber-700 text-5xl">{totalSubcategory}</h1>
             </div>

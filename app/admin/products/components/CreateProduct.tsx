@@ -17,6 +17,9 @@ import { cn } from "@/lib/utils";
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent} from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { Categories, Subcategories } from "@/type/productType";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { btnStyle } from "@/app/components/Icons";
+import { styledToast } from "@/app/components/Toast";
 
 const FormSchema = z.object({
   //Product Data
@@ -41,7 +44,7 @@ const FormSchema = z.object({
   expiry_date: z.date("Expiry date is required"),
   cost_price: z.number().min(0, "Cost price must be 0 or greater"),
   recieved_date: z.date("Received date is required"),
-  note: z.string(),
+  note: z.string().optional(),
   quantity: z.number().min(1, "Quantity must be at least 1"),
   packages_recieved: z.number().min(1, "Packages received must be at least 1"),
 });
@@ -75,6 +78,11 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
       base_unit: '',
       units_per_package: 1,
       package_type: 'box',
+      batch_number: "",
+      cost_price: 0,
+      note: "",
+      quantity: 1,
+      packages_recieved: 1,
     }
   });
 
@@ -140,12 +148,10 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
         const parsed = typeof result === "string" ? JSON.parse(result) : result;
         const { error } = parsed;
         if (error?.message) {
-          toast.error("Failed to create product!", {
-            description: error.message
-          });
+          styledToast.error("Failed to create product", error.message);
         } else {
           document.getElementById("product-trigger")?.click();
-          toast.success("Product created successfully!");
+          styledToast.success("Add Product Successfully!")
           form.reset();
           onSuccess?.();
           setImageUrls([]);
@@ -159,26 +165,40 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
     });
   }
 
+  //Steps
+  const steps = [
+    {
+      number: 1,
+      title: 'Product Info',
+      field: ["sku_code", "product_name", "description", "slug"]
+    },
+    {
+      number: 2,
+      title: 'Categories',
+      field: ["category_id", "subcategory_id", "vendor_id"]
+    },
+    {
+      number: 3,
+      title: 'Stock Info',
+      field: ["min_stock_level", "max_stock_level", "default_shelf_life_days", "base_unit", "units_per_package", "package_type"]
+    },
+    {
+      number: 4,
+      title: 'Batch Info',
+      field: ["batch_number", "manufacture_date", "expiry_date", "cost_price", "recieved_date", "note", "quantity", "packages_recieved"]
+    }
+  ];
+
   // Validate current step
   const validateStep = async () => {
-    let fieldsToValidate: (keyof z.infer<typeof FormSchema>)[] = [];
-    
-    if (currentStep === 1) {
-      fieldsToValidate = ['sku_code', 'product_name', 'description', 'slug'];
-    } else if (currentStep === 2) {
-      fieldsToValidate = ['category_id', 'subcategory_id', 'vendor_id'];
-    } else if(currentStep === 3){
-      fieldsToValidate = ['min_stock_level', 'max_stock_level', 'default_shelf_life_days', 'base_unit', 'units_per_package', 'package_type']
-    }
-
-    
-    const isValid = await form.trigger(fieldsToValidate);
+    const currentFields = steps[currentStep -1].field;
+    const isValid = await form.trigger(currentFields as any);
     return isValid;
   };
 
   const nextStep = async () => {
     const isValid = await validateStep();
-    if (isValid && currentStep < 4) {
+    if (isValid && currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -194,27 +214,34 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Progress Indicator */}
         <div className="flex items-center justify-between mb-8">
-          {[1, 2, 3, 4].map((step) => (
-            <div key={step} className="flex items-center flex-1">
-              <div
-                className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors",
-                  currentStep >= step
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-500"
+          {steps.map((step, index) => (
+            <div key={step.number} className="flex items-center flex-1">
+              <div className="flex flex-col items-center">
+                <div className={cn(
+                  "w-12 h-12 text-sm rounded-full flex items-center justify-center font-semibold transition-all duration-300",
+                  currentStep > step.number
+                  ? "bg-amber-700 text-white"
+                  : currentStep === step.number
+                    ? "bg-yellow-100 text-amber-700 shadow-lg ring-4 ring-amber-100" 
+                    : "bg-gray-200 text-gray-400"
+                )}>
+                  {currentStep > step.number ? <Check className="w-6 h-6" /> : step.number}
+                </div>
+
+                <span className={cn(
+                    "text-sm mt-2 font-medium transition-colors",
+                    currentStep >= step.number ? "text-gray-700" : "text-gray-400"
+                  )}>
+                    {step.title}
+                  </span>
+                </div>
+                {index < steps.length - 1 && (
+                  <div className={cn(
+                    "h-1 flex-1 mx-4 rounded transition-colors duration-300",
+                    currentStep > step.number ? "bg-amber-700" : "bg-gray-200"
+                  )} />
                 )}
-              >
-                {step}
               </div>
-              {step < 4 && (
-                <div
-                  className={cn(
-                    "flex-1 h-1 mx-2 transition-colors",
-                    currentStep > step ? "bg-blue-600" : "bg-gray-200"
-                  )}
-                />
-              )}
-            </div>
           ))}
         </div>
 
@@ -704,7 +731,7 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
             name="note"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className={text}>Note *</FormLabel>
+                <FormLabel className={text}>Note</FormLabel>
                 <FormControl>
                   <Textarea placeholder="Additional notes..." {...field} />
                 </FormControl>
@@ -718,43 +745,46 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
         )}
 
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between pt-4">
-          {currentStep > 1 ? (
-            <Button
-              type="button"
-              onClick={prevStep}
-              variant="outline"
-              className="border-gray-300"
-            >
-              Previous
-            </Button>
-          ) : (
-            <div></div>
-          )}
-          
-          {currentStep < 4 ? (
-            <Button
-              type="button"
-              onClick={nextStep}
-              className="ml-auto bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Next
-            </Button>
-          ) : (
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="ml-auto border border-blue-700 bg-blue-100 text-blue-700 hover:bg-blue-700 hover:text-blue-50"
-            >
-              {isPending ? (
-                <AiOutlineLoading3Quarters className={cn("animate-spin")} />
-              ) : (
-                "Create Product"
-              )}
-            </Button>
-          )}
-        </div>
+              {/* Navigation Buttons */}
+              <div className="flex justify-between items-center pt-6 border-t">
+                <Button
+                  type="button"
+                  onClick={prevStep}
+                  disabled={currentStep === 1}
+                  className="gap-2 bg-amber-600 hover:bg-amber-700 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Previous
+                </Button>
+
+                {currentStep < steps.length ? (
+                  <Button
+                    type="button"
+                    onClick={nextStep}
+                    className="gap-2 bg-amber-600 hover:bg-amber-700 text-white text-sm rounded-lg"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={isPending}
+                    className={btnStyle}
+                  >
+                    {isPending ? (
+                      <>
+                        <AiOutlineLoading3Quarters className="w-4 h-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        Create Product
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
       </form>
     </Form>
   );

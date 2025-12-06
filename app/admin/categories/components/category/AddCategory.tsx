@@ -6,10 +6,9 @@ import { useForm } from "react-hook-form";
 import { useTransition } from "react";
 import { addCategory } from "@/app/functions/stock/category/category";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { cn } from "@/lib/utils";
+import { btnStyle } from "@/app/components/Icons";
 
 // ---------------------
 // Zod Schema
@@ -73,7 +72,7 @@ export default function AddCategory() {
             <FormItem>
               <FormLabel>Category Name</FormLabel>
               <FormControl>
-                <Input
+                <input
                   type="text"
                   {...field}
                   onChange={(e) => field.onChange(e.target.value)}
@@ -90,7 +89,7 @@ export default function AddCategory() {
             <FormItem>
               <FormLabel>Slug</FormLabel>
               <FormControl>
-                <Input
+                <input
                   type="text"
                   {...field}
                   onChange={(e) => field.onChange(e.target.value)}
@@ -100,18 +99,17 @@ export default function AddCategory() {
           )}
         />
 
-        <Button
+        <button
           type="submit"
-          variant="outline"
           disabled={isPending}
-          className="flex items-center gap-2"
+          className={btnStyle}
         >
           {isPending ? (
             <AiOutlineLoading3Quarters className={cn("animate-spin")} />
           ) : (
             "Create Category"
           )}
-        </Button>
+        </button>
       </form>
     </Form>
   );

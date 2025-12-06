@@ -65,7 +65,7 @@ export default function UpdateCategory({category}:{category: Categories}){
                     <FormItem>
                         <FormLabel>Category Name: </FormLabel>
                         <FormControl>
-                            <Input
+                            <input
                             type="text"
                             {...field}
                             onChange={(e) => field.onChange(String(e.target.value))}
@@ -82,7 +82,7 @@ export default function UpdateCategory({category}:{category: Categories}){
                     <FormItem>
                         <FormLabel>Slug: </FormLabel>
                         <FormControl>
-                            <Input
+                            <input
                             type="text"
                             {...field}
                             onChange={(e) => field.onChange(String(e.target.value))}/>

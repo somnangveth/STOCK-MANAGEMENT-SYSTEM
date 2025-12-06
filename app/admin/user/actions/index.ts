@@ -21,11 +21,12 @@ export async function createMember(data: {
   primary_email_address: string;
   personal_email_address: string;
   primary_phone_number: string;
+  permissionIds?: string[]; // Add this parameter
 }) {
   const supabase = await createSupabaseAdmin();
 
   try {
-    const display_name = data.first_name + "" +data.last_name;
+    const display_name = data.first_name + " " + data.last_name; 
 
     //1. Create Auth user
     const { data: userData, error: userError } = await supabase.auth.admin.createUser({
@@ -46,7 +47,7 @@ export async function createMember(data: {
 
     const authId = userData.user.id;
 
-    //2.Insert into contact_info table
+    //2. Insert into contact_info table
     const {data: contactData, error: contactError} = await supabase
       .from("contact_info")
       .insert({
@@ -57,18 +58,18 @@ export async function createMember(data: {
       .select('contact_id')
       .single();
 
-      if(contactError){
-        console.error('Contact insert error', contactError);
-        throw contactError;
-      }
+    if(contactError){
+      console.error('Contact insert error', contactError);
+      throw contactError;
+    }
 
-      const contactId = contactData?.contact_id;
+    const contactId = contactData?.contact_id;
 
-      if(!contactId){
-        throw new Error("Contact ID is undefined after creation");
-      }
+    if(!contactId){
+      throw new Error("Contact ID is undefined after creation");
+    }
 
-    //3.Insert base on role
+    //3. Insert based on role
     if (data.role === "admin") {
       const { data: adminData, error: adminError } = await supabase
         .from("admin")
@@ -95,7 +96,7 @@ export async function createMember(data: {
       }
       const adminId = adminData.admin_id;
 
-      // 3️. Insert into member table
+      // Insert into member table
       const { data: memberData, error: memberError } = await supabase
         .from("member")
         .insert({
@@ -107,11 +108,16 @@ export async function createMember(data: {
         console.error('Member insert error: ', memberError);
         throw memberError;
       }
-      return memberData;
+
+      return { 
+        success: true, 
+        data: memberData, 
+        authId, 
+        adminId 
+      };
 
     } 
     else if (data.role === "staff") {
-
       const { data: staffData, error: staffError } = await supabase
         .from("staff")
         .insert({
@@ -137,6 +143,7 @@ export async function createMember(data: {
       }
       const staffId = staffData.staff_id;
 
+      // Insert into member table
       const { data: memberData, error: memberError } = await supabase
         .from("member")
         .insert({
@@ -145,21 +152,55 @@ export async function createMember(data: {
         });
 
       if (memberError){ 
-      console.error('Failed to insert member', memberError);
-      throw memberError;
-    }
+        console.error('Failed to insert member', memberError);
+        throw memberError;
+      }
 
-      return memberData;
+      //  Assign permissions to staff
+      if (data.permissionIds && data.permissionIds.length > 0) {
+        const permissionsToInsert = data.permissionIds.map(permissionId => ({
+          staff_id: staffId,
+          permission_id: permissionId,
+        }));
+
+        const { error: permError } = await supabase
+          .from('staff_permission')
+          .insert(permissionsToInsert);
+
+        if (permError) {
+          console.error('Failed to assign permissions to staff:', permError);
+          // Don't throw - staff was created successfully, just log the warning
+          return { 
+            success: true, 
+            data: memberData, 
+            authId, 
+            staffId,
+            warning: 'Staff created but some permissions failed to assign'
+          };
+        }
+      }
+
+      return { 
+        success: true, 
+        data: memberData, 
+        authId, 
+        staffId 
+      };
     }
 
     throw new Error("Invalid role provided");
 
   } catch (error: any) {
     console.error("Create member failed:", error);
-    throw new Error(error.message || "Failed to create member!");
+    
+    // Return error object instead of throwing for better error handling
+    return {
+      success: false,
+      error: error.message || "Failed to create member!",
+      details: error
+    };
   }
 }
-
 
 // Fetch all Admins 
 export async function fetchAdmins() {
@@ -193,6 +234,8 @@ export async function fetchAuthUsers(id: string,){
 }
 
 
+
+//Update Admin info
 export async function updateAdmin(
   admin_id: string,
   data: Partial<{
@@ -365,4 +408,102 @@ export async function fetchContacts(){
   }
 
   return contactData;
+}
+
+export async function deleteMember(user_id: string) {
+  const supabase = await createSupabaseAdmin();
+
+  try {
+    // 1. First, get the member info to find related records
+    const { data: member, error: fetchError } = await supabase
+      .from("member")
+      .select("id, auth_id, admin_id, staff_id")
+      .eq("auth_id", user_id)
+      .single();
+
+    if (fetchError || !member) {
+      console.error("Member not found:", fetchError);
+      return { 
+        success: false, 
+        error: "Member not found" 
+      };
+    }
+
+    // 2. Delete staff permissions if staff member (if not using CASCADE)
+    if (member.staff_id) {
+      const { error: permError } = await supabase
+        .from("staff_permission")
+        .delete()
+        .eq("staff_id", member.staff_id);
+
+      if (permError) {
+        console.error("Error deleting staff permissions:", permError);
+        // Continue anyway - might not exist
+      }
+    }
+
+    // 3. Delete from member table first
+    const { error: memberError } = await supabase
+      .from("member")
+      .delete()
+      .eq("auth_id", user_id);
+
+    if (memberError) {
+      console.error("Error deleting member:", memberError);
+      return { 
+        success: false, 
+        error: "Failed to delete member record" 
+      };
+    }
+
+    // 4. Delete from staff or admin table
+    if (member.staff_id) {
+      const { error: staffError } = await supabase
+        .from("staff")
+        .delete()
+        .eq("staff_id", member.staff_id);
+
+      if (staffError) {
+        console.error("Error deleting staff:", staffError);
+        // Continue - may already be deleted by CASCADE
+      }
+    } else if (member.admin_id) {
+      const { error: adminError } = await supabase
+        .from("admin")
+        .delete()
+        .eq("admin_id", member.admin_id);
+
+      if (adminError) {
+        console.error("Error deleting admin:", adminError);
+        // Continue - may already be deleted by CASCADE
+      }
+    }
+
+    // 5. Finally, delete the auth user
+    const { error: authError } = await supabase.auth.admin.deleteUser(user_id);
+
+    if (authError) {
+      console.error("Error deleting auth user:", authError);
+      return { 
+        success: false, 
+        error: authError.message || "Failed to delete user authentication" 
+      };
+    }
+
+    // 6. Revalidate the page to refresh data
+    revalidatePath("/admin/members");
+    revalidatePath("/members");
+
+    return { 
+      success: true, 
+      message: "Member deleted successfully" 
+    };
+
+  } catch (error) {
+    console.error("Delete member error:", error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "An unexpected error occurred" 
+    };
+  }
 }

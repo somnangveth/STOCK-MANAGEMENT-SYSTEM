@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { convertBlobUrlToFile } from "@/app/components/Image/actions/image";
 import { uploadImage } from "@/app/components/Image/actions/upload";
 import ProfileButton from "@/app/components/Image/components/ProfileButton";
+import { styledToast } from "@/app/components/Toast";
 
 const FormSchema = z.object({
     id: z.string().nonempty("ID is required"),
@@ -149,17 +150,14 @@ export default function MemberForm() {
                     toast.error("Failed to create member!");
                 } else {
                     document.getElementById("create-trigger")?.click(); 
-                    toast.success("Member created successfully!");
+                    styledToast.success("Member Added Successfully!")
                     form.reset(); 
                     setCurrentStep(1);
                     setImageUrls([]);
                 }
             } catch (error: any) {
-                toast.error("Image upload failed", {
-                    description: error.message,
-                });
-            }
-        });
+                styledToast.error("Failed to add member!", error);
+        }});
     }
 
     return (

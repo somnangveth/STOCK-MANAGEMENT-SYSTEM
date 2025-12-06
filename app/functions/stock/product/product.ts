@@ -4,7 +4,7 @@ import { createSupabaseAdmin } from "@/lib/supbase/action";
 import { Product } from "@/type/productType";
 
 // Create new Product
-export async function createProduct(data: {
+export async function createProduct(data: Partial<{
   // Products Info
   sku_code: string;
   product_name: string;
@@ -30,7 +30,7 @@ export async function createProduct(data: {
   note: string;
   quantity: number;
   packages_recieved: number;
-}) {
+}>) {
   const supabase = await createSupabaseAdmin();
   const getUser = await getLoggedInUser();
 
@@ -184,7 +184,8 @@ export async function fetchProducts() {
 
   const { data: productData, error: productError } = await supabase
     .from("products")
-    .select("*");
+    .select("*")
+    .order('sku_code', {ascending: true});
 
   if (productError) {
     console.error("Supabase query error:", productError); 

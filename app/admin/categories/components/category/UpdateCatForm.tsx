@@ -11,10 +11,10 @@ export default function UpdateCategoryForm({category}:{category: Categories}){
         id="category-update-trigger"
         title="Update Category"
         Trigger={
-            <Button
+            <button
             className="bg-blue-100 border border-blue-500 text-blue-500">
                 Update
-            </Button>
+            </button>
         }
         form={<UpdateCategoryForm category = {category as Categories}/>}/>
     )

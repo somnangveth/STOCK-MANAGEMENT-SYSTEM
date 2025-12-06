@@ -47,7 +47,7 @@ export default function AlertExpiredPanel() {
   if (hasError) return <div>Error loading data</div>;
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 overflow-y-auto">
       {expiredProducts.length === 0 ? (
         <div className="text-gray-500 text-sm">No expired products found</div>
       ) : (
