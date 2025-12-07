@@ -122,6 +122,7 @@ export async function createMember(data: {
         .from("staff")
         .insert({
           staff_id: data.id,
+          auth_id: authId,
           first_name: data.first_name,
           last_name: data.last_name,
           email: data.email,
@@ -156,29 +157,7 @@ export async function createMember(data: {
         throw memberError;
       }
 
-      //  Assign permissions to staff
-      if (data.permissionIds && data.permissionIds.length > 0) {
-        const permissionsToInsert = data.permissionIds.map(permissionId => ({
-          staff_id: staffId,
-          permission_id: permissionId,
-        }));
-
-        const { error: permError } = await supabase
-          .from('staff_permission')
-          .insert(permissionsToInsert);
-
-        if (permError) {
-          console.error('Failed to assign permissions to staff:', permError);
-          // Don't throw - staff was created successfully, just log the warning
-          return { 
-            success: true, 
-            data: memberData, 
-            authId, 
-            staffId,
-            warning: 'Staff created but some permissions failed to assign'
-          };
-        }
-      }
+      
 
       return { 
         success: true, 

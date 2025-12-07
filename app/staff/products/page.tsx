@@ -18,9 +18,7 @@ export default function ProductManagement() {
     onSearch: (results: EnhancedProduct[]) => void;
   } | null>(null);
 
-  /**
-   * Called by ProductList when data is loaded
-   */
+
   const registerSearch = useCallback(
     (
       data: EnhancedProduct[],

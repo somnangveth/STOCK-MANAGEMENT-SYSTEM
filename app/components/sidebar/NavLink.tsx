@@ -59,11 +59,11 @@ export default function NavLinks({ isAdmin }: NavLinksProps){
 
     const productLinks = [
         {
-            href: '/admin/products',
+            href: isAdmin ? '/admin/products': 'staff/products',
             text: 'Products'
         },
         {
-            href: '/admin/categories',
+            href: isAdmin ? '/admin/categories': 'staff/category',
             text: 'Category'
         },
         {
