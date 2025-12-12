@@ -1,3 +1,5 @@
+// app/admin/sales/components/CustomerSalesTable.tsx
+
 "use client";
 
 import React, { useState } from "react";

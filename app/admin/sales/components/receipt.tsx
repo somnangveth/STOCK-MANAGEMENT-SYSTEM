@@ -1,3 +1,5 @@
+// app/admin/sales/components/receipt.tsx
+
 "use client";
 
 import { Sale } from "../type";

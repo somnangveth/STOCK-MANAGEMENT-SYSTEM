@@ -1,12 +1,15 @@
+// app/admin/sales/page.tsx
+
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import Filters from "./components/Filters";
 import PriceTabs from "./components/PriceTabs";
-import PriceTable from "./components/PriceTable";
+import SalesTable from "./components/SalesTable";
 import CustomerSalesTable from "./components/CustomerSalesTable";
+import AddSalesForm from "./components/addForm";
 import Receipt from "./components/receipt";
-import { useReactToPrint, UseReactToPrintOptions } from "react-to-print";
+import { addSaleWithValidation, submitSaleForm } from "@/app/functions/sale/sales";
 import { Sale } from "./type";
 
 export default function Sales() {
@@ -15,9 +18,6 @@ export default function Sales() {
   const [customerSales, setCustomerSales] = useState<Sale[]>([]);
   const [currentSaleData, setCurrentSaleData] = useState<Sale | null>(null); // 当前销售单完整数据
   const receiptRef = useRef<HTMLDivElement>(null);
-
-  // 控制是否显示“添加销售”按钮的表单（现在用不到表单，直接生成销售单）
-  const [showAddForm, setShowAddForm] = useState(false);
 
   // 加载销售数据
   const loadSales = async () => {
@@ -72,6 +72,7 @@ export default function Sales() {
     loadSales();
   }, []);
 
+
   // Filters
   const [categoryFilter, setCategoryFilter] = useState("Select");
   const [subCategoryFilter, setSubCategoryFilter] = useState("Select");
@@ -97,51 +98,21 @@ export default function Sales() {
     return true;
   });
 
-  // 打印收据
-  const handlePrint = useReactToPrint({
-    content: () => receiptRef.current,
-    documentTitle: `Receipt-${currentSaleData?.sales_number ?? "Unknown"}`,
-  } as UseReactToPrintOptions);
-
-  // 点击按钮直接生成空销售单
-  const handleAddSaleClick = async () => {
-    // ⚡ 调用后端接口创建新销售单，假设返回 newSaleId
-    const res = await fetch("/api/sales/create", { method: "POST" }).then(r => r.json());
-    const newSaleId = res.sale_id;
-
-    const newSale: Sale = {
-      sale_id: newSaleId,
-      sales_number: "",
-      sale_date: "",
-      customer_name: "",
-      customer_email: "",
-      customer_phone: "",
-      payment_method: "",
-      payment_status: "",
-      process_status: "draft",
-      subtotal: 0,
-      tax_amount: 0,
-      discount_amount: 0,
-      total_amount: 0,
-      items: [],
-      note: "",
-    };
-
-    setCurrentSaleData(newSale);
-    loadSales(); // 刷新列表
-  };
+  function handlePrint(event: MouseEvent<HTMLButtonElement, MouseEvent>): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex-1 bg-[#fefaec] p-6">
       <main className="flex-1 p-6 space-y-6">
         {/* 卡片 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="bg-linear-to-r from-indigo-300 via-purple-200 to-pink-500 text-violet-600 p-6 rounded-3xl shadow-xl border-2 border-black/70">
+          <div className="bg-linear-to-r from-indigo-300 text-violet-600 p-6 rounded-3xl shadow-xl border-2 border-black/70">
             <h2 className="text-sm font-semibold">Today Sale</h2>
             <p className="text-5xl font-bold mt-4">{products.length}</p>
           </div>
 
-          <div className="bg-linear-to-r from-indigo-300 via-purple-200 to-pink-500 text-violet-600 p-6 rounded-3xl shadow-xl border-2 border-black/70">
+          <div className="bg-linear-to-r from-indigo-300 text-violet-600 p-6 rounded-3xl shadow-xl border-2 border-black/70">
             <h2 className="text-sm font-semibold">This Week's Sales Total</h2>
             <canvas id="salesChart"></canvas>
           </div>
@@ -158,19 +129,18 @@ export default function Sales() {
           categoryType={selectedTab === "Customer" ? "customer" : "product"}
         />
 
-        {/* 添加销售按钮 */}
-        <button
-          onClick={handleAddSaleClick}
-          className="mb-4 px-4 py-2 bg-green-500 text-white rounded"
-        >
-          Add New Sale
-        </button>
+    
+        <AddSalesForm onAddSuccess={(newSale) => {
+            setCustomerSales(prev => [newSale, ...prev]); // 直接把新 sale 加入列表
+            setCurrentSaleData(newSale);
+          }} />
+
 
         {/* Tabs */}
         <PriceTabs selectedTab={selectedTab} onTabChange={setSelectedTab} tabs={["Product", "Customer"]} />
 
         {/* Tables */}
-        {selectedTab === "Product" && <PriceTable products={filteredProducts} setProducts={setProducts} />}
+        {selectedTab === "Product" && <SalesTable />}
         {selectedTab === "Customer" && <CustomerSalesTable sales={filteredCustomerSales} setCustomerSales={setCustomerSales} />}
 
         {/* 收据单 */}

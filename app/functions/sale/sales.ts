@@ -1,13 +1,15 @@
+// app/functions/sale/sales.ts
+
 "use server";
 
 import { createSupabaseAdmin, createSupabaseServerClient } from "@/lib/supbase/action";
 import { Sale } from "@/app/admin/sales/type";
 
-export async function addSaleServerSide(): Promise<Sale> {
+export async function addSaleServerSide(p0: { customer_name: string; sale_date: any; subtotal: number; tax_amount: number; discount_amount: number; total_amount: number; sale_items: never[]; }): Promise<Sale> {
   const supabase = await createSupabaseAdmin();
 
   const { data, error } = await supabase
-    .from("sales")
+    .from("sale")
     .insert([
       {
         sales_number: "",
@@ -78,7 +80,7 @@ export async function addSaleItemServerSide({
 
 //Fetch All Sales
 export async function fetchSales(){
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseAdmin();
 
   const {data: salesData, error: salesError} = await supabase
   .from("sale")

@@ -15,12 +15,25 @@ import { Button } from "@/components/ui/button";
 import { Product } from "@/type/productType";
 import { useState } from "react";
 import { toast } from "sonner";
+import { deleteImage } from "@/app/components/Image/actions/upload";
+import { trash } from "@/app/components/Icons";
 
 export default function DeleteProduct({product}: {product: Product}){
     const [open, setOpen] = useState(false);
 
+    async function deleteProductImage(oldImage?: string){
+        try{
+            if(oldImage){
+                await deleteImage({imageUrl: oldImage, bucket: 'images'})
+            }
+            console.log("Image deleted Successfully!");
+        }catch(error){
+            console.error(JSON.stringify({error: "Failed to delete image"}));
+        }
+    }
     async function handleDelete(){
         try{
+            await deleteProductImage(product.product_image);
             const res = await deleteProduct({product});
             const result = JSON.parse(res);
 
@@ -42,12 +55,8 @@ export default function DeleteProduct({product}: {product: Product}){
             <AlertDialogTrigger asChild>
                 <Button
                 className="
-                h-7 w-15
-                bg-red-200 text-red-700
-                border border-red-700 text-sm
-                rounded-xl
-                hover:bg-red-500 hover:text-red-100">
-                    Delete
+                w-11 h-5 text-sm bg-transparent text-red-500 rounded-xl">
+                    {trash}
                 </Button>
             </AlertDialogTrigger>
 

@@ -3,19 +3,19 @@
 import { useState, useCallback } from "react";
 import SearchBar from "@/app/components/SearchBar";
 import ProductForm from "./components/ProductForm";
-import ProductList from "./components/ProductLists";
+import ProductList, { EnhancedProduct } from "./components/ProductLists";
 import { Product } from "@/type/productType";
 
 export default function ProductManagement() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Store product list locally
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<EnhancedProduct[]>([]);
 
   // Store search configs coming from ProductList
   const [searchConfig, setSearchConfig] = useState<{
-    searchKeys: (keyof Product)[];
-    onSearch: (results: Product[]) => void;
+    searchKeys: (keyof EnhancedProduct)[];
+    onSearch: (results: EnhancedProduct[]) => void;
   } | null>(null);
 
   /**
@@ -23,9 +23,9 @@ export default function ProductManagement() {
    */
   const registerSearch = useCallback(
     (
-      data: Product[],
-      onSearch: (results: Product[]) => void,
-      searchKeys: (keyof Product)[]
+      data: EnhancedProduct[],
+      onSearch: (results: EnhancedProduct[]) => void,
+      searchKeys: (keyof EnhancedProduct)[]
     ) => {
       setProducts(data); // store product list
       setSearchConfig({ searchKeys, onSearch });
@@ -43,7 +43,9 @@ export default function ProductManagement() {
   return (
     <div className="space-y-6 p-6">
 
-      {/* Search bar shows only after ProductList registers keys */}
+      <div className="flex justify-end">
+      <div className="w-1/3">
+        {/* Search bar shows only after ProductList registers keys */}
       {searchConfig && (
         <SearchBar
           data={products}
@@ -52,9 +54,13 @@ export default function ProductManagement() {
           placeholder="Search products by name, SKU, or category..."
         />
       )}
+    </div>
+      </div>
 
       {/* Add product form */}
-      <ProductForm onProductAdded={handleProductAdded} />
+      <div className="flex justify-end">
+        <ProductForm onProductAdded={handleProductAdded} />
+      </div>
 
       <div className="mt-10">
         {/* Product list */}

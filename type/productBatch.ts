@@ -1,4 +1,5 @@
 export type ProductBatch = {
+    batch_id: string;
     batch_number?: string;
     manufacture_date?: Date;
     expiry_date?:Date;
@@ -6,6 +7,7 @@ export type ProductBatch = {
     recieved_date?: Date;
     status?: 'active' | 'expired' | 'dispose' | 'returned';
     note?: string;
+    product_id: string;
     quantity?: number;
     quantity_remaining?: number;
     packages_recieved?: number;

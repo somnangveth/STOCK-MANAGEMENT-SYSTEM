@@ -1,3 +1,6 @@
+  // app/admin/sales/components/Filters.tsx
+
+
 "use client";
 
 import { ChevronDown } from "lucide-react";
@@ -108,7 +111,7 @@ export default function Filters({
     <div className="grid grid-cols-2 lg:grid-cols-7 gap-4 mb-6">
       {/* 类别 */}
       <div className="flex flex-col text-sm">
-        <label className="mb-1 font-medium">{categoryType === "customer" ? "客户类型:" : "类别:"}</label>
+        <label className="mb-1 font-medium">{categoryType === "customer" ? "Customer Type:" : "Category:"}</label>
         <div className="relative">
           <select
             value={category}
@@ -156,7 +159,7 @@ export default function Filters({
       {/* 产品 */}
       {categoryType === "product" && (
         <div className="flex flex-col text-sm">
-          <label className="mb-1 font-medium">产品:</label>
+          <label className="mb-1 font-medium">Product:</label>
           <div className="relative">
             <select
               value={product}
@@ -176,7 +179,7 @@ export default function Filters({
 
       {/* 状态 */}
       <div className="flex flex-col text-sm">
-        <label className="mb-1 font-medium">状态:</label>
+        <label className="mb-1 font-medium">Status:</label>
         <div className="relative">
           <select
             value={state}
@@ -194,7 +197,7 @@ export default function Filters({
 
       {/* From 日期 */}
       <div className="flex flex-col text-sm">
-        <label className="mb-1 font-medium">从:</label>
+        <label className="mb-1 font-medium">From:</label>
         <input
           type="date"
           value={fromDate}
@@ -205,7 +208,7 @@ export default function Filters({
 
       {/* To 日期 */}
       <div className="flex flex-col text-sm">
-        <label className="mb-1 font-medium">到:</label>
+        <label className="mb-1 font-medium">To:</label>
         <input
           type="date"
           value={toDate}

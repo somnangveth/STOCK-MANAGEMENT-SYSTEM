@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { getLoggedInUser } from "@/app/auth/actions";
-import Image from "next/image";
 import SignOut from "@/app/auth/components/Signout";
 
 export default function ProfilePage() {
@@ -26,12 +25,21 @@ export default function ProfilePage() {
   return (
     <div className=" border border-gray-500 rounded-xl">
       <div className="p-3">
-        <Image
+        {profile.profile_image ? (
+      <img
       src={profile.profile_image}
       alt={profile.name}
       className="rounded-full"
       height={100}
       width={100}/>
+        ):(
+      <img
+      src="/assets/default.jpg"
+      alt={profile.name}
+      className="rounded-full"
+      height={100}
+      width={100}/>
+      )}
       <p className="text-gray-500">
         Name: {profile.name || "N/A"}
       </p>

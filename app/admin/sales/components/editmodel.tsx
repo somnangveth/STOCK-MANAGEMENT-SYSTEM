@@ -1,3 +1,5 @@
+// app/admin/sales/components/editmodel.tsx
+
 "use client";
 
 import React from "react";

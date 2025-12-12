@@ -48,7 +48,7 @@ export default function SearchBar<T>({
   };
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className} bg-white`}>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
         <input

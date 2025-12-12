@@ -1,3 +1,6 @@
+//price-tabs.tsx
+
+
 "use client";
 import React from "react";
 
