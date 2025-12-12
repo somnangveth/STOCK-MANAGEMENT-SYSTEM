@@ -1,4 +1,4 @@
-import { fetchCategory } from "@/app/functions/stock/category/category";
+import { fetchCategory } from "@/app/functions/admin/stock/category/category";
 import { NextResponse } from "next/server";
 
 export async function GET(){

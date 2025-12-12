@@ -46,6 +46,9 @@ export type Product = {
   expiry_date?: string;
   received_date?: string;
   quantity_remaining?: number;
+
+  //Price
+  total_price: number;
 };
 
 // Batch fields (if you need them separately)

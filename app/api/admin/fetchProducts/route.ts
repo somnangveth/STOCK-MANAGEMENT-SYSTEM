@@ -1,4 +1,4 @@
-import { fetchProducts } from "@/app/functions/stock/product/product";
+import { fetchProducts } from "@/app/functions/admin/stock/product/product";
 import { NextResponse } from "next/server";
 
 

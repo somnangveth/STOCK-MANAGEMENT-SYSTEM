@@ -46,7 +46,7 @@ export default function NavLinks({ isAdmin }: NavLinksProps){
             text: 'Price',
         },
         {
-            href: isAdmin ? '/admin/sales' : '/staff/sales',
+            href: isAdmin ? '/admin/pos' : '/staff/sales',
             icon: <LuTrendingUp/>,
             text: 'Sales',
         },

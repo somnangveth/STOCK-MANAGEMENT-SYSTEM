@@ -9,7 +9,7 @@ export async function GET(){
 
         const hasPermission = await checkPermission('category.view');
 
-        console.log("Api Permission result: ", hasPermission);
+        console.log("API Permission Rresult: ", hasPermission);
 
         if(!hasPermission){
             console.log("Permission denied, returning 403");

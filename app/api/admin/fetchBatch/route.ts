@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchBatch } from "@/app/functions/stock/product_batches/productbatches";
+import { fetchBatch } from "@/app/functions/admin/stock/product_batches/productbatches";
 import { NextResponse } from "next/server";
 
 export async function GET(){

@@ -5,9 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { createProduct, fetchCategoriesAndSubcategories, fetchVendors } from "@/app/functions/stock/product/product";
+import { createProduct, fetchCategoriesAndSubcategories, fetchVendors } from "@/app/functions/admin/stock/product/product";
 import { toast } from "sonner";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import UploadImageButton from "@/app/components/Image/components/ImageButton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -198,7 +198,7 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
 
   const nextStep = async () => {
     const isValid = await validateStep();
-    if (isValid && currentStep < steps.length) {
+    if (isValid && currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -211,7 +211,6 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Progress Indicator */}
         <div className="flex items-center justify-between mb-8">
           {steps.map((step, index) => (
@@ -585,9 +584,7 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
                     />
                   </FormControl>
                   {form.formState.errors.manufacture_date && (
-                    <p className={text_red}>
-                      {form.formState.errors.manufacture_date.message}
-                    </p>
+                    <p className={text_red}>{form.formState.errors.manufacture_date.message}</p>
                   )}
                 </FormItem>
               )}
@@ -616,9 +613,7 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
                     />
                   </FormControl>
                   {form.formState.errors.expiry_date && (
-                    <p className={text_red}>
-                      {form.formState.errors.expiry_date.message}
-                    </p>
+                    <p className={text_red}>{form.formState.errors.expiry_date.message}</p>
                   )}
                 </FormItem>
               )}
@@ -647,9 +642,7 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
                     />
                   </FormControl>
                   {form.formState.errors.recieved_date && (
-                    <p className={text_red}>
-                      {form.formState.errors.recieved_date.message}
-                    </p>
+                    <p className={text_red}>{form.formState.errors.recieved_date.message}</p>
                   )}
                 </FormItem>
               )}
@@ -670,9 +663,7 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
                     />
                   </FormControl>
                   {form.formState.errors.cost_price && (
-                    <p className={text_red}>
-                      {form.formState.errors.cost_price.message}
-                    </p>
+                    <p className={text_red}>{form.formState.errors.cost_price.message}</p>
                   )}
                 </FormItem>
               )}
@@ -693,9 +684,7 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
                     />
                   </FormControl>
                   {form.formState.errors.quantity && (
-                    <p className={text_red}>
-                      {form.formState.errors.quantity.message}
-                    </p>
+                    <p className={text_red}>{form.formState.errors.quantity.message}</p>
                   )}
                 </FormItem>
               )}
@@ -716,9 +705,7 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
                     />
                   </FormControl>
                   {form.formState.errors.packages_recieved && (
-                    <p className={text_red}>
-                      {form.formState.errors.packages_recieved.message}
-                    </p>
+                    <p className={text_red}>{form.formState.errors.packages_recieved.message}</p>
                   )}
                 </FormItem>
               )}
@@ -733,7 +720,8 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
               <FormItem>
                 <FormLabel className={text}>Note</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Additional notes..." {...field} />
+                  <Textarea placeholder="Additional notes..." 
+                  {...field} />
                 </FormControl>
                 {form.formState.errors.note && (
                   <p className={text_red}>{form.formState.errors.note.message}</p>
@@ -757,7 +745,7 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
                   Previous
                 </Button>
 
-                {currentStep < steps.length ? (
+                {currentStep < 4 ? (
                   <Button
                     type="button"
                     onClick={nextStep}
@@ -769,6 +757,7 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
                 ) : (
                   <Button
                     type="submit"
+                    onClick={() => form.handleSubmit(onSubmit)()}
                     disabled={isPending}
                     className={btnStyle}
                   >
@@ -785,7 +774,6 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
                   </Button>
                 )}
               </div>
-      </form>
     </Form>
   );
 }

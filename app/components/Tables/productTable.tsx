@@ -29,6 +29,7 @@ type ColumnKey =
   | "expiry_date"
   | "recieved_date"
   | "quantity_remaining"
+
   // Action
   | "action";
 
@@ -128,6 +129,7 @@ export default function ProductTable({
             {columns.includes("recieved_date") && <TableHead>Received Date</TableHead>}
             {columns.includes("expiry_date") && <TableHead>Expiry Date</TableHead>}
             {columns.includes("quantity_remaining") && <TableHead>In Stock</TableHead>}
+
             {columns.includes("action") && <TableHead>Action</TableHead>}
           </TableRow>
         </TableHeader>

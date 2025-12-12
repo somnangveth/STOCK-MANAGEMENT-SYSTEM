@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { useTransition } from "react";
-import { addCategory } from "@/app/functions/stock/category/category";
+import { addCategory } from "@/app/functions/admin/stock/category/category";
 import { toast } from "sonner";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { cn } from "@/lib/utils";
@@ -63,7 +63,7 @@ export default function AddCategory() {
   // ---------------------
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-4">
 
         <FormField
           control={form.control}
@@ -101,6 +101,7 @@ export default function AddCategory() {
 
         <button
           type="submit"
+          onClick={() => form.handleSubmit(onSubmit)}
           disabled={isPending}
           className={btnStyle}
         >
@@ -110,7 +111,7 @@ export default function AddCategory() {
             "Create Category"
           )}
         </button>
-      </form>
+      </div>
     </Form>
   );
 }

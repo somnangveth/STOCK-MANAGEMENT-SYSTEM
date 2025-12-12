@@ -184,7 +184,7 @@ export default function CreateVendors({onSuccess}:{onSuccess?: () => void}) {
                           <FormLabel className="text-gray-700 font-medium">Vendor ID *</FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="e.g., VEN-001" 
+                              placeholder="e.g., 001" 
                               className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                               {...field} 
                             />

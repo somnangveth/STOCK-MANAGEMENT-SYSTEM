@@ -2,6 +2,7 @@
 import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import MemberForm from "./CreateMember";
+import { btnStyle } from "@/app/components/Icons";
 
 
 export default function CreateForm(){
@@ -10,12 +11,7 @@ export default function CreateForm(){
         id="create-trigger"
         Trigger = {
             <Button
-            className="
-            text-blue-700
-            border border-blue-500
-            bg-blue-100
-            rounded-xl p-1
-            hover:bg-blue-500 hover:text-white"
+            className={btnStyle}
             >
                 + Add New Users
             </Button>

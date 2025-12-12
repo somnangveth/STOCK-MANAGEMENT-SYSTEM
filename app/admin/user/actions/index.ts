@@ -21,12 +21,21 @@ export async function createMember(data: {
   primary_email_address: string;
   personal_email_address: string;
   primary_phone_number: string;
-  permissionIds?: string[]; // Add this parameter
 }) {
   const supabase = await createSupabaseAdmin();
 
   try {
-    const display_name = data.first_name + " " + data.last_name; 
+    const display_name = data.first_name + " " + data.last_name;
+
+    //Fetch all datas from permission default table
+    const {data: permissionData, error: permissionError} = await supabase
+    .from('permission_default')
+    .select('*');
+
+    if(permissionError){
+      console.error("Failed to fetch permission data", permissionError);
+      throw new Error("Failed to fetch permission data");
+    }
 
     //1. Create Auth user
     const { data: userData, error: userError } = await supabase.auth.admin.createUser({
@@ -47,7 +56,7 @@ export async function createMember(data: {
 
     const authId = userData.user.id;
 
-    //2. Insert into contact_info table
+    //2.Insert into contact_info table
     const {data: contactData, error: contactError} = await supabase
       .from("contact_info")
       .insert({
@@ -69,7 +78,7 @@ export async function createMember(data: {
       throw new Error("Contact ID is undefined after creation");
     }
 
-    //3. Insert based on role
+    //3.Insert base on role
     if (data.role === "admin") {
       const { data: adminData, error: adminError } = await supabase
         .from("admin")
@@ -108,21 +117,15 @@ export async function createMember(data: {
         console.error('Member insert error: ', memberError);
         throw memberError;
       }
-
-      return { 
-        success: true, 
-        data: memberData, 
-        authId, 
-        adminId 
-      };
+      return memberData;
 
     } 
     else if (data.role === "staff") {
+
       const { data: staffData, error: staffError } = await supabase
         .from("staff")
         .insert({
           staff_id: data.id,
-          auth_id: authId,
           first_name: data.first_name,
           last_name: data.last_name,
           email: data.email,
@@ -144,6 +147,23 @@ export async function createMember(data: {
       }
       const staffId = staffData.staff_id;
 
+      // Map permission defaults to staff_permission format
+      const staffPermissions = permissionData?.map((permission) => ({
+        auth_id: authId,
+        staff_id: staffId,
+        permission_default_id: permission.permission_default_id,
+      }));
+
+      // Insert all staff permissions at once
+      const {data: staffPermission, error: staffPermissionError} = await supabase
+        .from("staff_permission")
+        .insert(staffPermissions);
+
+      if (staffPermissionError) {
+        console.error('Failed to insert staff permissions', staffPermissionError);
+        throw staffPermissionError;
+      }
+
       // Insert into member table
       const { data: memberData, error: memberError } = await supabase
         .from("member")
@@ -157,30 +177,16 @@ export async function createMember(data: {
         throw memberError;
       }
 
-      
-
-      return { 
-        success: true, 
-        data: memberData, 
-        authId, 
-        staffId 
-      };
+      return memberData;
     }
 
     throw new Error("Invalid role provided");
 
   } catch (error: any) {
     console.error("Create member failed:", error);
-    
-    // Return error object instead of throwing for better error handling
-    return {
-      success: false,
-      error: error.message || "Failed to create member!",
-      details: error
-    };
+    throw new Error(error.message || "Failed to create member!");
   }
 }
-
 // Fetch all Admins 
 export async function fetchAdmins() {
   const supabase = await createSupabaseAdmin();

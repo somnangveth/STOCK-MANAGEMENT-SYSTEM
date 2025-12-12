@@ -1,24 +1,28 @@
 'use client';
 
 import { createSupabaseBrowserClient } from '@/lib/storage/browser';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
-// Add proper type definition for the nested query result
+// Correct type definition matching the actual Supabase response structure
 type PermissionData = {
-  permission_table: {
-    code: string;
+  permission_default: {
+    permission_table: {
+      code: string;
+    };
   };
 };
 
 export function usePermissions() {
-  const supabase = createSupabaseBrowserClient();
   const [permissions, setPermissions] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const loadPermissions = async () => {
+  const loadPermissions = useCallback(async () => {
+    const supabase = createSupabaseBrowserClient();
+    
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      
       if (!user) {
         setPermissions([]);
         setIsAdmin(false);
@@ -42,23 +46,33 @@ export function usePermissions() {
 
       setIsAdmin(false);
 
-      // Get staff permissions
+      // Get staff permissions with correct join path
       if (member?.staff_id) {
-        const { data: permData } = await supabase
+        const { data: permissionData, error } = await supabase
           .from('staff_permission')
           .select(`
-            permission_table!inner (
-              code
+            permission_default!inner (
+              permission_table!inner (
+                code
+              )
             )
           `)
           .eq('staff_id', member.staff_id);
 
-        // Type assertion to fix the TypeScript error
-        const codes = (permData as PermissionData[] | null)?.map(
-          p => p.permission_table.code
-        ) || [];
-        
-        setPermissions(codes);
+        if (error) {
+          console.error('Error fetching permissions:', error);
+          setPermissions([]);
+        } else if (permissionData) {
+          // Extract codes from the nested structure
+          const codes = permissionData
+            .map((item: any) => item.permission_default?.permission_table?.code)
+            .filter((code): code is string => typeof code === 'string');
+          
+          setPermissions(codes);
+          console.log('Loaded permissions:', codes);
+        } else {
+          setPermissions([]);
+        }
       } else {
         setPermissions([]);
       }
@@ -66,11 +80,14 @@ export function usePermissions() {
       console.error('Error loading permissions:', error);
       setPermissions([]);
       setIsAdmin(false);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    
     loadPermissions();
 
     // Listen for auth changes to refresh permissions
@@ -83,7 +100,7 @@ export function usePermissions() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [loadPermissions]);
 
   const hasPermission = (code: string): boolean => {
     return isAdmin || permissions.includes(code);
@@ -109,6 +126,6 @@ export function usePermissions() {
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
-    refetch, // Expose refetch in case you need to manually reload
+    refetch,
   };
 }

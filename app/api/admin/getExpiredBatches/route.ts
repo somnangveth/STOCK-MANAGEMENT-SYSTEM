@@ -1,6 +1,6 @@
 "use server";
 
-import { getExpiredBatches } from "@/app/functions/stock/product_batches/productbatches";
+import { getExpiredBatches } from "@/app/functions/admin/stock/product_batches/productbatches";
 import { NextResponse } from "next/server";
 
 export async function GET(){

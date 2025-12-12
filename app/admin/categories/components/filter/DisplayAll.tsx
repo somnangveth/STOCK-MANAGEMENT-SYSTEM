@@ -2,7 +2,6 @@
 import ProductTable from "@/app/components/Tables/productTable";
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Categories, Product, Subcategories } from "@/type/productType";
 import { useQueries } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";

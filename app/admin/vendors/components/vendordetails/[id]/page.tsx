@@ -60,7 +60,7 @@ export default function VendorDetailPage(){
     );
   }, [vendorData, id]);
   
-  //FIXED: Changed condition from || to &&, and added null check for vendors
+
   const products = useMemo(() => {
     if(!productData || !vendors) return null;
     const productArray = productData;

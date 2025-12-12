@@ -1,5 +1,5 @@
 'use client';
-import { addSubcategory } from "@/app/functions/stock/category/subcategory";
+import { addSubcategory } from "@/app/functions/admin/stock/category/subcategory";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Categories } from "@/type/productType";
@@ -49,12 +49,18 @@ export default function AddSubcategory() {
     startTransition(async () => {
       try {
         const result = await addSubcategory(formData);
-        if (!result) {
-          styledToast.error("Failed to create subcategory");
+
+        const res = typeof result === 'string' ? JSON.parse(result) : result;
+
+        if (!res || res.error || !res.success) {
+          styledToast.error(res?.error || "Failed to create subcategory");
           return;
         }
 
         toast.success("Create Subcategory Successfully!");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
         
         // Invalidate queries to refresh data
         queryClient.invalidateQueries({ queryKey: ["categories"] });
@@ -166,7 +172,7 @@ export default function AddSubcategory() {
 
         {/* Submit Button */}
         <Button
-          type="submit" 
+          type="submit"
           disabled={isPending} 
           className={btnStyle}
         >

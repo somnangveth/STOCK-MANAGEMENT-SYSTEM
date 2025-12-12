@@ -4,13 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Categories } from "@/type/productType";
 import { useTransition } from "react";
-import { updateCategory } from "@/app/functions/stock/category/category";
+import { updateCategory } from "@/app/functions/admin/stock/category/category";
 import { toast } from "sonner";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { cn } from "@/lib/utils";
+import { btnStyle } from "@/app/components/Icons";
 
 const UpdateSchema = z.object({
     category_name: z.string().optional(),
@@ -53,9 +54,9 @@ export default function UpdateCategory({category}:{category: Categories}){
 
     return(
         <Form {...form}>
-            <form
+            <div
             className="space-y-4"
-            onSubmit={form.handleSubmit(onSubmit)}>
+            >
 
                 {/* Category Name */}
                 <FormField
@@ -91,9 +92,9 @@ export default function UpdateCategory({category}:{category: Categories}){
                 )}/>
 
                 <Button
-                onClick={() => document.getElementById('category-update-trigger')?.click()}
+                onClick={() => form.handleSubmit(onSubmit)}
                 type="submit"
-                variant="outline">
+                className={btnStyle}>
                     {isPending ?
                     (
                         <AiOutlineLoading3Quarters className={cn("animate-spin")}/>
@@ -101,7 +102,7 @@ export default function UpdateCategory({category}:{category: Categories}){
                         "Update Category"
                     )}
                 </Button>
-            </form>
+            </div>
         </Form>
     )
 }
