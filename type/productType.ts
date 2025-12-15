@@ -1,20 +1,20 @@
 //vendortype
 export type Vendors = {
-    vendor_id: string,
-    vendor_name: string,
-    contact_person: string,
-    phone_number1: string,
-    phone_number2: string,
-    vendor_email: string,
-    vendor_image: string,
-    source_link: string,
-    vendortype: string,
-    address: string,
-    city: string,
-    country: string,
-    payment_terms: string,
-    notes: string
-}
+  vendor_id: string;
+  vendor_name: string;
+  contact_person: string;
+  phone_number1: string;
+  phone_number2: string;
+  vendor_email: string;
+  vendor_image: string;
+  source_link: string;
+  vendortype: string;
+  address: string;
+  city: string;
+  country: string;
+  payment_terms: string;
+  notes: string;
+};
 
 // productType.ts
 
@@ -22,8 +22,8 @@ export type Vendors = {
 export type Product = {
   product_id: string;
   sku_code: string;
-  product_name: string;            
-  product_image: string;                  
+  product_name: string;
+  product_image: string;
   description: string;
   slug: string;
   category_id: number;
@@ -34,7 +34,7 @@ export type Product = {
   default_shelf_life_days: number;
   base_unit: string;
   units_per_package: number;
-  package_type: 'box' | 'case';
+  package_type: "box" | "case";
   track_expiry: boolean;
   is_active: boolean;
   created_at: string;
@@ -66,7 +66,7 @@ export type ProductAssociation = {
   association_id: string;
   product_id: string;
   associated_product_id: string;
-  association_type: 'related' | 'bundle' | 'alternative';
+  association_type: "related" | "bundle" | "alternative";
   created_at: string;
 };
 //Category Type
@@ -74,17 +74,34 @@ export type Categories = {
   category_id: string;
   category_name: string;
   slug: string;
-}
+};
 
 //Subcategory Type
 export type Subcategories = {
   subcategory_id: string;
   subcategory_name: string;
   category_id: string;
-}
+};
 //Stock Type
 export type Stock = {
   id?: string;
   stock_name?: string;
   stock_total?: number;
-}
+};
+
+// Price type
+export type Price = {
+  price_id: string;
+  product_id: string;
+  sku_code: string;
+  product_name: string;
+  product_image?: string;
+
+  base_price: number;
+  profit_price: number;
+  tax: number;
+  shipping: number;
+  discount_price?: number;
+  total_price: number; // B2C
+  b2b_price: number; // B2B
+};

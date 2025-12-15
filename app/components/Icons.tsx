@@ -8,11 +8,10 @@ import { RxPlusCircled } from "react-icons/rx";
 export const edit = <RxPencil1 />;
 
 //View
-export const view = <RxEyeOpen/>;
+export const view = <RxEyeOpen />;
 
 //Delete TrashCan
-export const trash = <RxTrash/>;
-
+export const trash = <RxTrash />;
 
 //Plus Circle
-export const plusCircle = <RxPlusCircled/>;
+export const plusCircle = <RxPlusCircled />;

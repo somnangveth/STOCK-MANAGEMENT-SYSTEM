@@ -1,50 +1,80 @@
-import Link from "next/link";
-import { supabaseServer } from "@/lib/supabaseServer";
-import PriceTable from "./PriceTable";
+"use client";
 
-async function getPrices() {
-  const supabase = supabaseServer();
+import { useState, useCallback } from "react";
+import SearchBar from "@/app/components/SearchBar";
+import PriceList, { PriceProduct } from "./components/PriceList";
+import PriceForm from "./components/PriceForm";
+import { Button } from "@/components/ui/button";
 
-  const { data: prices, error } = await supabase
-    .from("prices")
-    .select(
-      `
-      price_id,
-      base_price,
-      final_price,
-      product:product_id (
-        product_name,
-        sku_code
-      )
-    `
-    )
-    .order("created_at", { ascending: false });
+export default function PricePage() {
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [role, setRole] = useState<"B2B" | "B2C">("B2C");
 
-  if (error) {
-    console.error("Error fetching prices:", error);
-    return [];
-  }
+  const [prices, setPrices] = useState<PriceProduct[]>([]);
+  const [searchConfig, setSearchConfig] = useState<{
+    searchKeys: (keyof PriceProduct)[];
+    onSearch: (results: PriceProduct[]) => void;
+  } | null>(null);
 
-  return prices || [];
-}
+  const registerSearch = useCallback(
+    (
+      data: PriceProduct[],
+      onSearch: (results: PriceProduct[]) => void,
+      searchKeys: (keyof PriceProduct)[]
+    ) => {
+      setPrices(data);
+      setSearchConfig({ onSearch, searchKeys });
+    },
+    []
+  );
 
-export default async function PricePage() {
-  const prices = await getPrices();
+  const handlePriceAdded = useCallback(() => {
+    setRefreshKey((prev) => prev + 1);
+  }, []);
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Price List</h1>
-
-        <Link
-          href="/admin/price/new"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+    <div className="space-y-6 p-6">
+      {/* ROLE SWITCH */}
+      <div className="flex gap-2">
+        <Button
+          variant={role === "B2C" ? "default" : "outline"}
+          onClick={() => setRole("B2C")}
         >
-          + Add Price
-        </Link>
+          B2C (Customer)
+        </Button>
+        <Button
+          variant={role === "B2B" ? "default" : "outline"}
+          onClick={() => setRole("B2B")}
+        >
+          B2B (Buyer)
+        </Button>
       </div>
 
-      <PriceTable prices={prices} />
+      {/* SEARCH */}
+      <div className="flex justify-end">
+        <div className="w-1/3">
+          {searchConfig && (
+            <SearchBar
+              data={prices}
+              onSearch={searchConfig.onSearch}
+              searchKeys={searchConfig.searchKeys}
+              placeholder="Search prices..."
+            />
+          )}
+        </div>
+      </div>
+
+      {/* ADD PRICE */}
+      <div className="flex justify-end">
+        <PriceForm onPriceAdded={handlePriceAdded} />
+      </div>
+
+      {/* PRICE LIST */}
+      <PriceList
+        refreshKey={refreshKey}
+        role={role}
+        registerSearch={registerSearch}
+      />
     </div>
   );
 }
