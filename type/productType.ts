@@ -20,7 +20,7 @@ export type Vendors = {
 
 // Base Product Type (matches your API response)
 export type Product = {
-  product_id: string;
+  product_id: string | number;
   sku_code: string;
   product_name: string;            
   product_image: string;                  
@@ -49,6 +49,10 @@ export type Product = {
 
   //Price
   total_price: number;
+  b2b_price: number;
+  b2c_price: number;
+  discount_price: number;
+  tax: number;
 };
 
 // Batch fields (if you need them separately)

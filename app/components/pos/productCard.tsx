@@ -1,7 +1,7 @@
 "use client";
 
 import { Categories, Product, Subcategories } from "@/type/productType";
-import { faMinusCircle, faPlusCircle } from "../Icons";
+import { circleCross, faMinusCircle, faPlusCircle, trash } from "../Icons";
 import { ReactNode, useState } from "react";
 
 // Product Card
@@ -38,19 +38,37 @@ export function ProductCard({
     );
 }
 
-// Product Card in Receipt
+interface ProductOrderCardProps{
+    product: Product;
+    quantity: number;
+    totalPrice: number;
+    onUpdateQuantity: (product_id: string | number, quantity: number) => void;
+}
 export function ProductOrderCard({
     product, 
     quantity = 1,
     totalPrice = 0,
-    onUpdateQuantity
-}: {
-    product: Product, 
-    quantity?: number,
-    totalPrice?: number,
-    onUpdateQuantity: (productId: number, newQuantity: number) => void
-}) {
+    onUpdateQuantity,
+}: ProductOrderCardProps) {
+    
+    const handleClearItem = () => {
+        onUpdateQuantity(product.product_id, quantity = 0);
+    }
 
+    const handleMinus = () => {
+        console.log('MINUS CLICKED');
+        console.log('Product ID:', product.product_id);
+        console.log('Current quantity:', quantity);
+        onUpdateQuantity(product.product_id, quantity - 1);
+    };
+    
+    const handlePlus = () => {
+        console.log('PLUS CLICKED');
+        console.log('Product ID:', product.product_id);
+        console.log('Current quantity:', quantity);
+        onUpdateQuantity(product.product_id, quantity + 1);
+    };
+    
     return (
         <div className="flex gap-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
             {product.product_image ? (
@@ -70,43 +88,34 @@ export function ProductOrderCard({
                 <p className="font-medium text-sm">{product.product_name}</p>
                 <div className="flex items-center gap-2">
                     <button
-                        className="w-6 h-6 flex items-center justify-center rounded-full text-gray-700 transition"
+                        type="button"
+                        onClick={handleMinus}
+                        className="w-6 h-6 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-900 transition"
                     >
                         {faMinusCircle}
                     </button>
-                    <span className="text-sm font-medium text-center">{quantity}</span>
+                    <span className="text-sm font-medium text-center min-w-[30px]">{quantity}</span>
                     <button
-                        className="w-6 h-6 flex items-center justify-center rounded-full text-white transition"
+                        type="button"
+                        onClick={handlePlus}
+                        className="w-6 h-6 flex items-center justify-center rounded-full text-amber-700 hover:text-amber-900 transition"
                     >
                         {faPlusCircle}
                     </button>
                 </div>
+            </div>
+            <div className="flex items-center gap-3">
                 <p className="font-semibold text-green-600">${totalPrice.toFixed(2)}</p>
+                <button
+                type="button"
+                className="bg-transparent hover:bg-transparent text-red-700"
+                onClick={handleClearItem}>
+                    {circleCross}
+                </button>
             </div>
         </div>
     );
 }
 
-//Category Card
-export function CategoryCard({category}:{category: Categories}){
-    const [selectedCategory, setSelectedCategory] = useState<string | null> (null);
-    const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
-
-    return(
-        <div className="flex items-center justify-center h-15 transition ease-in-out duration-300"
-        key={category.category_id}
-        onClick={() => <>setSelectedCategory(category.category_id); setSelectedSubcategory(null)</>}>
-            {category.category_name}
-        </div>
-    )
-}
 
 
-//Subcategory Card
-export function SubcategoryCard({subcategory}:{subcategory: Subcategories}){
-    return(
-        <div className="p-2 rounded-full bg-amber-700 text-white hover:bg-amber-900">
-            <span>{subcategory.subcategory_name}</span>
-        </div>
-    )
-}

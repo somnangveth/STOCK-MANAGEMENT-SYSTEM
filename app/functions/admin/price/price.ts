@@ -111,3 +111,19 @@ export async function deletePrice(price_id: string){
     console.error("Failed to delete", error);
   }
 }
+
+//Fetch Price
+export async function fetchPrice(){
+  const supabase = await createSupabaseAdmin();
+
+  const {data: priceData, error: priceError} = await supabase
+  .from("prices")
+  .select("*");
+
+  if(priceError){
+    console.error("Failed to fetch price data");
+    throw new Error("Error fetching...");
+  }
+
+  return priceData;
+}

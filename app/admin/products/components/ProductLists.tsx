@@ -8,6 +8,8 @@ import DeleteProduct from "./DeleteProduct";
 import { Categories, Subcategories } from "@/type/productType";
 import Link from "next/link";
 import { view } from "@/app/components/Icons";
+import { fetchCategoriesAndSubcategories } from "@/app/functions/admin/stock/product/product";
+import { fetchCategoryAndSubcategory } from "@/app/functions/admin/api/api";
 
 // Define enhanced product type
 export interface EnhancedProduct extends Product {
@@ -33,16 +35,9 @@ export default function ProductList({
     setDisplayProducts(results);
   }, []);
 
-  // Fetch products data
-  async function fetchProductData() {
-    const res = await fetch('/api/admin/fetchCategoryAndSubcategory');
-    if (!res.ok) throw new Error("Failed to fetch product data");
-    return res.json();
-  }
-
   const { data: productData, isLoading, error } = useQuery({
     queryKey: ["products", refreshKey],
-    queryFn: fetchProductData,
+    queryFn: fetchCategoryAndSubcategory,
   });
 
   // Process and enhance products when data changes

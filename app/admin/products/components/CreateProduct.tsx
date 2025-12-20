@@ -179,11 +179,16 @@ export default function CreateProduct({onSuccess}: {onSuccess?: () =>void }) {
     },
     {
       number: 3,
+      title: 'Price',
+      field: [""]
+    },
+    {
+      number: 4,
       title: 'Stock Info',
       field: ["min_stock_level", "max_stock_level", "default_shelf_life_days", "base_unit", "units_per_package", "package_type"]
     },
     {
-      number: 4,
+      number: 5,
       title: 'Batch Info',
       field: ["batch_number", "manufacture_date", "expiry_date", "cost_price", "recieved_date", "note", "quantity", "packages_recieved"]
     }

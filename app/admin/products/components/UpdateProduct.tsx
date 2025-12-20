@@ -134,7 +134,7 @@ export default function UpdateProduct({ product }: { product: Product }) {
           product_image: newImageUrl,
         };
 
-        const result = JSON.parse(await updateProduct(product.product_id, updatedData));
+        const result = JSON.parse(await updateProduct(String(product.product_id), updatedData));
 
         if (result?.error) {
           toast.error("Failed to update", { description: result.error });
