@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { Button } from "@/components/ui/button";
+import { fetchCategoryAndSubcategory } from "@/app/functions/admin/api/controller";
 
 const UpdateSchema = z.object({
   sku_code: z.string().nonempty("Product ID is required"),
@@ -61,12 +62,6 @@ export default function UpdateProduct({ product }: { product: Product }) {
       package_type: product.package_type,
     }
   });
-
-  async function fetchCategoryAndSubcategory() {
-    const res = await fetch('/api/admin/fetchCategoryAndSubcategory');
-    if (!res.ok) throw new Error("Failed to fetch categories");
-    return res.json();
-  }
 
   const selectedCategoryId = form.watch('category_id');
 

@@ -2,7 +2,7 @@
 import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import MemberForm from "./CreateMember";
-import { btnStyle } from "@/app/components/Icons";
+import { btnStyle } from "@/app/components/ui";
 
 
 export default function CreateForm(){

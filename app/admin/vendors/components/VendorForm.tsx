@@ -2,7 +2,7 @@
 import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import CreateVendors from "./CreateVendor";
-import { btnStyle, plusCircle } from "@/app/components/Icons";
+import { btnStyle, plusCircle } from "@/app/components/ui";
 
 export default function VendorForm({
     onVendorAdded

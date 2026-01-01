@@ -16,7 +16,7 @@ import { Product } from "@/type/productType";
 import { useState } from "react";
 import { toast } from "sonner";
 import { deleteImage } from "@/app/components/Image/actions/upload";
-import { trash } from "@/app/components/Icons";
+import { trash } from "@/app/components/ui";
 
 export default function DeleteProduct({product}: {product: Product}){
     const [open, setOpen] = useState(false);
@@ -41,7 +41,7 @@ export default function DeleteProduct({product}: {product: Product}){
                 console.error('Failed to delete: ',result.error);
                 toast.error('Failed to delete book');
             }else{
-                toast.success('Book deleted successfully');
+                toast.success('Product deleted successfully');
                 setOpen(false);
             }
         }catch(error){

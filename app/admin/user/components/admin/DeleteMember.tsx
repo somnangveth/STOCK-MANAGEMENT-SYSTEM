@@ -2,127 +2,50 @@
 
 import { useState } from "react";
 import { deleteMember } from "../../actions";
-import { styledToast } from "@/app/components/Toast";
-import { Button } from "@/components/ui/button";
-import { 
-    AlertDialog, 
-    AlertDialogAction, 
-    AlertDialogCancel, 
-    AlertDialogContent, 
-    AlertDialogDescription, 
-    AlertDialogFooter, 
-    AlertDialogHeader, 
-    AlertDialogTitle, 
-    AlertDialogTrigger 
-} from "@/components/ui/alert-dialog";
-import { trash } from "@/app/components/Icons";
-import { Loader2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { trash } from "@/app/components/ui";
 
-export default function DeleteMember({ user_id }: { user_id: string }) {
-    const [open, setOpen] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
+export interface DeleteMemberProps {
+  userId: string;
+  onDeleted?: () => void;
+}
 
-    async function handleDelete() {
-        setIsDeleting(true);
-        
-        try {
-            const res = await deleteMember(user_id);
-            
-            // Handle different response types
-            let result;
-            if (typeof res === "string") {
-                try {
-                    result = JSON.parse(res);
-                } catch (parseError) {
-                    console.error("Failed to parse response:", parseError);
-                    styledToast.error("Invalid response from server");
-                    setIsDeleting(false);
-                    return;
-                }
-            } else {
-                result = res;
-            }
+export default function DeleteMember({ userId, onDeleted }: DeleteMemberProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
 
-            // Check for errors
-            if (result?.error) {
-                console.error("Failed to delete:", result.error);
-                styledToast.error(result.error || "Failed to delete user");
-            } else if (result?.success) {
-                styledToast.success("Member deleted successfully!");
-                setOpen(false);
-                
-                // Optional: Trigger a refresh or redirect
-                // window.location.reload();
-                // or use router.refresh() if using Next.js router
-            } else {
-                // Unexpected response format
-                console.error("Unexpected response:", result);
-                styledToast.error("Unexpected response from server");
-            }
-        } catch (error) {
-            console.error("Delete error:", error);
-            const errorMessage = error instanceof Error 
-                ? error.message 
-                : "Something went wrong while deleting";
-            styledToast.error(errorMessage);
-        } finally {
-            setIsDeleting(false);
-        }
-    }
-
-    return (
-        <AlertDialog open={open} onOpenChange={setOpen}>
-            <AlertDialogTrigger asChild>
-                <Button
-                    className="
-                        h-7 w-15
-                        bg-transparent text-red-700
-                        text-sm
-                        rounded-xl
-                        hover:bg-red-500 hover:text-red-100
-                        transition-colors
-                    "
-                    aria-label="Delete member"
-                >
-                    {trash}
-                </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle className="text-lg font-semibold text-red-700">
-                        Confirm Deletion
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Are you sure you want to delete this member? This action cannot be undone.
-                        All associated data including permissions will be permanently removed.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel 
-                        disabled={isDeleting}
-                        className="border border-gray-300 hover:bg-gray-100 rounded-xl"
-                    >
-                        Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                        onClick={(e) => {
-                            e.preventDefault(); // Prevent default dialog close
-                            handleDelete();
-                        }}
-                        disabled={isDeleting}
-                        className="bg-red-200 border-2 border-red-700 rounded-xl text-red-700 hover:bg-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isDeleting ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Deleting...
-                            </>
-                        ) : (
-                            "Delete"
-                        )}
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this member? This action cannot be undone."
     );
+    
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+
+    try {
+      const result = await deleteMember(userId);
+      
+      if (result?.success) {
+        onDeleted?.(); // Call callback to update parent state
+      } else {
+        alert(result?.error || "Failed to delete member");
+      }
+    } catch (err: any) {
+      console.error("Error deleting member:", err);
+      alert("An unexpected error occurred");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleDelete}
+      disabled={isDeleting}
+      className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
+      title="Delete member"
+    >
+      {isDeleting ? "..." : <>{trash}</>}
+    </button>
+  );
 }

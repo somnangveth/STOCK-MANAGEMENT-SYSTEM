@@ -3,7 +3,7 @@ import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/type/productType";
 import UpdateProduct from "./UpdateProduct"; // Import the actual form component
-import { edit } from "@/app/components/Icons";
+import { edit } from "@/app/components/ui";
 
 export default function UpdateForm({product}: {product: Product}){
     return(

@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { cn } from "@/lib/utils";
-import { btnStyle } from "@/app/components/Icons";
+import { btnStyle } from "@/app/components/ui";
+import { styledToast } from "@/app/components/Toast";
 
 const UpdateSchema = z.object({
     category_name: z.string().optional(),
@@ -36,16 +37,15 @@ export default function UpdateCategory({category}:{category: Categories}){
         startTransition(async()=> {
             try{
                 const result = await updateCategory(category.category_id, data);
-                const parsed = typeof result === 'string' ? JSON.parse(result) : result;
-                const {error} = parsed;
 
-                if(error){
+                if(!result){
                     console.error('Failed to update category');
                     toast.error('Failed to update Category', )
                 }
 
-                toast.success('Category updated successfully!')
+                toast.success('Category updated successfully!');
                 document.getElementById('category-update-trigger')?.click();
+                window.location.reload();
             }catch(error){
                 console.error('Failed to update category', error);
             }
@@ -57,8 +57,12 @@ export default function UpdateCategory({category}:{category: Categories}){
             <div
             className="space-y-4"
             >
-
-                {/* Category Name */}
+                <form 
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4">
+                                    
+                                    
+            {/* Category Name */}
                 <FormField
                 control={form.control}
                 name="category_name"
@@ -66,7 +70,7 @@ export default function UpdateCategory({category}:{category: Categories}){
                     <FormItem>
                         <FormLabel>Category Name: </FormLabel>
                         <FormControl>
-                            <input
+                            <Input
                             type="text"
                             {...field}
                             onChange={(e) => field.onChange(String(e.target.value))}
@@ -83,7 +87,7 @@ export default function UpdateCategory({category}:{category: Categories}){
                     <FormItem>
                         <FormLabel>Slug: </FormLabel>
                         <FormControl>
-                            <input
+                            <Input
                             type="text"
                             {...field}
                             onChange={(e) => field.onChange(String(e.target.value))}/>
@@ -92,8 +96,6 @@ export default function UpdateCategory({category}:{category: Categories}){
                 )}/>
 
                 <Button
-                onClick={() => form.handleSubmit(onSubmit)}
-                type="submit"
                 className={btnStyle}>
                     {isPending ?
                     (
@@ -102,6 +104,7 @@ export default function UpdateCategory({category}:{category: Categories}){
                         "Update Category"
                     )}
                 </Button>
+                </form>
             </div>
         </Form>
     )

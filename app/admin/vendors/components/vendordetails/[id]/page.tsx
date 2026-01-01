@@ -1,5 +1,6 @@
 "use client";
 import VendorDetailCatalog from "@/app/components/catalog/vendorDetailCatalog";
+import { fetchProducts, fetchVendors } from "@/app/functions/admin/api/controller";
 import { cn } from "@/lib/utils";
 import { Product, Vendors } from "@/type/productType";
 import { useQueries } from "@tanstack/react-query";
@@ -10,26 +11,7 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 export default function VendorDetailPage(){
   const param = useParams();
   const id = param.id;
-  
-  //fetch Vendors (FIXED: added parentheses to res.json())
-  async function fetchVendors(){
-    const res = await fetch('/api/admin/fetchVendors');
-    if(!res.ok){
-      console.error("Failed to fetch vendor data");
-      throw new Error("Failed to fetch");
-    }
-    return res.json();
-  }
-  
-  //fetch Products (FIXED: endpoint from fetchProduct to fetchProducts)
-  async function fetchProducts(){
-    const res = await fetch('/api/admin/fetchProducts');
-    if(!res.ok){
-      console.error("Failed to fetch Product data");
-      throw new Error("Failed to fetch");
-    }
-    return res.json();
-  }
+
   
   const result = useQueries({
     queries: [

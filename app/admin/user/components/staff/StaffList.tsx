@@ -5,7 +5,7 @@ import { fetchStaffs } from "../../actions";
 import MemberTable from "@/app/components/Tables/memberTable";
 import EditStaff from "./EditStaff";
 import Link from "next/link";
-import { view } from "@/app/components/Icons";
+import { view } from "@/app/components/ui";
 
 export default function StaffList() {
   const [staffs, setStaffs] = useState<Staff[]>([]);

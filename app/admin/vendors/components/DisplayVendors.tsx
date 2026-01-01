@@ -1,6 +1,7 @@
 "use client";
-import { view } from "@/app/components/Icons";
+import { view } from "@/app/components/ui";
 import MemberTable from "@/app/components/Tables/memberTable";
+import { fetchVendors } from "@/app/functions/admin/api/controller";
 import { Vendors } from "@/type/productType";
 import { useQuery } from "@tanstack/react-query";
 import { Divide } from "lucide-react";
@@ -23,12 +24,6 @@ export default function DisplayVendors({
   const handleSearchResults = useCallback((results: Vendors[]) => {
     setDisplayVendors(results);
   }, []);
-
-  async function fetchVendors() {
-    const res = await fetch('/api/admin/fetchVendors');
-    if (!res.ok) throw new Error("Failed to fetch Vendor");
-    return res.json();
-  }
 
   const { data: vendors, isLoading, error } = useQuery<Vendors[]>({
     queryKey: ["query-vendors", refreshKey],

@@ -35,7 +35,7 @@ import { convertBlobUrlToFile } from "@/app/components/Image/actions/image";
 import { uploadImage } from "@/app/components/Image/actions/upload";
 import ProfileButton from "@/app/components/Image/components/ProfileButton";
 import { styledToast } from "@/app/components/Toast";
-import { btnStyle } from "@/app/components/Icons";
+import { btnStyle } from "@/app/components/ui";
 import { CalendarIcon, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 
@@ -188,7 +188,8 @@ export default function MemberForm() {
 
     return (
         <Form {...form}>
-            <div className="space-y-4">
+<form onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="space-y-4">
 
                 {/* Basic Information */}
                 {currentStep === 1 && (
@@ -537,8 +538,7 @@ export default function MemberForm() {
                       </Button>
                     ) : (
                       <Button
-                        type="button"
-                        onClick={() => form.handleSubmit(onSubmit)}
+                        type="submit"
                         disabled={isPending}
                         className={btnStyle}
                       >
@@ -556,6 +556,7 @@ export default function MemberForm() {
                     )}
                 </div>
                 </div>
+</form>
         </Form>
     );
 }

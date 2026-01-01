@@ -9,7 +9,7 @@ import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import { btnStyle } from "@/app/components/Icons";
+import { btnStyle } from "@/app/components/ui";
 import { Input } from "@/components/ui/input";
 import { styledToast } from "@/app/components/Toast";
 import { Button } from "@/components/ui/button";

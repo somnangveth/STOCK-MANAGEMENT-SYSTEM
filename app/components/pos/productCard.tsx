@@ -1,7 +1,7 @@
 "use client";
 
 import { Categories, Product, Subcategories } from "@/type/productType";
-import { circleCross, faMinusCircle, faPlusCircle, trash } from "../Icons";
+import { circleCross, faMinusCircle, faPlusCircle, trash } from "../ui";
 import { ReactNode, useState } from "react";
 
 // Product Card

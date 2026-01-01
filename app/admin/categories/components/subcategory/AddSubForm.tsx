@@ -4,7 +4,7 @@ import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import AddSubcategory from "./AddSubcategory";
 import { RxPlusCircled } from "react-icons/rx";
-import { btnStyle } from "@/app/components/Icons";
+import { btnStyle } from "@/app/components/ui";
 
 export default function AddSubcategoryForm(){
     return(

@@ -7,9 +7,9 @@ import UpdateForm from "./UpdateForm";
 import DeleteProduct from "./DeleteProduct";
 import { Categories, Subcategories } from "@/type/productType";
 import Link from "next/link";
-import { view } from "@/app/components/Icons";
+import { view } from "@/app/components/ui";
 import { fetchCategoriesAndSubcategories } from "@/app/functions/admin/stock/product/product";
-import { fetchCategoryAndSubcategory } from "@/app/functions/admin/api/api";
+import { fetchCategoryAndSubcategory } from "@/app/functions/admin/api/controller";
 
 // Define enhanced product type
 export interface EnhancedProduct extends Product {
@@ -114,6 +114,7 @@ export default function ProductList({
         itemsPerPage={9}
         product={displayProducts}
         columns={[
+          'select',
           'product_image',
           'sku-code',     
           'product_name',
@@ -132,6 +133,10 @@ export default function ProductList({
             </div>
           )
         }}
+        onSelectionChange={(selected) => {
+    console.log("Selected products:", selected);
+    // Do something with selected products
+  }}
       />
     </div>
   );

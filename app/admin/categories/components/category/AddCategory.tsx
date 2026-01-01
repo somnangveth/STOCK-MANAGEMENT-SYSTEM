@@ -8,7 +8,7 @@ import { addCategory } from "@/app/functions/admin/stock/category/category";
 import { toast } from "sonner";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { cn } from "@/lib/utils";
-import { btnStyle } from "@/app/components/Icons";
+import { btnStyle } from "@/app/components/ui";
 
 // ---------------------
 // Zod Schema
@@ -58,9 +58,6 @@ export default function AddCategory() {
     });
   }
 
-  // ---------------------
-  // UI
-  // ---------------------
   return (
     <Form {...form}>
       <div className="space-y-4">

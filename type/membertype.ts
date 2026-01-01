@@ -76,4 +76,18 @@ export type Permission = {
 
 export type StaffWithPermissions = Staff & {
   permissions: Permission[];
+};
+
+
+export type Dealer = {
+  dealer_id: string;
+  business_name: string;
+  dealer_name: string;
+  nationalid: string;
+  passportnumber: string;
+  contact_number: string;
+  email_address: string;
+  shop_address: string;
+  delivery_address: string;
+  businesstype: "retail" | "wholesale" | "mixed" | "online";
 }

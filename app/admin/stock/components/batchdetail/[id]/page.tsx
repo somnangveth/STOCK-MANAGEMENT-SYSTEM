@@ -1,6 +1,7 @@
 "use client";
 
 import Catalog from "@/app/components/catalog/Catalog";
+import { fetchBatch, fetchExpiredBatch, fetchProducts } from "@/app/functions/admin/api/controller";
 import { cn } from "@/lib/utils";
 import { ProductBatch } from "@/type/productBatch";
 import { Product } from "@/type/productType";
@@ -19,40 +20,6 @@ export default function BatchDetailPage(){
 
     //Styling
     const text = 'text-sm text-gray-500';
-
-
-    //Fetch Batch Datas
-    async function fetchBatch(){
-        const res = await fetch('/api/admin/fetchBatch');
-        if(!res.ok){
-            console.error('Failed to fetch batch data');
-            throw new Error("Failed to fetch");
-        }
-
-        return res.json();
-    }
-
-    //Fetch Products
-    async function fetchProducts(){
-        const res = await fetch('/api/admin/fetchProducts');
-        if(!res.ok){
-            console.error("Failed to fetch product data");
-            throw new Error("Failed to fetch");
-        }
-
-        return res.json();
-    }
-
-    //Fetch Expired Product
-    async function fetchExpiredBatch(){
-        const res = await fetch('/api/admin/getExpiredBatches');
-        if(!res.ok){
-            console.error('Failed to fetch expired datas');
-            throw new Error('Failed to fetch');
-        }
-
-        return res.json();
-    }
 
 
     const result = useQueries({

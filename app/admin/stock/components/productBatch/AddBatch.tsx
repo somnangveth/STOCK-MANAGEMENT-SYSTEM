@@ -32,7 +32,7 @@ export default function AddBatch({onSuccess, product}:{onSuccess?: () => void, p
   function onSubmit(data: z.infer<typeof FormSchema>){
     startTransition(async() => {
       try{
-        const res = await addBatch(product.product_id, data);
+        const res = await addBatch(String(product.product_id), data);
         const parsed = typeof res === 'string' ? JSON.parse(res) : res;
         const result = parsed;
         if(result.error){
