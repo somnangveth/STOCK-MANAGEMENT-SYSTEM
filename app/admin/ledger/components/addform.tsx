@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useTransition } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { createLedger, fetchVendors } from "../action/ledger";
+import { createLedger } from "../action/ledger";
 
 import {
   Form,
@@ -19,56 +19,48 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { fetchVendors } from "@/app/functions/admin/api/controller";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-
-interface Vendor {
-  vendor_id: number;
-  vendor_name: string;
-}
+import { Vendors } from "@/type/productType";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // ---------------- Schema ----------------
 const LedgerFormSchema = z
   .object({
     source_type: z.enum(["purchase", "refund"]),
-    vendor_name: z.string().min(1, "Vendor is required"),
-    debit: z.preprocess(
-      (val) => (val === "" || val === undefined ? 0 : Number(val)),
-      z.number().min(0)
-    ),
-    credit: z.preprocess(
-      (val) => (val === "" || val === undefined ? 0 : Number(val)),
-      z.number().min(0)
-    ),
+    vendor_id: z.number().min(1, "Vendor is required"),
+    debit: z.number().min(0),
+    credit: z.number().min(0),
     note: z.string().optional(),
-    created_at: z.string(), // 会传完整 ISO 时间
-    over_date: z.string(),  // 会传完整 ISO 时间
   })
   .refine((data) => !(data.debit > 0 && data.credit > 0), {
     message: "Debit and Credit cannot both have values",
     path: ["debit"],
+  })
+  .refine((data) => data.debit > 0 || data.credit > 0, {
+    message: "Either Debit or Credit must have a value",
+    path: ["credit"],
   });
 
 // ---------------- Component ----------------
 export default function CreateLedgerEntry({ onSuccess }: { onSuccess?: () => void }) {
   const [isPending, startTransition] = useTransition();
 
-  // ---- 获取 Vendor 数据 ----
-  const { data: vendors = [], isLoading: isVendorsLoading } = useQuery<Vendor[]>({
+  // ---- Fetch Vendor data ----
+  const { data: vendorData, isLoading, error } = useQuery<Vendors[]>({
     queryKey: ["vendors"],
-    queryFn: () => fetchVendors(),
+    queryFn: fetchVendors,
   });
 
-  // ---- 表单 ----
+  // ---- Form setup ----
   const form = useForm<z.infer<typeof LedgerFormSchema>>({
     resolver: zodResolver(LedgerFormSchema),
     defaultValues: {
       source_type: "purchase",
-      vendor_id: "",
+      vendor_id: 0,
       debit: 0,
       credit: 0,
       note: "",
-      created_at: new Date().toISOString(),
-      over_date: new Date().toISOString(),
     },
     mode: "onTouched",
   });
@@ -76,39 +68,48 @@ export default function CreateLedgerEntry({ onSuccess }: { onSuccess?: () => voi
   const onSubmit = (data: z.infer<typeof LedgerFormSchema>) => {
     startTransition(async () => {
       try {
-        // 调用 server action
-        await createLedger({
-          source_type: data.source_type,
-          vendor_id: data.vendor_id,
-          debit: data.debit,
-          credit: data.credit,
-          note: "",
-          created_at: data.created_at,
-          over_date: data.over_date,
-          source_id: "",
-          balance: 0,
-          created_by: "",
-          vendor_name: ""
-        });
-        toast.success("Ledger entry created");
+        const result = await createLedger(data);
+
+        if (!result) {
+          console.error("Failed to create ledger");
+          toast.error("Failed to create ledger!");
+          return;
+        }
+
+        toast.success("Ledger entry created successfully");
+
         form.reset({
           source_type: "purchase",
-          vendor_id:"",
-          vendor_name: "",
+          vendor_id: 0,
           debit: 0,
           credit: 0,
           note: "",
-          created_at: new Date().toISOString(),
-          over_date: new Date().toISOString(),
         });
+
         onSuccess?.();
       } catch (e: any) {
-        toast.error("Create failed", { description: e?.message });
+        console.error("Ledger creation error:", e);
+        toast.error("Create failed", { description: e?.message || "Unknown error" });
       }
     });
   };
 
-  if (isVendorsLoading) return <p>Loading vendors...</p>;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <AiOutlineLoading3Quarters className="h-6 w-6 animate-spin" />
+        <span className="ml-2">Loading vendors...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-red-600 border border-red-300 rounded">
+        Error loading vendors. Please try again.
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -122,7 +123,10 @@ export default function CreateLedgerEntry({ onSuccess }: { onSuccess?: () => voi
               <FormItem>
                 <FormLabel>Type *</FormLabel>
                 <FormControl>
-                  <select {...field} className="w-full border rounded px-2 py-1">
+                  <select
+                    {...field}
+                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
                     <option value="purchase">Purchase</option>
                     <option value="refund">Refund</option>
                   </select>
@@ -140,14 +144,21 @@ export default function CreateLedgerEntry({ onSuccess }: { onSuccess?: () => voi
               <FormItem>
                 <FormLabel>Vendor *</FormLabel>
                 <FormControl>
-                  <select {...field} className="w-full border rounded px-2 py-1">
-                    <option value="">Select vendor</option>
-                    {vendors.map((v) => (
-                      <option key={v.vendor_id} value={v.vendor_id}>
-                        {v.vendor_name}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    value={field.value?.toString()}
+                    onValueChange={(value) => field.onChange(Number(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a vendor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vendorData?.map((vendor: Vendors) => (
+                        <SelectItem key={vendor.vendor_id} value={vendor.vendor_id.toString()}>
+                          {vendor.vendor_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -164,12 +175,17 @@ export default function CreateLedgerEntry({ onSuccess }: { onSuccess?: () => voi
                 <FormControl>
                   <Input
                     type="number"
-                    {...field}
+                    step="0.01"
+                    min="0"
+                    value={field.value}
                     onChange={(e) => {
-                      const v = e.target.value;
-                      field.onChange(v === "" ? 0 : Number(v));
-                      if (v !== "") form.setValue("credit", 0);
+                      const value = e.target.value === "" ? 0 : Number(e.target.value);
+                      field.onChange(value);
+                      if (value > 0) {
+                        form.setValue("credit", 0);
+                      }
                     }}
+                    placeholder="0.00"
                   />
                 </FormControl>
                 <FormMessage />
@@ -187,43 +203,18 @@ export default function CreateLedgerEntry({ onSuccess }: { onSuccess?: () => voi
                 <FormControl>
                   <Input
                     type="number"
-                    {...field}
+                    step="0.01"
+                    min="0"
+                    value={field.value}
                     onChange={(e) => {
-                      const v = e.target.value;
-                      field.onChange(v === "" ? 0 : Number(v));
-                      if (v !== "") form.setValue("debit", 0);
+                      const value = e.target.value === "" ? 0 : Number(e.target.value);
+                      field.onChange(value);
+                      if (value > 0) {
+                        form.setValue("debit", 0);
+                      }
                     }}
+                    placeholder="0.00"
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Created Date */}
-          <FormField
-            control={form.control}
-            name="created_at"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date *</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} value={field.value.slice(0, 10)} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Over Date */}
-          <FormField
-            control={form.control}
-            name="over_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Over Date *</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} value={field.value.slice(0, 10)} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -238,7 +229,7 @@ export default function CreateLedgerEntry({ onSuccess }: { onSuccess?: () => voi
               <FormItem className="col-span-2">
                 <FormLabel>Note</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea {...field} placeholder="Optional notes..." rows={3} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -247,7 +238,10 @@ export default function CreateLedgerEntry({ onSuccess }: { onSuccess?: () => voi
         </div>
 
         <div className="flex justify-end border-t pt-4">
-          <Button type="submit" disabled={isPending}>
+          <Button
+            type="submit"
+            disabled={isPending || !form.formState.isValid}
+          >
             {isPending ? (
               <>
                 <AiOutlineLoading3Quarters className="mr-2 h-4 w-4 animate-spin" />

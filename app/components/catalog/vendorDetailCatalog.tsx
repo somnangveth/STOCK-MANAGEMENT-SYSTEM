@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeftIcon } from "lucide-react";
 import { Product, Vendors } from "@/type/productType";
-import { Ledger } from "@/type/ledger";
+import { Ledger } from "@/type/membertype";
 import { getLedgerByVendor } from "../../admin/vendors/actions/ledger";
 import Updatevendor from "../../admin/vendors/components/editvendorform";
 import DeleteVendor from "@/app/admin/vendors/components/Deletevendorform";

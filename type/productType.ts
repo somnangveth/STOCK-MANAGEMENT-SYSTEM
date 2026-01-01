@@ -1,6 +1,6 @@
 //vendortype
 export type Vendors = {
-    vendor_id: string,
+    vendor_id: number,
     vendor_name: string,
     contact_person: string,
     phone_number1: string,
@@ -41,15 +41,42 @@ export type Product = {
   updated_at: string;
   created_by: string;
 
+  total_price: number;
+  discount_price: number;
+  tax_amount: number;
+
   //Expiry
   manufacture_date?: string;
   expiry_date?: string;
   received_date?: string;
   quantity_remaining?: number;
-
-  //Price
-  total_price: number;
 };
+
+export type Price = {
+  price_id: string;
+  product_id: string;
+  base_price: number;
+  profit_price: number;
+  tax: number;
+  shipping: number;
+  discount: number;
+  total_price: number;
+  b2b_price: number | null;
+  created_at: string;
+};
+
+export type Sale = {
+  sale_id: string;
+  subtotal: string;
+  tax_amount: string;
+  discount_amount: string;
+  total_amount: string;
+  process_status: string;
+  payment_method: string;
+  created_at: string;
+  status: string;
+  customertype: "Dealer" | "General";
+}
 
 // Batch fields (if you need them separately)
 export type ProductBatch = {

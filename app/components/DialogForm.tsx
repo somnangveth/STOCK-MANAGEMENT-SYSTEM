@@ -12,10 +12,12 @@ export default function DialogForm({
     Trigger,
     id,
     title,
+    style,
     form,
 }: {
     title?: string,
     id: string,
+    style?: string;
     form: ReactNode,
     Trigger: ReactNode,
 }){
@@ -24,7 +26,7 @@ export default function DialogForm({
             <DialogTrigger asChild id={id}>
                 {Trigger}
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className={style}>
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                 </DialogHeader>

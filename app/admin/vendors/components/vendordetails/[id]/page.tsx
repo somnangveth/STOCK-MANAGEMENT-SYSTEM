@@ -1,8 +1,9 @@
 "use client";
 import VendorDetailCatalog from "@/app/components/catalog/vendorDetailCatalog";
+import { fetchProducts, fetchVendors } from "@/app/functions/admin/api/controller";
 import { cn } from "@/lib/utils";
 import { Product, Vendors } from "@/type/productType";
-import { Ledger } from "@/type/ledger"
+import { Ledger } from "@/type/membertype"
 import { useQueries } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";

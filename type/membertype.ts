@@ -76,21 +76,37 @@ export type Permission = {
 
 export type StaffWithPermissions = Staff & {
   permissions: Permission[];
+};
+
+
+export type Dealer = {
+  dealer_id: string;
+  business_name: string;
+  dealer_name: string;
+  nationalid: string;
+  passportnumber: string;
+  contact_number: string;
+  email_address: string;
+  shop_address: string;
+  delivery_address: string;
+  businesstype: "retail" | "wholesale" | "mixed" | "online";
 }
 
-export type Vendor = {
+export interface Ledger {
+  id: string;
   vendor_id: string;
   vendor_name: string;
-  contact_person: string;
-  phone_number1: string;
-  phone_number2: string;  
-  vendor_email: string;
-  vendor_image: string;
-  source_link: string;
-  vendortype: string;
-  address: string;
-  city: string;
-  country: string;
-  payment_terms: string;
-  notes: string;
+  source_type: "purchase" | "refund";
+  source_id: string;
+  debit: number;
+  credit: number;
+  balance: number;
+  note: string;
+  created_at: string;
+  created_by: string;
+  over_date: string;
+}
+
+export interface EnhancedLedger extends Ledger {
+  key: string; // React 列表 key
 }

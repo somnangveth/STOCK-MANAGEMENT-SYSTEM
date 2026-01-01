@@ -1,6 +1,6 @@
 import { checkUserRole } from "@/lib/auth/roles";
 import { redirect } from "next/navigation";
-import { StaffSideBar } from "../components/sidebar/StaffSideNav";
+import SignOut from "../auth/components/Signout";
 
 export default async function StaffLayout({
   children,
@@ -13,10 +13,10 @@ export default async function StaffLayout({
     redirect('/auth');
   }
   return (
-    <div className="min-h-screen flex bg-[#fefaec]">
-      <StaffSideBar/>
+    <div className="min-h-screen flex">
       <main className="flex-1 p-6">
         {children}
+        <SignOut/>
       </main>
     </div>
   );

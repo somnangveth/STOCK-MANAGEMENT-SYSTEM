@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Vendor } from "@/type/membertype";
 import { useState } from "react";
 import { toast } from "sonner";
-import { trash } from "@/app/components/Icons";
+import { trash } from "@/app/components/ui";
 
 export default function DeleteVendor({ vendor }: { vendor: Vendor }) {
     const [open, setOpen] = useState(false);

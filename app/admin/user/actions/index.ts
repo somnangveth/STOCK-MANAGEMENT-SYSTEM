@@ -95,6 +95,7 @@ export async function createMember(data: {
           martial_status: data.martial_status,
           gender: data.gender,
           contact_id: contactId,
+          auth_id: authId,
         })
         .select("admin_id")
         .single();
@@ -137,6 +138,7 @@ export async function createMember(data: {
           martial_status: data.martial_status,
           gender: data.gender,
           contact_id: contactId,
+          auth_id: authId,
         })
         .select("staff_id")
         .single();
@@ -371,7 +373,7 @@ export async function updateStaff(
     .single();
 
     if(staffError){
-        throw new Error("Failed to update Staff Info");
+        throw new Error("Failed to update Staff Info", staffError);
     }
 
     return JSON.stringify(staffData);
@@ -388,107 +390,77 @@ export async function fetchContacts(){
   .select("*");
 
   if(contactError || !contactData){
-    console.error("Failed to fetch data", contactError);
+    console.error("Failed to fetch data", contactError.message);
     throw new Error("Failed to fetch");
   }
 
   return contactData;
 }
 
-export async function deleteMember(user_id: string) {
+export async function deleteMember(userId: string) {
   const supabase = await createSupabaseAdmin();
-
+  
   try {
-    // 1. First, get the member info to find related records
-    const { data: member, error: fetchError } = await supabase
-      .from("member")
-      .select("id, auth_id, admin_id, staff_id")
-      .eq("auth_id", user_id)
-      .single();
-
-    if (fetchError || !member) {
-      console.error("Member not found:", fetchError);
-      return { 
-        success: false, 
-        error: "Member not found" 
-      };
+    // Validate the userId parameter
+    if (!userId) {
+      console.error("userId is required");
+      return { success: false, error: "userId is required" };
     }
 
-    // 2. Delete staff permissions if staff member (if not using CASCADE)
-    if (member.staff_id) {
-      const { error: permError } = await supabase
-        .from("staff_permission")
-        .delete()
-        .eq("staff_id", member.staff_id);
-
-      if (permError) {
-        console.error("Error deleting staff permissions:", permError);
-        // Continue anyway - might not exist
-      }
+    // Get the user to verify they exist
+    const { data: { user }, error: getUserError } = await supabase.auth.admin.getUserById(userId);
+    
+    if (getUserError || !user) {
+      console.error("User not found", getUserError?.message);
+      return { success: false, error: "User not found" };
     }
 
-    // 3. Delete from member table first
+    // Delete records from tables with FK references in the correct order
+    // Delete from member table
     const { error: memberError } = await supabase
-      .from("member")
+      .from('member')
       .delete()
-      .eq("auth_id", user_id);
-
+      .eq('auth_id', userId);
+    
     if (memberError) {
-      console.error("Error deleting member:", memberError);
-      return { 
-        success: false, 
-        error: "Failed to delete member record" 
-      };
+      console.error("Failed to delete from member table", memberError.message);
+      return { success: false, error: memberError.message };
     }
 
-    // 4. Delete from staff or admin table
-    if (member.staff_id) {
-      const { error: staffError } = await supabase
-        .from("staff")
-        .delete()
-        .eq("staff_id", member.staff_id);
-
-      if (staffError) {
-        console.error("Error deleting staff:", staffError);
-        // Continue - may already be deleted by CASCADE
-      }
-    } else if (member.admin_id) {
-      const { error: adminError } = await supabase
-        .from("admin")
-        .delete()
-        .eq("admin_id", member.admin_id);
-
-      if (adminError) {
-        console.error("Error deleting admin:", adminError);
-        // Continue - may already be deleted by CASCADE
-      }
+    // Delete from staff table
+    const { error: staffError } = await supabase
+      .from('staff')
+      .delete()
+      .eq('auth_id', userId);
+    
+    if (staffError) {
+      console.error("Failed to delete from staff table", staffError.message);
+      return { success: false, error: staffError.message };
     }
 
-    // 5. Finally, delete the auth user
-    const { error: authError } = await supabase.auth.admin.deleteUser(user_id);
-
-    if (authError) {
-      console.error("Error deleting auth user:", authError);
-      return { 
-        success: false, 
-        error: authError.message || "Failed to delete user authentication" 
-      };
+    // Delete from admin table
+    const { error: adminError } = await supabase
+      .from('admin')
+      .delete()
+      .eq('auth_id', userId);
+    
+    if (adminError) {
+      console.error("Failed to delete from admin table", adminError.message);
+      return { success: false, error: adminError.message };
     }
 
-    // 6. Revalidate the page to refresh data
-    revalidatePath("/admin/members");
-    revalidatePath("/members");
+    // Finally, delete the auth user
+    const { data: deleteData, error: deleteError } = await supabase.auth.admin.deleteUser(userId);
+    
+    if (deleteError) {
+      console.error("Failed to delete user from auth", deleteError.message);
+      return { success: false, error: deleteError.message };
+    }
 
-    return { 
-      success: true, 
-      message: "Member deleted successfully" 
-    };
-
+    return { success: true, data: deleteData };
+    
   } catch (error) {
-    console.error("Delete member error:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "An unexpected error occurred" 
-    };
+    console.error("Error deleting member:", error);
+    return { success: false, error: "Unexpected error occurred" };
   }
 }

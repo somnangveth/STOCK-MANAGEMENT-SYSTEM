@@ -13,9 +13,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { trash } from "@/app/components/Icons";
+import { trash } from "@/app/components/ui";
 import { DeleteLedger } from "../action/ledger";
-import { Ledger } from "@/type/ledger";
+import { Ledger } from "@/type/membertype";
+import { id } from "date-fns/locale";
 
 interface DeleteLedgerProps {
   ledger: Ledger;
@@ -33,7 +34,7 @@ export default function DeleteLedger({
     startTransition(async () => {
       try {
         // ✅ server action 直接 throw error，不返回 res
-        await deleteLedgerEntry(ledger.id);
+        DeleteLedger(ledger.id);
 
         toast.success("Ledger entry deleted successfully");
         setOpen(false);

@@ -1,5 +1,6 @@
 'use client';
 
+import { trash } from "@/app/components/ui";
 import { deleteCategory } from "@/app/functions/admin/stock/category/category";
 import { AlertDescription } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -27,8 +28,8 @@ export default function DeleteCategoryForm({category}:{category: Categories}){
         <AlertDialog open={open} onOpenChange={setOpen} >
             <AlertDialogTrigger asChild>
                 <Button
-                className="h-7 w-15 bg-red-200 text-red-700 border border-red-700 text-sm rounded-xl hover:bg-red-500 hover:text-red-100">
-                    Delete
+                className="bg-transparent text-red-700 text-sm rounded-xl hover:bg-transparent hover:text-red-900">
+                    {trash}
                 </Button>
             </AlertDialogTrigger>
 
@@ -42,7 +43,7 @@ export default function DeleteCategoryForm({category}:{category: Categories}){
                     </AlertDescription>
                 </AlertDialogHeader>
 
-                <AlertDialogFooter>
+                <AlertDialogFooter className="flex gap-2">
                     <AlertDialogCancel
                     className="border border-gray-300 hover:bg-gray-100 rounded-xl">
                         Cancel

@@ -3,7 +3,7 @@ import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import { Admin } from "@/type/membertype";
 import EditAdmin from "./EditForm";
-import { edit } from "@/app/components/Icons";
+import { edit } from "@/app/components/ui";
 
 export default function EditMember({admin}: {admin: Admin}){
     return(

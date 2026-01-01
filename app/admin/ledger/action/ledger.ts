@@ -1,7 +1,7 @@
 "use server";
 import { createSupabaseAdmin } from "@/lib/supbase/action"
 import { v4 as uuidv4 } from "uuid";
-import { Ledger } from "@/type/ledger";
+import { Ledger } from "@/type/membertype";
 import { string } from "zod";
 
 // ---- 获取所有 Vendor ----
@@ -21,12 +21,12 @@ export async function createLedger(data: Partial<{
   source_type: string;
   debit: number;
   credit: number;
-  balance: number;
   note: string;
 
 }>) {
   const supabase = await createSupabaseAdmin();
 
+  const balance = Number(data.credit) - Number(data.debit) - Number(data.credit)
   const { data: ledgerData, error: ledgerError } = await supabase
     .from("ledger")
     .insert(
@@ -35,14 +35,14 @@ export async function createLedger(data: Partial<{
         source_type: data.source_type,
         debit: data.debit,
         credit: data.credit,
-        balance: data.balance,
+        balance: balance,
         note: data.note,
       },
     )
     .select();
 
-  if (Error) throw Error;
-  return data;
+    if(ledgerError) throw ledgerError;
+  return ledgerData;
 }
 
 
@@ -94,7 +94,7 @@ export async function UpdateLedger(
 /**
  * Delete Ledger
  */
-export async function DeleteLedger(ledger_id: string) {
+export async function  DeleteLedger(ledger_id: string) {
   const supabase = await createSupabaseAdmin();
 
   try {

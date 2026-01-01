@@ -18,7 +18,7 @@ import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent} from "@/
 import { useQuery } from "@tanstack/react-query";
 import { Categories, Subcategories } from "@/type/productType";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
-import { btnStyle } from "@/app/components/Icons";
+import { btnStyle } from "@/app/components/ui";
 import { styledToast } from "@/app/components/Toast";
 
 const FormSchema = z.object({

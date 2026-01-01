@@ -4,8 +4,9 @@ import { Product } from "@/type/productType";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import AddFormBatch from "./AddFormBatch";
-import { view } from "@/app/components/Icons";
+import { view } from "@/app/components/ui";
 import Link from "next/link";
+import { fetchBatch, fetchCategoryAndSubcategory } from "@/app/functions/admin/api/controller";
 
 // Define enhanced product type
 export interface EnhancedProduct extends Product {
@@ -32,26 +33,11 @@ export default function ProductList({
     setDisplayProducts(results);
   }, []);
 
-  async function fetchCategoryAndSubcategoryData() {
-    const res = await fetch('/api/admin/fetchCategoryAndSubcategory');
-    if (!res.ok) throw new Error("Failed to fetch product data");
-    return res.json();
-  }
-
-  async function fetchBatch(){
-    const res = await fetch('/api/admin/fetchBatch');
-    if(!res.ok){
-      console.error('Failed to fetch batch datas');
-      throw new Error("Failed to fetch");
-    }
-    return res.json();
-  }
-
   const result = useQueries({
     queries: [
       {
         queryKey: ["products", refreshKey],
-        queryFn: fetchCategoryAndSubcategoryData,
+        queryFn: fetchCategoryAndSubcategory,
       },
       {
         queryKey: ["batchQuery"],

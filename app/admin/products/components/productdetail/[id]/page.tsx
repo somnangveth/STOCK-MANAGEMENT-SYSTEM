@@ -1,5 +1,6 @@
 "use client";
 import ProductDetailCatalog from "@/app/components/catalog/productDetailCatalog";
+import { fetchCategoryAndSubcategory, fetchProducts, fetchVendors } from "@/app/functions/admin/api/controller";
 import { cn } from "@/lib/utils";
 import { Categories, Product, Subcategories, Vendors } from "@/type/productType";
 import { useQueries } from "@tanstack/react-query";
@@ -10,36 +11,7 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 export default function ProductDetailPage(){
   const param = useParams();
   const id = param.id;
-  
-  //Fetch Category and subcategory
-  async function fetchCategoryAndSubcategory(){
-    const res = await fetch('/api/admin/fetchCategoryAndSubcategory');
-    if(!res.ok){
-      console.error('Failed to fetch category and subcategory');
-      throw new Error("Failed to fetch");
-    }
-    return res.json();
-  }
-  
-  //Fetch Products
-  async function fetchProducts(){
-    const res = await fetch('/api/admin/fetchProducts');
-    if(!res.ok){
-      console.error("Failed to fetch products");
-      throw new Error("Failed to fetch");
-    }
-    return res.json();
-  }
-  
-  //Fetch Vendors
-  async function fetchVendors(){
-    const res = await fetch('/api/admin/fetchVendors');
-    if(!res.ok){
-      console.error("Failed to fetch vendor data");
-      throw new Error('Failed to fetch');
-    }
-    return res.json();
-  }
+
   
   const result = useQueries({
     queries: [

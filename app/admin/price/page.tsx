@@ -1,15 +1,19 @@
 "use client";
+<<<<<<< HEAD
 
 import { useState } from "react";
 import PriceTable from "./components/PriceTable";
 import { B2BPriceTable } from "./components/B2BPriceTable";
 import B2BPriceManager from "./components/B2BPriceManafer";
+=======
+import FilterPriceType from "./components/Filter/FilterPriceType";
+>>>>>>> f3693f4e91bf619c3756f7d29b272f292b2901ba
 
 export default function PriceManagementPage(){
-  const [activeTabs, setActiveTabs] = useState<'b2c' | 'b2b'>('b2c');
 
   return(
     <div className="flex flex-col">
+<<<<<<< HEAD
       <div className="flex">
         <button
       onClick={() => setActiveTabs('b2c')}
@@ -41,6 +45,9 @@ export default function PriceManagementPage(){
         <B2BPriceManager/>
       )}
       </div>
+=======
+      <FilterPriceType/>
+>>>>>>> f3693f4e91bf619c3756f7d29b272f292b2901ba
     </div>
   )
 }

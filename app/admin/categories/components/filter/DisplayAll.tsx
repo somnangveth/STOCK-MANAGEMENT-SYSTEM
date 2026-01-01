@@ -8,6 +8,9 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import AddCategoryForm from "../category/AddCatForm";
 import AddSubcategoryForm from "../subcategory/AddSubForm";
 import { EnhancedProduct } from "@/app/admin/products/components/ProductLists";
+import { fetchCategoryAndSubcategory, fetchProducts } from "@/app/functions/admin/api/controller";
+import { btnStyle, view } from "@/app/components/ui";
+import { useRouter } from "next/navigation";
 
 export default function DisplayAll(
 { 
@@ -28,32 +31,11 @@ export default function DisplayAll(
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('all');
   const [displayProducts, setDisplayProducts] = useState<EnhancedProduct[]>([]);
-
+  const router = useRouter();
 
   const handleSearchResults = useCallback((results: EnhancedProduct[]) => {
     setDisplayProducts(results);
   },[]);
-
-  
-  //fetch Category and Subcategory
-  async function fetchCategoryAndSubcategory(){
-    const res = await fetch('/api/admin/fetchCategoryAndSubcategory');
-    if(!res.ok){
-      console.error("Failed to fetch category and subcategory datas");
-      throw new Error("Failed to fetch");
-    }
-    return res.json();
-  }
-
-  //fetch Products
-  async function fetchProducts(){
-    const res = await fetch('/api/admin/fetchProducts');
-    if(!res.ok){
-      console.error("Failed to fetch product datas.");
-      throw new Error("Failed to fetch");
-    }
-    return res.json();
-  }
 
 
   // Queries All Datas
@@ -239,6 +221,12 @@ export default function DisplayAll(
         </div>
 
         <div className="flex gap-2 mt-6">
+          <button
+          className={btnStyle}
+          onClick={() => router.push('/admin/categories/components/categoryInfo')}
+          >
+            {view}View Categories
+          </button>
           <AddCategoryForm/>
           <AddSubcategoryForm/>
         </div>

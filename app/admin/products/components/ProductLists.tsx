@@ -7,7 +7,9 @@ import UpdateForm from "./UpdateForm";
 import DeleteProduct from "./DeleteProduct";
 import { Categories, Subcategories } from "@/type/productType";
 import Link from "next/link";
-import { view } from "@/app/components/Icons";
+import { view } from "@/app/components/ui";
+import { fetchCategoriesAndSubcategories } from "@/app/functions/admin/stock/product/product";
+import { fetchCategoryAndSubcategory } from "@/app/functions/admin/api/controller";
 
 // Define enhanced product type
 export interface EnhancedProduct extends Product {
@@ -33,16 +35,9 @@ export default function ProductList({
     setDisplayProducts(results);
   }, []);
 
-  // Fetch products data
-  async function fetchProductData() {
-    const res = await fetch('/api/admin/fetchCategoryAndSubcategory');
-    if (!res.ok) throw new Error("Failed to fetch product data");
-    return res.json();
-  }
-
   const { data: productData, isLoading, error } = useQuery({
     queryKey: ["products", refreshKey],
-    queryFn: fetchProductData,
+    queryFn: fetchCategoryAndSubcategory,
   });
 
   // Process and enhance products when data changes
@@ -119,6 +114,7 @@ export default function ProductList({
         itemsPerPage={9}
         product={displayProducts}
         columns={[
+          'select',
           'product_image',
           'sku-code',     
           'product_name',
@@ -137,6 +133,10 @@ export default function ProductList({
             </div>
           )
         }}
+        onSelectionChange={(selected) => {
+    console.log("Selected products:", selected);
+    // Do something with selected products
+  }}
       />
     </div>
   );

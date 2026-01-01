@@ -1,27 +1,23 @@
 "use client";
 import DialogForm from "@/app/components/DialogForm";
-import { Button } from "@/components/ui/button";
-import CreateProduct from "./CreateProduct";
 import { RxPlusCircled } from "react-icons/rx";
-import { btnStyle } from "@/app/components/Icons";
+import { btnStyle } from "@/app/components/ui";
+import { useRouter } from "next/navigation";
 
 export default function ProductForm({ 
   onProductAdded 
 }: { 
   onProductAdded?: () => void 
 }) {
+
+  const router = useRouter();
   return (
-    <DialogForm
-      id="product-trigger"
-      title="Create Product"
-      Trigger={
         <button
+        onClick={() => router.push("/admin/products/components/createproduct")}
           className={btnStyle}
         >
           <RxPlusCircled/> Add Product
         </button>
-      }
-      form={<CreateProduct onSuccess={onProductAdded} />}
-    />
+      
   );
 }

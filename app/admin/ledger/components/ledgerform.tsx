@@ -1,15 +1,15 @@
 "use client";
 
 import { RxPlusCircled } from "react-icons/rx";
-import { btnStyle } from "@/app/components/Icons";
+import { btnStyle } from "@/app/components/ui";
 import DialogForm from "@/app/components/DialogForm";
 import CreateLedger from "./addform";
-import { Vendor } from "@/type/membertype";
+import { Vendors } from "@/type/productType";
 import { output, ZodObject, ZodEnum, ZodString, ZodOptional, ZodNumber } from "zod";
 import { $strip } from "zod/v4/core";
 
 interface LedgerFormProps {
-  vendors?: Vendor[];
+  vendors?: Vendors[];
   onLedgerAdded?: () => void;
 }
 

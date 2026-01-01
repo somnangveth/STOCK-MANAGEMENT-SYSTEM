@@ -57,7 +57,7 @@ export default function AdminPage() {
         <div className="w-1/3 shadow-lg rounded-xl overflow-hidden bg-white flex items-center justify-center text-gray-400 text-xl">
           Hello
         </div>
-      <div className="w-1/3 h-[340px] border border-gray-200 shadow-lg rounded-xl overflow-hidden bg-white flex flex-col">
+      <div className="w-1/3 h-[370px] border border-gray-200 shadow-lg rounded-xl overflow-hidden bg-white flex flex-col">
       <div className="h-12 bg-amber-700 flex justify-center items-center text-amber-50 font-semibold text-lg shadow-sm">
         Expiry Notification
       </div>
