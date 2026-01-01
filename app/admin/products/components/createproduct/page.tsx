@@ -26,6 +26,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
+import { CancelBtn, SubmitBtn } from "@/app/components/ui";
 
 const FormSchema = z.object({
 
@@ -48,11 +49,11 @@ const FormSchema = z.object({
 
   //Price for B2C
   base_price: z.number().min(0, "Must be 0 or greater"),
-  tax: z.number().min(0, "Must be 0 or greater"),
+  tax_amount: z.number().min(0, "Must be 0 or greater"),
   profit_price: z.number().min(0, "Must be 0 or greater"),
   shipping: z.number().min(0, "Must be 0 or greater"),
-  discount: z.number().min(0, "Must be 0 or greater"),
-  total_price: z.number().min(0, "Must be 0 or greater"),
+  discount_amount: z.number().min(0, "Must be 0 or greater"),
+  total_amount: z.number().min(0, "Must be 0 or greater"),
 
   //Price for B2B
   base_price_b2b: z.number().min(0, "Must be 0 or greater"),
@@ -97,11 +98,11 @@ export default function CreateProduct({ onSuccess }: { onSuccess?: () => void })
       package_type: 'box',
       product_location: '',
       base_price: 0,
-      tax: 0,
-      total_price: 0,
+      tax_amount: 0,
+      total_amount: 0,
       profit_price: 0,
       shipping: 0,
-      discount: 0,
+      discount_amount: 0,
       b2b_price: 0,
       batch_number: "",
       note: "",
@@ -114,6 +115,10 @@ export default function CreateProduct({ onSuccess }: { onSuccess?: () => void })
   const text = "text-sm text-gray-500";
   const line = <div className="flex-1 border-b border-gray-300"></div>;
 
+
+  const payment_status = ["paid", "pending", "partial", "refunded"];
+
+
   // Calculate total price for B2C
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
@@ -121,10 +126,10 @@ export default function CreateProduct({ onSuccess }: { onSuccess?: () => void })
       
       if (priceFields.includes(name as string)) {
         const base_price = value.base_price || 0;
-        const tax_percent = value.tax || 0;
+        const tax_percent = value.tax_amount || 0;
         const profit_price = value.profit_price || 0;
         const shipping = value.shipping || 0;
-        const discount_percent = value.discount || 0;
+        const discount_percent = value.discount_amount || 0;
         
         const subtotal = base_price + profit_price + shipping;
         const taxAmount = (subtotal * tax_percent) / 100;
@@ -132,7 +137,7 @@ export default function CreateProduct({ onSuccess }: { onSuccess?: () => void })
         const discountAmount = (totalBeforeDiscount * discount_percent) / 100;
         const total = totalBeforeDiscount - discountAmount;
         
-        form.setValue('total_price', Math.max(0, total));
+        form.setValue('total_amount', Math.max(0, total));
       }
     });
     
@@ -440,12 +445,13 @@ export default function CreateProduct({ onSuccess }: { onSuccess?: () => void })
                   )}
                 />
               </div>
+          
 
           {/* Price Management */}
               <h2 className="flex items-center text-xl font-semibold mb-4">Price Management{line}</h2>
               <p className="font-semibold">B2C (Buyer to Customer)</p>
               {/* Price Management for B2C */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+              <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                 <FormField
                   control={form.control}
                   name="base_price"
@@ -508,7 +514,7 @@ export default function CreateProduct({ onSuccess }: { onSuccess?: () => void })
 
                 <FormField
                   control={form.control}
-                  name="tax"
+                  name="tax_amount"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Tax (%)</FormLabel>
@@ -528,7 +534,7 @@ export default function CreateProduct({ onSuccess }: { onSuccess?: () => void })
 
                 <FormField
                   control={form.control}
-                  name="discount"
+                  name="discount_amount"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Discount (%)</FormLabel>
@@ -551,7 +557,7 @@ export default function CreateProduct({ onSuccess }: { onSuccess?: () => void })
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-medium text-gray-700">Total Price:</span>
                   <span className="text-2xl font-bold text-amber-600">
-                    ${(form.watch('total_price') || 0).toFixed(2)}
+                    ${(form.watch('total_amount') || 0).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -987,11 +993,11 @@ export default function CreateProduct({ onSuccess }: { onSuccess?: () => void })
           <div className="flex w-full gap-2">
             <Button
             onClick={() => router.push("/admin/products")}
-            className="w-1/2">
+            className={CancelBtn}>
               Cancel
             </Button>
             <Button type="submit" disabled={isPending} 
-            className="w-1/2 bg-orange-100 border border-amber-500 text-amber-700">
+            className={SubmitBtn}>
             {isPending ? (
               <>
                 <AiOutlineLoading3Quarters className="animate-spin mr-2"/>

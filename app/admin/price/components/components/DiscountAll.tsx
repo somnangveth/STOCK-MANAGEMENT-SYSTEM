@@ -9,6 +9,7 @@ import { styledToast } from "@/app/components/Toast";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { PriceProductProps } from "../B2C/UpdateForm";
 
 const FormSchema = z.object({
   data: z.array(z.object({
@@ -21,7 +22,7 @@ const FormSchema = z.object({
 
 type FormValues = z.infer<typeof FormSchema>;
 
-export default function DiscountMultiple({ price }: { price: Price }) {
+export default function DiscountMultiple({ price }: { price: PriceProductProps }) {
   const [isPending, startTransition] = useTransition();
   
   const form = useForm<FormValues>({

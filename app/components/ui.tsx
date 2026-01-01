@@ -47,7 +47,7 @@ export const btnStyle = 'text-sm border border-amber-700 text-amber-700 bg-yello
 //Submit Button
 export const SubmitBtn = 'text-sm bg-amber-500 text-white items-center p-2 rounded-lg hover:bg-amber-700 hover:text-white';
 //Cancel Button 
-export const CancelBtn = 'text-sm bg-white border-gray-500 items-center text-gray-600 rounded-lg hover:bg-gray-300';
+export const CancelBtn = 'text-sm bg-white border border-gray-500 items-center text-gray-600 rounded-lg hover:bg-gray-300';
 //Edit Icon Button
 export const EditIconBtn = "bg-transparent hover:bg-transparent text-blue-500 hover:text-blue-700";
 //Delete Icon Button

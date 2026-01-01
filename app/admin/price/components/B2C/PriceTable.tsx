@@ -11,7 +11,7 @@ import UpdatePriceFormB2C from "./UpdateForm";
 import DiscountMultipleForm from "../components/DiscountForm";
 
 export default function PriceTableB2C() {
-  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<PriceProductProps[]>([]);
 
   const result = useQueries({
     queries: [
@@ -74,6 +74,11 @@ export default function PriceTableB2C() {
     );
   }
 
+   if (!priceData || !productData) {
+  return <div>No product found</div>;
+}
+
+
   // Debug: Log selected products
   console.log("Selected products:", selectedProducts);
 
@@ -95,7 +100,7 @@ export default function PriceTableB2C() {
               ))}
             </div>
           </div>
-          <DiscountMultipleForm prices={selectedProducts as Price[]} />
+          <DiscountMultipleForm prices={selectedProducts as PriceProductProps[]} />
         </div>
       )}
 

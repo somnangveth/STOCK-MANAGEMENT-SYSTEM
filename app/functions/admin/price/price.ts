@@ -91,11 +91,11 @@ export async function updatePriceB2C(
   price_id: string,
   data: Partial<{
     base_price: number;
-    tax: number;
+    tax_amount: number;
     b2b_price: number;
     profit_price: number;
     shipping: number;
-    discount: number;
+    discount_amount: number;
   }>
   ){
   const supabase = await createSupabaseAdmin();
@@ -107,11 +107,11 @@ export async function updatePriceB2C(
     .from("prices")
     .update({
       base_price: data.base_price,
-      tax: data.tax,
+      tax_amount: data.tax_amount,
       b2b_price: data.b2b_price,
       profit_price: data.profit_price,
       shipping: data.shipping,
-      discount: data.discount,
+      discount_amount: data.discount_amount,
     })
     .eq("price_id", price_id);
 

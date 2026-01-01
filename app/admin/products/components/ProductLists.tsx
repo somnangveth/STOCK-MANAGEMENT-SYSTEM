@@ -7,9 +7,10 @@ import UpdateForm from "./UpdateForm";
 import DeleteProduct from "./DeleteProduct";
 import { Categories, Subcategories } from "@/type/productType";
 import Link from "next/link";
-import { view } from "@/app/components/ui";
-import { fetchCategoriesAndSubcategories } from "@/app/functions/admin/stock/product/product";
+import { SubmitBtn, view } from "@/app/components/ui";
+import { deleteProduct, fetchCategoriesAndSubcategories } from "@/app/functions/admin/stock/product/product";
 import { fetchCategoryAndSubcategory } from "@/app/functions/admin/api/controller";
+import { toast } from "sonner";
 
 // Define enhanced product type
 export interface EnhancedProduct extends Product {
@@ -29,6 +30,7 @@ export default function ProductList({
   ) => void;
 }) {
   const [displayProducts, setDisplayProducts] = useState<EnhancedProduct[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
 
   // Memoized search handler
   const handleSearchResults = useCallback((results: EnhancedProduct[]) => {
@@ -78,6 +80,29 @@ export default function ProductList({
     }
   }, [productData, onDataLoaded, handleSearchResults]);
 
+  // Handle bulk delete
+  const handleBulkDelete = async () => {
+    if (selectedProducts.length === 0) return;
+    
+    try {
+      const res = await deleteProduct(selectedProducts);
+      const result = JSON.parse(res);
+      
+      if (result.error) {
+        console.error('Failed to delete products:', result.error);
+        toast.error('Failed to delete products');
+      } else {
+        toast.success(`${selectedProducts.length} product(s) deleted successfully`);
+        setSelectedProducts([]);
+        // Trigger a refetch by incrementing refreshKey or reload
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Bulk delete error:', error);
+      toast.error('Something went wrong while deleting');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -110,6 +135,17 @@ export default function ProductList({
 
   return (
     <div className="overflow-x-auto">
+      {selectedProducts.length > 0 && (
+        <div className="mb-4 p-3 rounded-lg flex items-center justify-between">
+          <button
+            onClick={handleBulkDelete}
+            className={SubmitBtn}
+          >
+            Delete Selected
+          </button>
+        </div>
+      )}
+      
       <ProductTable
         itemsPerPage={9}
         product={displayProducts}
@@ -124,19 +160,26 @@ export default function ProductList({
           'action'
         ]}
         form={(product) => {
+          // Ensure product exists before rendering actions
+          if (!product) {
+            return null;
+          }
+          
           const p = product as Product;
-          return(
-            <div className="flex items-center">
-            <UpdateForm product={product as Product} />
-            <DeleteProduct product={product as Product} />
-            <Link href={`/admin/products/components/productdetail/${p.product_id}`}>{view}</Link>
+          return (
+            <div className="flex items-center gap-2">
+              <UpdateForm product={p} />
+              <DeleteProduct product={p} />
+              <Link href={`/admin/products/components/productdetail/${p.product_id}`}>
+                {view}
+              </Link>
             </div>
-          )
+          );
         }}
-        onSelectionChange={(selected) => {
-    console.log("Selected products:", selected);
-    // Do something with selected products
-  }}
+        onSelectionChange={(selected: any) => {
+          console.log("Selected products:", selected);
+          setSelectedProducts(selected);
+        }}
       />
     </div>
   );
