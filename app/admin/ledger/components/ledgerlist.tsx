@@ -100,7 +100,7 @@ export default function LedgerList({ refreshKey = 0, onDataLoaded }: LedgerListP
     { key: "balance", label: "Balance", render: (v) => 
     <span className="font-medium">{Number(v).toFixed(2)}</span> 
   },
-    { key: "over_date", label: "Date"},
+    { key: "over_date", label: "Due date"},
     { key: "note", label: "Note" },
     { key: "created_at", label: "Date", render: (v) => 
       new Date(String(v)).toLocaleDateString() },

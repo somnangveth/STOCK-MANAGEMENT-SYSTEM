@@ -5,6 +5,7 @@ import SearchBar from "@/app/components/SearchBar";
 import LedgerList from "./components/ledgerlist";
 import { EnhancedLedger } from "@/type/membertype";
 import LedgerForm from "./components/ledgerform"; // 弹窗 + Add Ledger 按钮
+import { fetchLedgerAlert } from "./action/ledgerAlert";
 
 export default function LedgerManagement() {
   const [refreshKey, setRefreshKey] = useState(0);
