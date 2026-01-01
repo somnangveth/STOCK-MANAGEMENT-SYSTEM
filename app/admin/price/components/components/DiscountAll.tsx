@@ -22,7 +22,7 @@ const FormSchema = z.object({
 
 type FormValues = z.infer<typeof FormSchema>;
 
-export default function DiscountMultiple({ price }: { price: PriceProductProps }) {
+export default function DiscountMultiple({ price }: { price: Price }) {
   const [isPending, startTransition] = useTransition();
   
   const form = useForm<FormValues>({

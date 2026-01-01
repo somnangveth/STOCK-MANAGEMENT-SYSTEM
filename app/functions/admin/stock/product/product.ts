@@ -89,10 +89,12 @@ export async function createProduct(data: Partial<{
     throw new Error("No product ID returned from product insert.");
   }
 
+
   //Insert into Price table for B2C
   const {data: priceB2CData, error:  priceError} = await supabase
   .from("prices")
   .insert({
+    product_id: productId,
     base_price: data.base_price,
     profit_price: data.profit_price,
     shipping: data.shipping,
@@ -111,6 +113,7 @@ export async function createProduct(data: Partial<{
   const {data: priceB2BData, error: priceB2BError} = await supabase
   .from("prices")
   .insert({
+    product_id: productId,
     base_price: data.base_price_b2b,
     profit_price: data.profit_price_b2b,
     shipping: data.shipping_b2b,

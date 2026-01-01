@@ -5,7 +5,7 @@ import { Price } from "@/type/productType";
 import DiscountMultiple from "./DiscountAll";
 import { PriceProductProps } from "../B2C/UpdateForm";
 
-export default function DiscountMultipleForm({ prices }: { prices: PriceProductProps[] }) {
+export default function DiscountMultipleForm({ prices }: { prices: Price[] }) {
   // Debug: Log the prices to see what's being passed
   console.log("Prices passed to DiscountMultipleForm:", prices);
   

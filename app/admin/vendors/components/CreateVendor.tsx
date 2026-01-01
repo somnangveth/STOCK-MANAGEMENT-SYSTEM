@@ -117,6 +117,7 @@ export default function CreateVendors({onSuccess}:{onSuccess?: () => void}) {
         }else{
           document.getElementById("vendor-trigger")?.click();
           toast.success("Vendor created successfully!");
+          window.location.reload();
           form.reset();
           onSuccess?.();
           setImageUrls([]);

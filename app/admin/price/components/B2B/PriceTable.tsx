@@ -11,7 +11,7 @@ import { RetryButton } from "@/app/components/error/error";
 import DiscountMultipleForm from "../components/DiscountForm";
 
 export default function PriceTableB2B() {
-  const [selectedProducts, setSelectedProducts] = useState<PriceProductProps[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<Price[]>([]);
 
   const result = useQueries({
     queries: [
@@ -67,7 +67,7 @@ export default function PriceTableB2B() {
           <span className="text-sm font-medium">
             {selectedProducts.length} product(s) selected
           </span>
-          <DiscountMultipleForm prices={selectedProducts as PriceProductProps[]} />
+          <DiscountMultipleForm prices={selectedProducts as Price[]} />
         </div>
       )}
 
@@ -75,7 +75,7 @@ export default function PriceTableB2B() {
         product={PriceProductData}
         itemsPerPage={10}
         columns={['select', 'product_name', 'base_price', 'profit_price', 'shipping', 'action']}
-        form={(item) => <UpdatePriceFormB2B priceData={item as PriceProductProps} />}
+        form={(item) => <UpdatePriceFormB2B priceData={item as Price} />}
         onSelectionChange={(selected: any) => {
           setSelectedProducts(selected);
         }}
