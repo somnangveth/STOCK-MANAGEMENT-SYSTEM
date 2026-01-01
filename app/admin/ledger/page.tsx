@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import SearchBar from "@/app/components/SearchBar";
 import LedgerList from "./components/ledgerlist";
-import { EnhancedLedger } from "@/type/ledger";
+import { EnhancedLedger } from "@/type/membertype";
 import LedgerForm from "./components/ledgerform"; // 弹窗 + Add Ledger 按钮
 
 export default function LedgerManagement() {

@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { trash } from "@/app/components/ui";
+import { ProductOrderCard } from "@/app/components/pos/productCard";
 
 
 type CartItem = {
@@ -42,8 +43,7 @@ const FormSchema = z.object({
         quantity: z.number(),
         unit_price: z.number(),
         subtotal: z.number(),
-    })
-)
+    }))
 });
 
 export default function ReceiptPanelB2B({
@@ -91,8 +91,8 @@ export default function ReceiptPanelB2B({
             payment_method: "cash",
             payment_status: "pending",
             note: "",
-            delivery_date: new Date,
-            payment_duedate: new Date,
+            delivery_date: new Date(),
+            payment_duedate: new Date(),
             discount: 0,
             tax: 0,
             subtotal: 0,
@@ -154,16 +154,16 @@ export default function ReceiptPanelB2B({
         });
     }
 
-    //Add error handleer to see validation errors
+    //Add error handler to see validation errors
     const onError = (errors: any) => {
-        console.log("====FORM VALIDATION ERRROS====");
+        console.log("====FORM VALIDATION ERRORS====");
         console.log("Errors: ", errors);
         styledToast.error("Please check all required fields");
     }
 
     return (
-        <div className="w-full bg-white p-4">
-            <h1 className="font-semibold">Dealer Information</h1>
+        <div className="w-full bg-white">
+            <h1 className="font-semibold mb-4">Dealer Information</h1>
 
             <div>
                 <Form {...form}>
@@ -181,13 +181,13 @@ export default function ReceiptPanelB2B({
                                 <FormControl>
                                     <Select
                                     value={field.value}
-                                    onValueChange={(e) => field.onChange(String(field.onChange))}>
+                                    onValueChange={field.onChange}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select a dealer"/>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {dealer.map((d) => (
-                                                <SelectItem key={d.dealer_id} value={d.business_name}>
+                                                <SelectItem key={d.dealer_id} value={String(d.dealer_id)}>
                                                     {d.business_name}
                                                 </SelectItem>
                                             ))}
@@ -204,11 +204,11 @@ export default function ReceiptPanelB2B({
                             name="payment_status"
                             render={({field}) => (
                                 <FormItem>
-                                    <FormLabel className={text}>Payment Status: </FormLabel>
+                                    <FormLabel className={text}>Payment Status</FormLabel>
                                     <FormControl>
                                         <Select
                                         value={field.value}
-                                        onValueChange={(e) => field.onChange(String(field.value))}>
+                                        onValueChange={field.onChange}>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select"/>
                                             </SelectTrigger>
@@ -231,11 +231,11 @@ export default function ReceiptPanelB2B({
                             name="payment_method"
                             render={({field}) => (
                                 <FormItem>
-                                    <FormLabel className={text}>Payment Status: </FormLabel>
+                                    <FormLabel className={text}>Payment Method</FormLabel>
                                     <FormControl>
                                         <Select
                                         value={field.value}
-                                        onValueChange={(e) => field.onChange(String(field.value))}>
+                                        onValueChange={field.onChange}>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select"/>
                                             </SelectTrigger>
@@ -258,7 +258,7 @@ export default function ReceiptPanelB2B({
                             name="delivery_date"
                             render={({field}) => (
                                 <FormItem>
-                                    <FormLabel className={text}>Delivery Date: </FormLabel>
+                                    <FormLabel className={text}>Delivery Date</FormLabel>
                                     <FormControl>
                                     <Popover>
                                         <PopoverTrigger asChild>
@@ -296,7 +296,7 @@ export default function ReceiptPanelB2B({
                             name="payment_duedate"
                             render={({field}) => (
                                 <FormItem>
-                                    <FormLabel className={text}>Payment duedate: </FormLabel>
+                                    <FormLabel className={text}>Payment Due Date</FormLabel>
                                     <FormControl>
                                     <Popover>
                                         <PopoverTrigger asChild>
@@ -334,12 +334,14 @@ export default function ReceiptPanelB2B({
                             name="discount"
                             render={({field}) => (
                                 <FormItem>
-                                    <FormLabel className={text}>Discount(optional): </FormLabel>
+                                    <FormLabel className={text}>Discount (optional)</FormLabel>
                                     <FormControl>
                                         <Input
                                         type="number"
-                                        {...field}
-                                        onChange={field.onChange}/>
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        value={field.value || ''}
+                                        onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}/>
                                     </FormControl>
                                 </FormItem>
                             )}/>
@@ -350,12 +352,14 @@ export default function ReceiptPanelB2B({
                             name="tax"
                             render={({field}) => (
                                 <FormItem>
-                                    <FormLabel className={text}>Tax(optional): </FormLabel>
+                                    <FormLabel className={text}>Tax (optional)</FormLabel>
                                     <FormControl>
                                         <Input
                                         type="number"
-                                        {...field}
-                                        onChange={field.onChange}/>
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        value={field.value || ''}
+                                        onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}/>
                                     </FormControl>
                                 </FormItem>
                             )}/>
@@ -365,32 +369,81 @@ export default function ReceiptPanelB2B({
                             control={form.control}
                             name="note"
                             render={({field}) => (
-                                <FormItem>
-                                    <FormLabel className={text}>Note(optional): </FormLabel>
+                                <FormItem className="lg:col-span-2">
+                                    <FormLabel className={text}>Note (optional)</FormLabel>
                                     <FormControl>
                                         <Input
                                         type="text"
-                                        {...field}
-                                        onChange={field.onChange}/>
+                                        placeholder="Add a note..."
+                                        {...field}/>
                                     </FormControl>
                                 </FormItem>
                             )}/>
                         </div>
 
                         {/* Product List */}
-                        <div>
-                            <div>
-                                <h3>Order Details</h3>
+                        <div className="border-t pt-3 mt-3">
+                            <div className="flex justify-between items-center mb-2">
+                                <h3 className="text-sm font-semibold text-gray-700">Order Details</h3>
                                 {cart.length > 0 && (
                                     <button
                                     type="button"
                                     onClick={onClearCart}
-                                    className="text-red-600">
+                                    className="text-red-600 hover:text-red-800 transition">
                                         {trash}
                                     </button>
                                 )}
                             </div>
+                            <div className="max-h-[300px] overflow-y-auto">
+                                {cart.length > 0 ? (
+                                    cart.map((item) => (
+                                        <ProductOrderCard
+                                        key={item.product.product_id}
+                                        product={item.product}
+                                        quantity={item.quantity}
+                                        totalPrice={item.totalPrice}
+                                        onUpdateQuantity={onUpdateQuantity}
+                                        />
+                                    ))
+                                ):(
+                                    <div className="text-center text-gray-400 py-8">
+                                        No items in cart
+                                    </div>
+                                )}
+                            </div>
                         </div>
+
+                        {/* Total */}
+                        <div className="border-t pt-3 mt-3 space-y-2">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-600">Subtotal:</span>
+                                <span className="font-medium">${cartSubtotal.toFixed(2)}</span>
+                            </div>
+                            {cartDiscount && cartDiscount > 0 ? (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Discount:</span>
+                                    <span className="font-medium text-red-600">-${cartDiscount.toFixed(2)}</span>
+                                </div>
+                            ):null}
+                            {cartTax && cartTax > 0 ? (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Tax:</span>
+                                    <span className="font-medium">${cartTax.toFixed(2)}</span>
+                                </div>
+                            ):null}
+                            <div className="flex justify-between text-lg font-bold border-t pt-2">
+                                <span>Total:</span>
+                                <span className="text-amber-700">${cartTotal.toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        {/* Submit Button */}
+                        <button 
+                        type="submit"
+                        disabled = {isPending || cart.length === 0}
+                        className="py-2 bg-amber-700 text-white w-full rounded-lg hover:bg-amber-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition">
+                        {isPending ? "Saving..." : "Save Receipt"}
+                    </button>
                     </form>
                 </Form>
             </div>

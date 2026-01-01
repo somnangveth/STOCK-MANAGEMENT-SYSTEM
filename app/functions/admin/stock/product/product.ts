@@ -1,5 +1,6 @@
 "use server";
 import { getLoggedInUser } from "@/app/auth/actions";
+import { deleteImage } from "@/app/components/Image/actions/upload";
 import { createSupabaseAdmin } from "@/lib/supbase/action";
 import { Product } from "@/type/productType";
 
@@ -20,6 +21,22 @@ export async function createProduct(data: Partial<{
   base_unit: string;
   units_per_package: number;
   package_type: "box" | "case";
+
+
+  //Price
+  base_price: number;
+  profit_price: number;
+  shipping: number;
+  tax_amount: number;
+  discount_amount: number;
+  total_amount: number;
+
+  base_price_b2b: number;
+  profit_price_b2b: number;
+  shipping_b2b: number;
+  tax_b2b: number;
+  discount_b2b: number;
+  b2b_price: number;
 
   // Product Batches
   batch_number: string;
@@ -72,6 +89,42 @@ export async function createProduct(data: Partial<{
     throw new Error("No product ID returned from product insert.");
   }
 
+  //Insert into Price table for B2C
+  const {data: priceB2CData, error:  priceError} = await supabase
+  .from("prices")
+  .insert({
+    base_price: data.base_price,
+    profit_price: data.profit_price,
+    shipping: data.shipping,
+    tax_amount: data.tax_amount,
+    discount_amount: data.discount_amount,
+    total_amount: data.total_amount,
+  })
+  .select()
+  .single();
+
+  if(priceError){
+    console.error("Failed to insert b2c price", priceError.message);
+  }
+
+  //Insert into price table for B2B
+  const {data: priceB2BData, error: priceB2BError} = await supabase
+  .from("prices")
+  .insert({
+    base_price: data.base_price_b2b,
+    profit_price: data.profit_price_b2b,
+    shipping: data.shipping_b2b,
+    tax_amount: data.tax_b2b,
+    discount_amount: data.discount_b2b,
+    b2b_price: data.b2b_price
+  })
+  .select()
+  .single();
+
+  if(priceB2BError){
+    console.error("Failed to insert b2b price", priceB2BError.message);
+  }
+
   // -----------------------------
   // Insert First Product Batch
   // -----------------------------
@@ -100,7 +153,7 @@ export async function createProduct(data: Partial<{
     throw new Error(batchError.message);
   }
 
-  return { productData, batchData };
+  return { productData, batchData, priceB2CData, priceB2BData};
 }
 
 
@@ -155,26 +208,81 @@ export async function updateProduct(
   }
 }
 
-//Delete a Product
-export async function deleteProduct({product}:{product: Product}){
-  const supabase = await createSupabaseAdmin();
 
-  try{
-    const {data: productData, error: productError} = await supabase
-    .from('products')
-    .delete()
-    .eq('product_id', product.product_id)
-    .single();
+export async function deleteProduct(products: Product | Product[]) {
+    const supabase = await createSupabaseAdmin();
+    
+    try {
+        // Validate input
+        if (!products) {
+            console.error('deleteProduct: No products provided');
+            return JSON.stringify({ 
+                success: false, 
+                error: 'No products provided' 
+            });
+        }
 
-    if(productError){
-      console.error('Failed to delete product data', productError);
+        // Normalize to array
+        const productArray = Array.isArray(products) ? products : [products];
+        
+        // Validate products have required fields
+        const validProducts = productArray.filter(p => p && p.product_id);
+        
+        if (validProducts.length === 0) {
+            console.error('deleteProduct: No valid products with product_id');
+            return JSON.stringify({ 
+                success: false, 
+                error: 'No valid products to delete' 
+            });
+        }
+        
+        // Extract product IDs
+        const productIds = validProducts.map(p => p.product_id);
+        
+        // Extract image URLs (filter out null/undefined)
+        const imageUrls = validProducts
+            .map(p => p.product_image)
+            .filter((url): url is string => Boolean(url));
+        
+        // Delete images if they exist
+        if (imageUrls.length > 0) {
+            try {
+                await deleteImage({
+                    imageUrls,
+                    bucket: 'images',
+                });
+            } catch (imageError) {
+                console.error('Failed to delete images:', imageError);
+                // Continue with product deletion even if image deletion fails
+            }
+        }
+        
+        // Delete products from database
+        const { error } = await supabase
+            .from('products')
+            .delete()
+            .in('product_id', productIds);
+        
+        if (error) {
+            console.error('Failed to delete products:', error);
+            return JSON.stringify({ 
+                success: false, 
+                error: error.message 
+            });
+        }
+        
+        return JSON.stringify({ success: true });
+        
+    } catch (error: any) {
+        console.error('Delete product error:', error);
+        return JSON.stringify({ 
+            success: false, 
+            error: error.message || 'Unknown error occurred' 
+        });
     }
-
-    return JSON.stringify({success: true}, productData);
-  }catch(error: any){
-    throw new Error('Failed to delete Product', error);
-  }
 }
+
+
 
 
 

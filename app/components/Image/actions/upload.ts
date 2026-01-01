@@ -44,9 +44,11 @@ export async function uploadImage({file, bucket, folder}: UploadProps){
 export async function deleteImage(
     {
         imageUrl, 
+        imageUrls,
         bucket
     }: {
-        imageUrl: string, 
+        imageUrl?: string, 
+        imageUrls?: string[],
         bucket: string
     }){
     if(!imageUrl) return {sucess: false, error: "No image URL provided"};

@@ -1,7 +1,11 @@
 "use client";
 
+import AddDealerForm from "./components/AddDealerForm";
+
 export default function SalesPageB2B(){
     return(
-        <h1>B2B Sales Page</h1>
+        <div>
+            <AddDealerForm/>
+        </div>
     )
 }
