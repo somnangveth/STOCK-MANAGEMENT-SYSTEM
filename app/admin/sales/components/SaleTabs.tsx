@@ -4,20 +4,20 @@
 "use client";
 import React from "react";
 
-interface PriceTabsProps {
+interface SaleTabsProps {
   selectedTab: "Product" | "Customer";
   onTabChange: (tab: "Product" | "Customer") => void;
 }
 
-export default function PriceTabs({ selectedTab, onTabChange }: PriceTabsProps) {
+export default function SaleTabs({ selectedTab, onTabChange }: SaleTabsProps) {
   return (
     <div className="flex gap-10 text-lg border-b pb-2">
       <button
         className={`pb-2 ${
           selectedTab === "Product"
-            ? "border-b-2 border-blue-400 text-blue-600"
-            : "text-gray-600 hover:text-blue-600"
-        }`}
+            ? "text-amber-600 border-b-2 border-amber-600 bg-amber-50"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"}`
+        }
         onClick={() => onTabChange("Product")}
       >
         Product
@@ -26,8 +26,8 @@ export default function PriceTabs({ selectedTab, onTabChange }: PriceTabsProps) 
       <button
         className={`pb-2 ${
           selectedTab === "Customer"
-            ? "border-b-2 border-blue-400 text-blue-600"
-            : "text-gray-600 hover:text-blue-600"
+            ? "text-amber-600 border-b-2 border-amber-600 bg-amber-50"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
         }`}
         onClick={() => onTabChange("Customer")}
       >

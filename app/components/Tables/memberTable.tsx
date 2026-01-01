@@ -117,14 +117,14 @@ export default function MemberTable({ members, columns, form, itemsPerPage}: Mem
             {columns.includes("gender") && <TableHead>Gender</TableHead>}
 
             {/* Vendors */}
-            {columns.includes("vendor_id") && <TableHead>Vendor ID: </TableHead>}
-            {columns.includes("vendor_image") && <TableHead>Logo: </TableHead>}
-            {columns.includes("vendor_name") && <TableHead>Vendor Name: </TableHead>}
+            {columns.includes("vendor_id") && <TableHead>Vendor ID</TableHead>}
+            {columns.includes("vendor_image") && <TableHead>Logo</TableHead>}
+            {columns.includes("vendor_name") && <TableHead>Vendor Name</TableHead>}
             {columns.includes("contact_person") && <TableHead>Contact Person</TableHead>}
-            {columns.includes("vendor_type") && <TableHead>Vendor Type:</TableHead>}
-            {columns.includes("phone_number1") && <TableHead>Phone Number 1: </TableHead>}
-            {columns.includes("phone_number2") && <TableHead>Phone Number 2: </TableHead>}
-            {columns.includes("action") && <TableHead>Action:</TableHead>}
+            {columns.includes("vendor_type") && <TableHead>Vendor Type</TableHead>}
+            {columns.includes("phone_number1") && <TableHead>Phone Number 1</TableHead>}
+            {columns.includes("phone_number2") && <TableHead>Phone Number 2</TableHead>}
+            {columns.includes("action") && <TableHead>Action</TableHead>}
           </TableRow>
         </TableHeader>
 
@@ -179,7 +179,7 @@ export default function MemberTable({ members, columns, form, itemsPerPage}: Mem
                 {columns.includes("vendor_type") && <TableCell>{member.vendortype}</TableCell>}
                 {columns.includes("phone_number1") && <TableCell>{member.phone_number1}</TableCell>}
                 {columns.includes("phone_number2") && <TableCell>{member.phone_number2}</TableCell>}
-                {columns.includes("action") && <TableCell>{actionContent}</TableCell>}
+                {columns.includes("action") && <TableCell className="text-right">{actionContent}</TableCell>}
               </TableRow>
             );
           })}

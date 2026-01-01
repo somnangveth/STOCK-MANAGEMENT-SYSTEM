@@ -4,13 +4,14 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Filters from "./components/Filters";
-import PriceTabs from "./components/PriceTabs";
+import PriceTabs from "./components/SaleTabs";
 import SalesTable from "./components/SalesTable";
 import CustomerSalesTable from "./components/CustomerSalesTable";
 import AddSalesForm from "./components/addForm";
 import Receipt from "./components/receipt";
 import { addSaleWithValidation, submitSaleForm } from "@/app/functions/sale/sales";
 import { Sale } from "./type";
+import SaleTabs from "./components/SaleTabs";
 
 export default function Sales() {
   const [selectedTab, setSelectedTab] = useState<"Product" | "Customer">("Product");
@@ -98,10 +99,6 @@ export default function Sales() {
     return true;
   });
 
-  function handlePrint(event: MouseEvent<HTMLButtonElement, MouseEvent>): void {
-    throw new Error("Function not implemented.");
-  }
-
   return (
     <div className="flex-1 bg-[#fefaec] p-6">
       <main className="flex-1 p-6 space-y-6">
@@ -137,7 +134,7 @@ export default function Sales() {
 
 
         {/* Tabs */}
-        <PriceTabs selectedTab={selectedTab} onTabChange={setSelectedTab} tabs={["Product", "Customer"]} />
+        <SaleTabs selectedTab={selectedTab} onTabChange={setSelectedTab} tabs={["Product", "Customer"]} />
 
         {/* Tables */}
         {selectedTab === "Product" && <SalesTable />}
@@ -147,8 +144,8 @@ export default function Sales() {
         {currentSaleData && (
           <div className="mt-6" ref={receiptRef}>
             <Receipt sale={currentSaleData} />
-            <button onClick={handlePrint} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
-              Print / Download Receipt
+            <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
+              Download Receipt
             </button>
           </div>
         )}

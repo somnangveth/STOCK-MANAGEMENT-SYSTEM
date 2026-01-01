@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteProduct } from "@/app/functions/stock/product/product";
+import { deleteProduct } from "@/app/functions/admin/stock/product/product";
 import { 
     AlertDialog, 
     AlertDialogAction, 

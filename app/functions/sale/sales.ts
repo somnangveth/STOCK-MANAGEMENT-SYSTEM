@@ -5,29 +5,39 @@
 import { createSupabaseAdmin, createSupabaseServerClient } from "@/lib/supbase/action";
 import { Sale } from "@/app/admin/sales/type";
 
-export async function addSaleServerSide(p0: { customer_name: string; sale_date: any; subtotal: number; tax_amount: number; discount_amount: number; total_amount: number; sale_items: never[]; }): Promise<Sale> {
+export async function addSaleServerSide({ p0 }: {
+  p0: {
+    customer_name: string;
+    sale_date: any;
+    subtotal: number;
+    tax_amount: number;
+    discount_amount: number;
+    total_amount: number;
+    sale_items: never[];
+  };
+}): Promise<Sale> {
   const supabase = await createSupabaseAdmin();
 
   const { data, error } = await supabase
     .from("sale")
     .insert([
       {
-        sales_number: "",
-        sale_date: new Date().toISOString(),
-        customer_name: "",
-        customer_email: "",
-        customer_phone: "",
+        sales_number: data.sales_number,
+        sale_date: data.sale_date,
+        customer_name: data.customer_name,
+        customer_email: data.customer_email,
+        customer_phone: data.customer_phone,
         payment_method: "Online",
         payment_status: "pending",
         process_status: "draft",
-        subtotal: 0,
-        tax_amount: 0,
-        discount_amount: 0,
-        total_amount: 0,
-        note: "",
+        subtotal: data.subtotal,
+        tax_amount: data.tax_amount,
+        discount_amount: data.discount_amount,
+        total_amount: data.total_amount,
+        note: data.note,
       },
     ])
-    .select()
+    .select("*")
     .single();
 
   if (error || !data) throw new Error(error?.message || "Failed to create sale");

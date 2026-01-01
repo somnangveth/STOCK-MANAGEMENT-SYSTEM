@@ -140,7 +140,7 @@ function ProductCatalog({
           >
             {/* Checkbox for multiple selection */}
             {multiple && (
-              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
                 selected 
                   ? "bg-blue-600 border-blue-600" 
                   : "border-slate-300"
@@ -157,7 +157,7 @@ function ProductCatalog({
             <img
               src={p.product_image}
               alt={p.product_name}
-              className="w-5 h-5 rounded object-cover flex-shrink-0"
+              className="w-5 h-5 rounded object-cover"
             />
 
             {/* Product Info */}
@@ -168,7 +168,7 @@ function ProductCatalog({
 
             {/* Radio indicator for single selection */}
             {!multiple && selected && (
-              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center">
                 <div className="w-2 h-2 rounded-full bg-white"></div>
               </div>
             )}

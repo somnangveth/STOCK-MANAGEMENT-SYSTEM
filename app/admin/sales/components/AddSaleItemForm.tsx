@@ -14,7 +14,6 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { Sale, SaleItem } from "../type";
 import { addSaleItemServerSide, addSaleServerSide } from "@/app/functions/sale/sales"; // 添加销售项函数
 import { useRouter } from "next/navigation";
-import { z } from "zod";
 
 // Zod 表单校验
 const SaleItemSchema = z.object({
@@ -36,13 +35,15 @@ export default function CreateSaleWithItems() {
     startTransition(async () => {
       try {
         const newSale: Sale = await addSaleServerSide({
-          customer_name: " ", // 可以改成动态表单
-          sale_date: new Date().toISOString().split("T")[0],
-          subtotal: 0,
-          tax_amount: 0,
-          discount_amount: 0,
-          total_amount: 0,
-          sale_items: [],
+          p0: {
+            customer_name: " ", // 可以改成动态表单
+            sale_date: new Date().toISOString().split("T")[0],
+            subtotal: 0,
+            tax_amount: 0,
+            discount_amount: 0,
+            total_amount: 0,
+            sale_items: [],
+          }
         });
         setSale(newSale);
         setShowSaleForm(false);
@@ -97,19 +98,6 @@ export default function CreateSaleWithItems() {
 
   return (
     <div className="space-y-6">
-      {!sale && !showSaleForm && (
-        <Button className="bg-green-500 text-white" onClick={() => setShowSaleForm(true)}>
-          Add New Sale
-        </Button>
-      )}
-
-      {showSaleForm && !sale && (
-        <div className="p-4 border rounded shadow space-y-4">
-          <Button onClick={handleCreateSale} disabled={isPending}>
-            {isPending ? <AiOutlineLoading3Quarters className="animate-spin" /> : "Create Sale"}
-          </Button>
-        </div>
-      )}
 
       {sale && (
         <div className="space-y-4">

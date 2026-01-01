@@ -35,10 +35,10 @@ const FormSchema = z.object({
   discount_amount: z.number().min(0),
   total_amount: z.number().min(0),
   payment_method: z.enum(["Online", "Cash", "Card", "Bank Transfer"]),
-  payment_status: z.enum(["pending", "paid", "partial", "refunded"]),
+  payment_type: z.enum(["pending", "paid", "partial", "refunded"]),
   process_status: z.enum(["draft", "completed", "cancelled"]),
   note: z.string().optional(),
-  items: z.array(ProductSchema).min(1, "至少选择一个产品"),
+  items: z.array(ProductSchema).min(1, "At least one product is required"),
 });
 
 export default function AddSalesForm({ onAddSuccess }: AddSalesFormProps) {
@@ -57,7 +57,7 @@ export default function AddSalesForm({ onAddSuccess }: AddSalesFormProps) {
       discount_amount: 0,
       total_amount: 0,
       payment_method: "Online",
-      payment_status: "pending",
+      payment_type: "pending",
       process_status: "draft",
       note: "",
       items: [{ product_id: "", quantity: 1, unit_price: 0, total: 0 }],
@@ -80,12 +80,14 @@ export default function AddSalesForm({ onAddSuccess }: AddSalesFormProps) {
       try {
         // 1️⃣ 创建销售单
         const sale: Sale = await addSaleServerSide({
-          ...data,
-          subtotal: Number(data.subtotal),
-          tax_amount: Number(data.tax_amount),
-          discount_amount: Number(data.discount_amount),
-          total_amount: Number(data.total_amount),
-          sale_items: []
+          p0: {
+            ...data,
+            subtotal: Number(data.subtotal),
+            tax_amount: Number(data.tax_amount),
+            discount_amount: Number(data.discount_amount),
+            total_amount: Number(data.total_amount),
+            sale_items: []
+          }
         });
 
         // 2️⃣ 循环添加销售项

@@ -116,7 +116,7 @@ export default function ProductList({
   return (
     <div className="overflow-x-auto">
       <ProductTable
-        itemsPerPage={10}
+        itemsPerPage={9}
         product={displayProducts}
         columns={[
           'product_image',

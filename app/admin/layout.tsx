@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { SideBar } from "../components/sidebar/SideNav";
 import { checkUserRole } from "@/lib/auth/roles";
+import { Toaster } from "sonner";
 
 
 export default async function AdminLayout({ 
@@ -16,7 +17,9 @@ export default async function AdminLayout({
   return (
     <div className="flex min-h-screen">
       <SideBar/>
-      <main className="flex-1 bg-[#fefaec] p-6">{children}</main>
+      <main className="flex-1 bg-[#fefaec] p-6">
+        {children}
+      </main>
     </div>
   );
 }

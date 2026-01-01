@@ -11,51 +11,63 @@ import { LuTrendingUp } from "react-icons/lu";
 import { LuUsers } from "react-icons/lu";
 import { LuBoxes } from "react-icons/lu";
 
+interface NavLinksProps {
+    isAdmin: boolean;
+}
 
-export default function NavLinks(){
+export default function NavLinks({ isAdmin }: NavLinksProps){
     const pathname = usePathname();
     const [isProductsOpen, setIsProductsOpen] = useState(
         pathname.startsWith('/admin/products') ||
         pathname.startsWith('/admin/association') ||
-        pathname.startsWith('/admin/stock')
+        pathname.startsWith('/admin/stock') ||
+        pathname.startsWith('/admin/categories') ||
+        pathname.startsWith('/staff/products') ||
+        pathname.startsWith('/staff/association') ||
+        pathname.startsWith('/staff/stock') ||
+        pathname.startsWith('/staff/categories')
     );
 
-    const dashboard = <LuLayoutDashboard/>;
+    // 新增 Suppliers 展开状态
+    const [isSuppliersOpen, setIsSuppliersOpen] = useState(
+        pathname.startsWith('/admin/vendors') ||
+        pathname.startsWith('/admin/ledger') ||
+        pathname.startsWith('/staff/vendors') ||
+        pathname.startsWith('/staff/ledger')
+    );
+
     const links =[
         {
-            href: '/admin',
+            href: isAdmin ? '/admin' : '/staff',
             icon: <LuLayoutDashboard/>,
             text: 'Dashboard'
         },
         {
             href: '/admin/user',
             icon: <LuUserRoundCog/>,
-            text: 'Users'
+            text: 'Users',
+            adminOnly: true
         },
         {
-            href: '/admin/price',
+            href: isAdmin ? '/admin/price' : '/staff/price',
             icon: <LuDollarSign/>,
             text: 'Price',
         },
         {
-            href: '/admin/sales',
+            href: isAdmin ? '/admin/pos' : '/staff/sales',
             icon: <LuTrendingUp/>,
             text: 'Sales',
         },
-        {
-            href: '/admin/vendors',
-            icon: <LuUsers/>,
-            text: 'Suppliers',
-        }
+        
     ];
 
     const productLinks = [
         {
-            href: '/admin/products',
+            href: isAdmin ? '/admin/products': 'staff/products',
             text: 'Products'
         },
         {
-            href: '/admin/categories',
+            href: isAdmin ? '/admin/categories': 'staff/category',
             text: 'Category'
         },
         {
@@ -68,11 +80,36 @@ export default function NavLinks(){
         }
     ];
 
-    const isProductsActive = pathname.startsWith('/admin/products') || pathname.startsWith('/admin/association') || pathname.startsWith('/admin/stock');
+    // 新增 Suppliers 子菜单
+    const supplierLinks = [
+        { 
+            href: isAdmin ? '/admin/ledger' : '/staff/ledger', 
+            text: 'Ledger' },
+        { 
+            href: isAdmin ? '/admin/vendors' : '/staff/vendors', 
+            text: 'Vendor' }
+    ];
+
+    const isProductsActive = pathname.startsWith('/admin/products') || 
+        pathname.startsWith('/admin/association') || 
+        pathname.startsWith('/admin/stock') ||
+        pathname.startsWith('/admin/categories') ||
+        pathname.startsWith('/staff/products') || 
+        pathname.startsWith('/staff/association') || 
+        pathname.startsWith('/staff/stock') ||
+        pathname.startsWith('/staff/categories');
+
+    const isSuppliersActive = pathname.startsWith('/admin/vendors') ||
+        pathname.startsWith('/admin/ledger') ||
+        pathname.startsWith('/staff/vendors') ||
+        pathname.startsWith('/staff/ledger');
+
+    // Filter links based on admin status
+    const filteredLinks = links.filter(link => !link.adminOnly || isAdmin);
 
     return (
         <div className="space-y-1 flex flex-col">
-            {links.slice(0,1).map((link, index)=> (
+            {filteredLinks.slice(0,1).map((link, index)=> (
                 <Link
                 onClick={() => document.getElementById('sidebar-close')?.click()}
                     href = {link.href}
@@ -135,20 +172,66 @@ export default function NavLinks(){
                 )}
             </div>
 
+            {/* Suppliers Menu */}
+                <div>
+                <button
+                    onClick={() => setIsSuppliersOpen(!isSuppliersOpen)}
+                    className={cn(
+                    "w-full flex justify-between items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors",
+                    {
+                        "bg-amber-50 dark:bg-amber-950": isSuppliersActive
+                    }
+                    )}
+                >
+                    <Link
+                    href={isAdmin ? '/admin/vendors' : '/staff/vendors'}
+                    onClick={() => document.getElementById('sidebar-close')?.click()}
+                    className={cn(
+                        "flex-1 flex items-center gap-2",
+                        { "text-amber-700 dark:text-amber-300 font-medium": isSuppliersActive }
+                    )}
+                    >
+                    <LuUsers /> Suppliers
+                    </Link>
+                    {isSuppliersOpen ? <ChevronDown className="w-4 h-4"/> : <ChevronRight className="w-4 h-4"/>}
+                </button>
+
+                {isSuppliersOpen && (
+                    <div>
+                    {supplierLinks.map((link, index) => (
+                        <Link
+                        key={index}
+                        href={link.href}
+                        onClick={() => document.getElementById('sidebar-close')?.click()}
+                        className={cn(
+                            "flex items-center justify-start gap-2 p-2 text-sm hover:bg-amber-100 dark:hover:bg-amber-800 rounded transition-colors",
+                            {
+                            "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300":
+                                pathname === link.href
+                            }
+                        )}
+                        >
+                        {link.text}
+                        </Link>
+                    ))}
+                    </div>
+                )}
+                </div>
+
             {/* Remaining Links */}
-            {links.slice(1).map((link, index) => (
+            {filteredLinks.slice(1).map((link, index) => (
                 <Link
                 onClick={() => document.getElementById('sidebar-close')?.click()}
                 href={link.href}
                 key={index}
                 className={cn(
-                    "flex items-center gap-2 p-2 justify-start hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors",
+                    "flex items-center gap-2 p-2 justify-start hover:bg-amber-100 dark:hover:bg-amber-800 rounded transition-colors",
                     {
                         "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300":
                         pathname === link.href
                     }
                 )}>
-                    {link.text}
+                    {link.icon} {link.text}
                 </Link>
             ))}
         </div>

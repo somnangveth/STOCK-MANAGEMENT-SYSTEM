@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { useTransition } from "react";
-import { addBatch } from "@/app/functions/stock/product_batches/productbatches";
+import { addBatch } from "@/app/functions/admin/stock/product_batches/productbatches";
 import { Product } from "@/type/productType";
 import { Button } from "@/components/ui/button";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";

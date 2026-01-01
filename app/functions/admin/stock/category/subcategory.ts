@@ -5,63 +5,68 @@ import { revalidatePath } from "next/cache";
 
 //Add Subcategory
 export async function addSubcategory(data: {
-    subcategory_name: string;
-    category_id: string;
+  subcategory_name: string;
+  category_id: string;
 }){
-    try{
-        const supabase = await createSupabaseAdmin();
-
-        const {data: categoryExists, error: categoryError } = await supabase
-        .from('category')
-        .select('category_id')
-        .eq('category_id', data.category_id)
-        .single();
-
-        if(categoryError || !categoryExists){
-            return JSON.stringify({
-                error: "Category not found"
-            });
-        }
-
-        //Check if subcategory already exists in this category
-        const {data: existingSubcategory} = await supabase
-        .from('subcategory')
-        .select('subcategory_id')
-        .eq('category_id', data.category_id)
-        .eq('subcategory_name', data.subcategory_name.trim())
-        .maybeSingle();
-
-        if(existingSubcategory){
-            return JSON.stringify({
-                error: "Subcategory already exists in this category"
-            });
-        }
-
-        //Insert subcategory
-        const { data: subcategoryData, error: subcategoryError } = await supabase
-        .from('subcategory')
-        .insert({
-            subcategory_name: data.subcategory_name.trim(),
-            category_id: data.category_id
-        })
-        .select()
-        .single();
-
-        if(subcategoryError){
-            console.error('Failed to insert subcategory data', subcategoryError);
-            return JSON.stringify({
-                error: 'Failed to create subcategory'
-            });
-        }
-
-        revalidatePath('/admin/categories')
-
-    }catch(error){
-        console.error('Error creating subcategory: ', error);
-        return JSON.stringify({
-            error: "Failed to create subcategory"
-        });
+  try{
+    const supabase = await createSupabaseAdmin();
+    const {data: categoryExists, error: categoryError } = await supabase
+      .from('category')
+      .select('category_id')
+      .eq('category_id', data.category_id)
+      .single();
+      
+    if(categoryError || !categoryExists){
+      return JSON.stringify({
+        error: "Category not found"
+      });
     }
+    
+    //Check if subcategory already exists in this category
+    const {data: existingSubcategory} = await supabase
+      .from('subcategory')
+      .select('subcategory_id')
+      .eq('category_id', data.category_id)
+      .eq('subcategory_name', data.subcategory_name.trim())
+      .maybeSingle();
+      
+    if(existingSubcategory){
+      return JSON.stringify({
+        error: "Subcategory already exists in this category"
+      });
+    }
+    
+    //Insert subcategory
+    const { data: subcategoryData, error: subcategoryError } = await supabase
+      .from('subcategory')
+      .insert({
+        subcategory_name: data.subcategory_name.trim(),
+        category_id: data.category_id
+      })
+      .select()
+      .single();
+      
+    if(subcategoryError){
+      console.error('Failed to insert subcategory data', subcategoryError);
+      return JSON.stringify({
+        error: 'Failed to create subcategory'
+      });
+    }
+    
+    revalidatePath('/admin/categories');
+    
+    // ADD THIS RETURN STATEMENT
+    return JSON.stringify({
+      success: true,
+      data: subcategoryData
+    });
+    
+  }catch(error){
+    console.error('Error creating subcategory: ', error);
+    return JSON.stringify({
+      error: "Failed to create subcategory"
+    });
+  }
 }
 
 

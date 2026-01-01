@@ -25,7 +25,7 @@ export default function CustomerSalesTable({ sales, setCustomerSales }: any) {
   };
 
   const deleteSale = async (row: CustomerSale) => {
-    if (!confirm("删除这个订单?")) return;
+    if (!confirm("Delete this order?")) return;
 
     await fetch("/api/sale/delete", {
       method: "POST",

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useEffect, useState, useTransition } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchVendors, updateProduct } from "@/app/functions/stock/product/product";
+import { fetchVendors, updateProduct } from "@/app/functions/admin/stock/product/product";
 import { deleteImage, uploadImage } from "@/app/components/Image/actions/upload";
 import { convertBlobUrlToFile } from "@/app/components/Image/actions/image";
 import { toast } from "sonner";

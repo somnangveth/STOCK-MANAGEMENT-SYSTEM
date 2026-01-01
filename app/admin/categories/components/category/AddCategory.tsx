@@ -4,12 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { useTransition } from "react";
-import { addCategory } from "@/app/functions/stock/category/category";
+import { addCategory } from "@/app/functions/admin/stock/category/category";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { cn } from "@/lib/utils";
+import { btnStyle } from "@/app/components/Icons";
 
 // ---------------------
 // Zod Schema
@@ -64,7 +63,7 @@ export default function AddCategory() {
   // ---------------------
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-4">
 
         <FormField
           control={form.control}
@@ -73,7 +72,7 @@ export default function AddCategory() {
             <FormItem>
               <FormLabel>Category Name</FormLabel>
               <FormControl>
-                <Input
+                <input
                   type="text"
                   {...field}
                   onChange={(e) => field.onChange(e.target.value)}
@@ -90,7 +89,7 @@ export default function AddCategory() {
             <FormItem>
               <FormLabel>Slug</FormLabel>
               <FormControl>
-                <Input
+                <input
                   type="text"
                   {...field}
                   onChange={(e) => field.onChange(e.target.value)}
@@ -100,19 +99,19 @@ export default function AddCategory() {
           )}
         />
 
-        <Button
+        <button
           type="submit"
-          variant="outline"
+          onClick={() => form.handleSubmit(onSubmit)}
           disabled={isPending}
-          className="flex items-center gap-2"
+          className={btnStyle}
         >
           {isPending ? (
             <AiOutlineLoading3Quarters className={cn("animate-spin")} />
           ) : (
             "Create Category"
           )}
-        </Button>
-      </form>
+        </button>
+      </div>
     </Form>
   );
 }

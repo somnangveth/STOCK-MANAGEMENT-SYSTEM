@@ -11,11 +11,11 @@ export default function UpdateForm({product}: {product: Product}){
             id="update-trigger"
             title="Update Product"
             Trigger={
-                <Button
+                <button
                     className="
                         w-10 h-5 text-sm bg-transparent text-blue-500 rounded-xl">
                     {edit}
-                </Button>
+                </button>
             }
             form = {<UpdateProduct product={product}/>}
         />

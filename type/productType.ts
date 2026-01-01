@@ -42,10 +42,13 @@ export type Product = {
   created_by: string;
 
   //Expiry
-  manufacture_date: Date;
-  expiry_date: Date;
-  received_date: Date;
-  quantity_remaining: number;
+  manufacture_date?: string;
+  expiry_date?: string;
+  received_date?: string;
+  quantity_remaining?: number;
+
+  //Price
+  total_price: number;
 };
 
 // Batch fields (if you need them separately)

@@ -44,17 +44,6 @@ export default function SalesTable() {
   const handleDelete = (item: any) => alert("Delete function delete API");
   const handleSave = (updated: any) => alert("Save function update API");
 
-  const columns = [
-    "sales_number",
-    "sale_date",
-    "customer_name",
-    "total_amount",
-    "payment_status",
-    "payment_method",
-    "process_status",
-    "action",
-  ];
-
   const rows = salesData.map((item: any, index: number) => ({
     ...item,
     action: (
@@ -96,7 +85,7 @@ export default function SalesTable() {
 
   return (
     <div>
-      {/* 表单新增（打开弹窗） */}
+
 
 
       {/* 表格显示 */}

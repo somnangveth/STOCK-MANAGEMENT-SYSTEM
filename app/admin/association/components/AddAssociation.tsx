@@ -5,7 +5,7 @@ import { Product } from "@/type/productType";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useState, useTransition } from "react";
-import { addAssociation } from "@/app/functions/stock/assocation/association";
+import { addAssociation } from "@/app/functions/admin/stock/assocation/association";
 import SelectedProductListForm from "@/app/components/catalog/proListForm";
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue

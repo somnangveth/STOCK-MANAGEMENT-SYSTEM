@@ -25,7 +25,17 @@ export async function createMember(data: {
   const supabase = await createSupabaseAdmin();
 
   try {
-    const display_name = data.first_name + "" +data.last_name;
+    const display_name = data.first_name + " " + data.last_name;
+
+    //Fetch all datas from permission default table
+    const {data: permissionData, error: permissionError} = await supabase
+    .from('permission_default')
+    .select('*');
+
+    if(permissionError){
+      console.error("Failed to fetch permission data", permissionError);
+      throw new Error("Failed to fetch permission data");
+    }
 
     //1. Create Auth user
     const { data: userData, error: userError } = await supabase.auth.admin.createUser({
@@ -57,16 +67,16 @@ export async function createMember(data: {
       .select('contact_id')
       .single();
 
-      if(contactError){
-        console.error('Contact insert error', contactError);
-        throw contactError;
-      }
+    if(contactError){
+      console.error('Contact insert error', contactError);
+      throw contactError;
+    }
 
-      const contactId = contactData?.contact_id;
+    const contactId = contactData?.contact_id;
 
-      if(!contactId){
-        throw new Error("Contact ID is undefined after creation");
-      }
+    if(!contactId){
+      throw new Error("Contact ID is undefined after creation");
+    }
 
     //3.Insert base on role
     if (data.role === "admin") {
@@ -95,7 +105,7 @@ export async function createMember(data: {
       }
       const adminId = adminData.admin_id;
 
-      // 3️. Insert into member table
+      // Insert into member table
       const { data: memberData, error: memberError } = await supabase
         .from("member")
         .insert({
@@ -137,6 +147,24 @@ export async function createMember(data: {
       }
       const staffId = staffData.staff_id;
 
+      // Map permission defaults to staff_permission format
+      const staffPermissions = permissionData?.map((permission) => ({
+        auth_id: authId,
+        staff_id: staffId,
+        permission_default_id: permission.permission_default_id,
+      }));
+
+      // Insert all staff permissions at once
+      const {data: staffPermission, error: staffPermissionError} = await supabase
+        .from("staff_permission")
+        .insert(staffPermissions);
+
+      if (staffPermissionError) {
+        console.error('Failed to insert staff permissions', staffPermissionError);
+        throw staffPermissionError;
+      }
+
+      // Insert into member table
       const { data: memberData, error: memberError } = await supabase
         .from("member")
         .insert({
@@ -145,9 +173,9 @@ export async function createMember(data: {
         });
 
       if (memberError){ 
-      console.error('Failed to insert member', memberError);
-      throw memberError;
-    }
+        console.error('Failed to insert member', memberError);
+        throw memberError;
+      }
 
       return memberData;
     }
@@ -159,8 +187,6 @@ export async function createMember(data: {
     throw new Error(error.message || "Failed to create member!");
   }
 }
-
-
 // Fetch all Admins 
 export async function fetchAdmins() {
   const supabase = await createSupabaseAdmin();
@@ -193,6 +219,8 @@ export async function fetchAuthUsers(id: string,){
 }
 
 
+
+//Update Admin info
 export async function updateAdmin(
   admin_id: string,
   data: Partial<{
@@ -365,4 +393,102 @@ export async function fetchContacts(){
   }
 
   return contactData;
+}
+
+export async function deleteMember(user_id: string) {
+  const supabase = await createSupabaseAdmin();
+
+  try {
+    // 1. First, get the member info to find related records
+    const { data: member, error: fetchError } = await supabase
+      .from("member")
+      .select("id, auth_id, admin_id, staff_id")
+      .eq("auth_id", user_id)
+      .single();
+
+    if (fetchError || !member) {
+      console.error("Member not found:", fetchError);
+      return { 
+        success: false, 
+        error: "Member not found" 
+      };
+    }
+
+    // 2. Delete staff permissions if staff member (if not using CASCADE)
+    if (member.staff_id) {
+      const { error: permError } = await supabase
+        .from("staff_permission")
+        .delete()
+        .eq("staff_id", member.staff_id);
+
+      if (permError) {
+        console.error("Error deleting staff permissions:", permError);
+        // Continue anyway - might not exist
+      }
+    }
+
+    // 3. Delete from member table first
+    const { error: memberError } = await supabase
+      .from("member")
+      .delete()
+      .eq("auth_id", user_id);
+
+    if (memberError) {
+      console.error("Error deleting member:", memberError);
+      return { 
+        success: false, 
+        error: "Failed to delete member record" 
+      };
+    }
+
+    // 4. Delete from staff or admin table
+    if (member.staff_id) {
+      const { error: staffError } = await supabase
+        .from("staff")
+        .delete()
+        .eq("staff_id", member.staff_id);
+
+      if (staffError) {
+        console.error("Error deleting staff:", staffError);
+        // Continue - may already be deleted by CASCADE
+      }
+    } else if (member.admin_id) {
+      const { error: adminError } = await supabase
+        .from("admin")
+        .delete()
+        .eq("admin_id", member.admin_id);
+
+      if (adminError) {
+        console.error("Error deleting admin:", adminError);
+        // Continue - may already be deleted by CASCADE
+      }
+    }
+
+    // 5. Finally, delete the auth user
+    const { error: authError } = await supabase.auth.admin.deleteUser(user_id);
+
+    if (authError) {
+      console.error("Error deleting auth user:", authError);
+      return { 
+        success: false, 
+        error: authError.message || "Failed to delete user authentication" 
+      };
+    }
+
+    // 6. Revalidate the page to refresh data
+    revalidatePath("/admin/members");
+    revalidatePath("/members");
+
+    return { 
+      success: true, 
+      message: "Member deleted successfully" 
+    };
+
+  } catch (error) {
+    console.error("Delete member error:", error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "An unexpected error occurred" 
+    };
+  }
 }

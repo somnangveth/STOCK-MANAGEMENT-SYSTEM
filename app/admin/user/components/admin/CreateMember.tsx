@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { format } from "date-fns";
 import { 
     Form,
     FormField,
@@ -16,6 +17,11 @@ import {
     SelectItem,
     SelectContent,
 } from "@/components/ui/select";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import { useForm } from "react-hook-form";
 import { useState, useTransition } from "react";
 import * as z from "zod";
@@ -28,6 +34,10 @@ import { cn } from "@/lib/utils";
 import { convertBlobUrlToFile } from "@/app/components/Image/actions/image";
 import { uploadImage } from "@/app/components/Image/actions/upload";
 import ProfileButton from "@/app/components/Image/components/ProfileButton";
+import { styledToast } from "@/app/components/Toast";
+import { btnStyle } from "@/app/components/Icons";
+import { CalendarIcon, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 
 const FormSchema = z.object({
     id: z.string().nonempty("ID is required"),
@@ -42,14 +52,26 @@ const FormSchema = z.object({
     role: z.enum(["staff", "admin"]),
     nationality: z.string().nonempty("Nationality must included"),
     date_of_birth: z.date(),
-    martial_status: z.string(),
+    martial_status: z.enum(["Single", "Married", "Divorced", "Widowed"]),
     gender: z.enum(['Male', 'Female']),
     primary_email_address: z.string(),
     personal_email_address: z.string(),
     primary_phone_number: z.string(),
-}).refine((data) => data.confirm === data.password, {
+})
+//Check that confirm matches password
+.refine((data) => data.confirm === data.password, {
     message: "Password does not match",
     path: ["confirm"],
+})
+.refine((data) => {
+    const today = new Date();
+    const age = today.getFullYear() - data.date_of_birth.getFullYear();
+    const monthDiff = today.getMonth() - data.date_of_birth.getMonth();
+    const dayDiff = today.getDate() - data.date_of_birth.getDate();
+    return age > 18 || (age === 18 && (monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0)));
+},{
+    message: "Users must be at least 18 years old",
+    path: ["date_of_birth"],
 });
 
 export default function MemberForm() {
@@ -60,6 +82,7 @@ export default function MemberForm() {
 
     const roles = ["admin", "staff"];
     const genders = ['Male', 'Female'];
+    const martial_status = ["Single", "Married" , "Divorced", "Widowed"];
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -74,42 +97,46 @@ export default function MemberForm() {
             role: "staff",
             gender: "Male",
             nationality: "",
-            martial_status: "",
+            martial_status: "Single",
+            primary_email_address: "",
+            personal_email_address: "",
+            primary_phone_number: "",
         },
     });
 
     // Styling
     const text = 'text-sm text-gray-500'
 
+
+    const steps = [
+        {
+            number: 1,
+            title: "Personal Info",
+            fields: ["id", "first_name", "last_name", "email", "password", "confirm", "role", "nationality", "date_of_birth", "martial_status", "gender"],
+        },
+        {
+            number: 2,
+            title: "Contact Info",
+            fields: ["primary_email_address", "personal_email_address", "primary_phone_number"],
+        }
+    ]
     //Validate step 1 fields
-    async function validateStep1(){
-        const fieldsToValidate = [
-            'id',
-            'first_name',
-            'last_name',
-            'email',
-            'password',
-            'confirm',
-            'role',
-            'nationality',
-            'date_of_birth',
-            'martial_status',
-            'gender',
-        ] as const;
-        const isValid = await form.trigger(fieldsToValidate);
+    async function validateStep(){
+        const currentFields = steps[currentStep - 1].fields;
+        const isValid = await form.trigger(currentFields as any);
         return isValid;
     }
 
-    async function handleNext(){
-        const isValid = await validateStep1();
+    async function nextStep(){
+        const isValid = await validateStep();
 
         if(isValid){
-            setCurrentStep(2);
+            setCurrentStep(currentStep + 1);
         }
     }
 
-    function handBack(){
-        setCurrentStep(1)
+    function prevStep(){
+        setCurrentStep(currentStep - 1);
     }
 
     // Upload all images
@@ -149,216 +176,230 @@ export default function MemberForm() {
                     toast.error("Failed to create member!");
                 } else {
                     document.getElementById("create-trigger")?.click(); 
-                    toast.success("Member created successfully!");
+                    styledToast.success("Member Added Successfully!")
                     form.reset(); 
                     setCurrentStep(1);
                     setImageUrls([]);
                 }
             } catch (error: any) {
-                toast.error("Image upload failed", {
-                    description: error.message,
-                });
-            }
-        });
+                styledToast.error("Failed to add member!", error);
+        }});
     }
 
     return (
-        <div>
-            <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold">
-                    {currentStep === 1 ? "Personal Information" : "Contact Information"}
-                </h3>
-            </div>
-
         <Form {...form}>
-            <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-2">
+            <div className="space-y-4">
 
-                {/* Personal Information */}
+                {/* Basic Information */}
                 {currentStep === 1 && (
-                    <div className="space-y-1">
-                        <ProfileButton
-                        imageUrls={imageUrls}
-                        setImageUrls={setImageUrls}
-                        />
-
-                        {/* ID  */}
+                    <div className="space-y-2 h-[550px]">
+                        {/* Profile Image */}
+                        <ProfileButton imageUrls={imageUrls} setImageUrls={setImageUrls}/>
+                        
+                        {/* ID */}
                         <FormField
                         control={form.control}
                         name="id"
                         render={({field}) => (
                             <FormItem>
-                                <FormLabel className={text}>ID: </FormLabel>
+                                <FormLabel>ID</FormLabel>
                                 <FormControl>
-                                    <Input 
+                                    <Input
                                     type="text"
+                                    placeholder="123456"
                                     {...field}
-                                    onChange={field.onChange}
                                     />
                                 </FormControl>
+                                <FormMessage />
                             </FormItem>
+                        )}/>
+
+                        {/* First Name and Last Name */}
+                        <div className="flex gap-4">
+                            {/* First Name */}
+                            <FormField
+                            control={form.control}
+                            name="first_name"
+                            render={({field}) => (
+                                <FormItem className="flex-1">
+                                    <FormLabel>First Name</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                        type="text"
+                                        placeholder="John"
+                                        {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                            
+                            {/* Last Name */}
+                            <FormField
+                            control={form.control}
+                            name="last_name"
+                            render={({field}) => (
+                                <FormItem className="flex-1">
+                                    <FormLabel>Last Name</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                        type="text"
+                                        placeholder="Doe"
+                                        {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                        </div>
+
+                        {/* Date of Birth and Nationality */}
+                        <div className="flex gap-2">
+                            <FormField
+                        control={form.control}
+                        name="date_of_birth"
+                        render={({ field }) => (
+                        <FormItem className="flex-1">
+                            <FormLabel>Date of Birth</FormLabel>
+                            <Popover>
+                            <PopoverTrigger asChild>
+                                <FormControl>
+                                <Button
+                                    variant="outline"
+                                    className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                    )}
+                                >
+                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                                </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                mode="single"
+                                selected={field.value || undefined}
+                                onSelect={(date) => field.onChange(date || undefined)}
+                                captionLayout="dropdown"
+                                />
+                            </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                        </FormItem>
                         )}
                         />
 
-                        {/* FirstName + LastName */}
-                        <div className="flex gap-2">
-                            {/* Firstname */}
+                        {/* Nationality */}
                         <FormField
                         control={form.control}
-                        name="first_name"
-                        render={({field}) => (
+                        name="nationality"
+                        render={({field})=> (
                             <FormItem>
-                                <FormLabel className={text}>Firstname: </FormLabel>
+                                <FormLabel>Nationality: </FormLabel>
                                 <FormControl>
                                     <Input
-                                    placeholder="Firstname"
                                     type="text"
                                     {...field}
-                                    onChange={field.onChange}/>
-                                </FormControl>
-                            </FormItem>
-                        )}/>
-
-                        {/* Lastname */}
-                        <FormField
-                        control={form.control}
-                        name="last_name"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel className={text}>Lastname: </FormLabel>
-                                <FormControl>
-                                    <Input
-                                    placeholder="Lastname"
-                                    type="text"
-                                    {...field}
-                                    onChange={field.onChange}
-                                    />
+                                    value={field.value}
+                                    onChange={(e) => field.onChange(e.target.value)}/>
                                 </FormControl>
                             </FormItem>
                         )}/>
                         </div>
 
-                        {/* Nationality and Date of Birth */}
-                        <div>
-                            {/* Nationality */}
-                            <FormField
-                            control={form.control}
-                            name="nationality"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel className={text}>Nationality: </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                        placeholder="Nationality"
-                                        type="text"
-                                        {...field}
-                                        onChange={field.onChange}/>
-                                    </FormControl>
-                                </FormItem>
-                            )}/>
 
-                            {/* Date of Birth */}
-                            <FormField
-                            control={form.control}
-                            name="date_of_birth"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel className={text}>Date of Birth: </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                        type="date"
-                                        placeholder="Date of Birth"
-                                        onChange={(e) => field.onChange(new Date(e.target.value))}
-                                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                                        />
-                                    </FormControl>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}/>
-                        </div>
-
-                        {/* Martial Status and Gender */}
-                        <div className="flex gap-2">
-                            {/* Martial Status */}
+                        {/* Marital Status and Gender */}
+                        <div className="flex gap-4">
+                            {/* Marital Status */}
                             <FormField
                             control={form.control}
                             name="martial_status"
                             render={({field}) => (
-                                <FormItem>
-                                    <FormLabel className={text}>Martial Status</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                        type="text"
-                                        {...field}
-                                        onChange={field.onChange}/>
-                                    </FormControl>
-                                </FormItem>
-                            )}/>
-
-                            {/* Gender */}
-                            <FormField
-                            control={form.control}
-                            name="gender"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel className={text}>Gender: </FormLabel>
+                                <FormItem className="flex-1">
+                                    <FormLabel>Marital Status</FormLabel>
                                     <FormControl>
                                         <Select
                                         value={field.value}
                                         onValueChange={field.onChange}>
                                             <SelectTrigger>
-                                                <SelectValue placeholder=""/>
+                                                <SelectValue placeholder="Select status"/>
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {genders.map((gender) => (
-                                                   <SelectItem key={gender} value={gender}>
-                                                    {gender}
-                                                   </SelectItem>
+                                                {martial_status.map((status) => (
+                                                    <SelectItem key={status} value={status}>
+                                                        {status}
+                                                    </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
                                     </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                            
+                            {/* Gender */}
+                            <FormField
+                            control={form.control}
+                            name="gender"
+                            render={({field}) => (
+                                <FormItem className="flex-1">
+                                    <FormLabel>Gender</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                        value={field.value}
+                                        onValueChange={field.onChange}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select gender"/>
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {genders.map((gender) => (
+                                                    <SelectItem key={gender} value={gender}>
+                                                        {gender}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                    <FormMessage />
                                 </FormItem>
                             )}/>
                         </div>
 
-                        {/* Role and Email */}
-                        <div className="flex gap-2">
+                        {/* Email and Role */}
+                        <div className="flex gap-4">
                             {/* Email */}
                             <FormField
                             control={form.control}
                             name="email"
                             render={({field}) => (
-                                <FormItem>
-                                    <FormLabel className={text}>
-                                        Email: 
-                                    </FormLabel>
+                                <FormItem className="flex-1">
+                                    <FormLabel>Email</FormLabel>
                                     <FormControl>
                                         <Input
-                                        type="text"
-                                        placeholder="example@gmail.com"
+                                        type="email"
+                                        placeholder="example@email.com"
                                         {...field}
-                                        onChange={field.onChange}/>
+                                        />
                                     </FormControl>
-                                    <FormMessage/>
+                                    <FormMessage />
                                 </FormItem>
                             )}/>
-
+                            
                             {/* Role */}
                             <FormField
                             control={form.control}
                             name="role"
                             render={({field}) => (
-                                <FormItem>
-                                    <FormLabel className={text}>Role: </FormLabel>
+                                <FormItem className="flex-1">
+                                    <FormLabel>Role</FormLabel>
                                     <FormControl>
                                         <Select
                                         value={field.value}
                                         onValueChange={field.onChange}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder=""/>
-                                                </SelectTrigger>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select role"/>
+                                            </SelectTrigger>
                                             <SelectContent>
                                                 {roles.map((role) => (
                                                     <SelectItem key={role} value={role}>
@@ -368,65 +409,70 @@ export default function MemberForm() {
                                             </SelectContent>
                                         </Select>
                                     </FormControl>
+                                    <FormMessage />
                                 </FormItem>
                             )}/>
                         </div>
 
                         {/* Password and Confirm */}
-                        <div className="flex gap-2">
+                        <div className="flex gap-4">
                             {/* Password */}
                             <FormField
                             control={form.control}
                             name="password"
                             render={({field}) => (
-                                <FormItem>
-                                    <FormLabel className={text}>Password: </FormLabel>
+                                <FormItem className="flex-1">
+                                    <FormLabel>Password</FormLabel>
                                     <FormControl>
                                         <Input
                                         type="password"
+                                        placeholder="••••••••"
                                         {...field}
-                                        onChange={field.onChange}/>
+                                        />
                                     </FormControl>
-                                    <FormMessage/>
+                                    <FormMessage />
                                 </FormItem>
                             )}/>
-
+                            
                             {/* Confirm */}
                             <FormField
                             control={form.control}
                             name="confirm"
                             render={({field}) => (
-                                <FormItem>
-                                    <FormLabel className={text}>Confirm: </FormLabel>
+                                <FormItem className="flex-1">
+                                    <FormLabel>Confirm Password</FormLabel>
                                     <FormControl>
                                         <Input
                                         type="password"
-                                        placeholder="confirm"
+                                        placeholder="••••••••"
                                         {...field}
-                                        onChange={field.onChange}/>
+                                        />
                                     </FormControl>
-                                    <FormMessage/>
+                                    <FormMessage />
                                 </FormItem>
                             )}/>
                         </div>
                     </div>
                 )}
 
+                {/* Contact Info */}
                 {currentStep === 2 && (
-                    <div className="space-y-2">
-                        {/* Primary Email */}
+                    <div className="space-y-4 h-[550px]">
+                        {/* Primary Email Address */}
                         <FormField
                         control={form.control}
                         name="primary_email_address"
                         render={({field}) => (
                             <FormItem>
-                                <FormLabel className={text}>Primary email address: </FormLabel>
+                                <FormLabel>Primary Email Address</FormLabel>
                                 <FormControl>
                                     <Input
-                                    placeholder="primary email address"
-                                    {...field}/>
+                                    type="email"
+                                    placeholder="primary@email.com"
+                                    {...field}
+                                    />
                                 </FormControl>
-                                <FormMessage/>
+                                <FormMessage />
                             </FormItem>
                         )}/>
 
@@ -436,12 +482,15 @@ export default function MemberForm() {
                         name="personal_email_address"
                         render={({field}) => (
                             <FormItem>
-                                <FormLabel className={text}>Personal email address: </FormLabel>
+                                <FormLabel>Personal Email Address</FormLabel>
                                 <FormControl>
                                     <Input
-                                    placeholder="Personal email address"
-                                    {...field}/>
+                                    type="email"
+                                    placeholder="personal@email.com"
+                                    {...field}
+                                    />
                                 </FormControl>
+                                <FormMessage />
                             </FormItem>
                         )}/>
 
@@ -451,65 +500,62 @@ export default function MemberForm() {
                         name="primary_phone_number"
                         render={({field}) => (
                             <FormItem>
-                                <FormLabel className={text}>Primary phone number:</FormLabel>
+                                <FormLabel>Primary Phone Number</FormLabel>
                                 <FormControl>
                                     <Input
-                                    placeholder="primary phone number"
-                                    {...field}/>
+                                    type="tel"
+                                    placeholder="+1 (555) 000-0000"
+                                    {...field}
+                                    />
                                 </FormControl>
+                                <FormMessage />
                             </FormItem>
                         )}/>
                     </div>
                 )}
 
-                <div className="flex w-full justify-end gap-2 pt-4">
-                    {currentStep === 1 ? (
-                        <>
-                        <Button
+                {/* Navigation Buttons */}
+                <div className="flex justify-between items-center pt-6 border-t">
+                    <Button
+                      type="button"
+                      onClick={prevStep}
+                      disabled={currentStep === 1}
+                      className="gap-2 bg-amber-600 hover:bg-amber-700 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </Button>
+
+                    {currentStep < 2 ? (
+                      <Button
                         type="button"
-                        className="bg-white border border-gray-500 rounded-xl text-black hover:text-white"
-                        onClick={() => document.getElementById('create-trigger')?.click()}>
-                            Cancel
-                        </Button>
-                        <Button
+                        onClick={nextStep}
+                        className="gap-2 bg-amber-600 hover:bg-amber-700 text-white text-sm rounded-lg"
+                      >
+                        Next
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    ) : (
+                      <Button
                         type="button"
-                        onClick={handleNext}
-                        className={cn(
-                            "border border-blue-700 text-blue-700 bg-blue-100 rounded-xl",
-                            "hover:bg-blue-500 hover:text-white"
-                        )}>
-                            Next
-                        </Button>
-                        </>
-                    ): (
-                        <>
-                        <Button
-                        type="button"
-                        onClick={handBack}>
-                            Back
-                        </Button>
-                        <Button
-                        type="submit"
-                        disabled= {isPending}
-                        className={cn(
-                            "border border-blue-700 text-blue-700 bg-blue-100 rounded-xl",
-                            "hover:bg-blue-500 hover:text-white"
+                        onClick={() => form.handleSubmit(onSubmit)}
+                        disabled={isPending}
+                        className={btnStyle}
+                      >
+                        {isPending ? (
+                          <>
+                            <AiOutlineLoading3Quarters className="w-4 h-4 animate-spin" />
+                            Creating...
+                          </>
+                        ) : (
+                          <>
+                            Create Member
+                          </>
                         )}
-                        >
-                            {isPending ? (
-                                <>
-                                <AiOutlineLoading3Quarters className="inline-block animate-spin mr-2"/>
-                                Creating...
-                                </>
-                            ): (
-                                "Create Member"
-                            )}
-                        </Button>
-                        </>
+                      </Button>
                     )}
                 </div>
-            </form>
+                </div>
         </Form>
-        </div>
     );
 }

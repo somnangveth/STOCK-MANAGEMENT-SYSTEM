@@ -6,7 +6,7 @@ export const PAYMENT_METHODS = [
   "E-Wallet",
 ] as const;
 
-export const PAYMENT_STATUS = [
+export const PAYMENT_TYPES = [
   "Paid",
   "Unpaid",
   "Partial",
@@ -22,5 +22,5 @@ export const PROCESS_STATUS = [
 ] as const;
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
-export type PaymentStatus = (typeof PAYMENT_STATUS)[number];
+export type PaymentType = (typeof PAYMENT_TYPES)[number];
 export type ProcessStatus = (typeof PROCESS_STATUS)[number];

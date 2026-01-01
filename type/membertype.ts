@@ -1,4 +1,10 @@
 export type Member = {
+  member_id: string;
+  auth_id: string;
+  admin_id: string;
+  staff_id: string;
+
+
   first_name: string;
   last_name: string;
   email: string;
@@ -15,6 +21,7 @@ export type Member = {
 }
 
 export type Admin = {
+  auth_id: string;
   admin_id: string;
   first_name: string;
   last_name: string;
@@ -57,4 +64,33 @@ export type Contact = {
   primary_email_address: string;
   personal_email_address: string;
   primary_phone_number: string;
+}
+
+export type Permission = {
+  permission_id: string;
+  permission_name: string;
+  code: string;
+  module: string;
+  description: string;
+}
+
+export type StaffWithPermissions = Staff & {
+  permissions: Permission[];
+}
+
+export type Vendor = {
+  vendor_id: string;
+  vendor_name: string;
+  contact_person: string;
+  phone_number1: string;
+  phone_number2: string;  
+  vendor_email: string;
+  vendor_image: string;
+  source_link: string;
+  vendortype: string;
+  address: string;
+  city: string;
+  country: string;
+  payment_terms: string;
+  notes: string;
 }

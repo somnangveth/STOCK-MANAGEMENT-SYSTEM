@@ -86,7 +86,7 @@ export default function CreateVendors({onSuccess}:{onSuccess?: () => void}) {
     }
   };
 
-  // --- Upload Images (UNCHANGED) ---
+  // --- Upload Images ---
   async function uploadAllImages(){
     const uploadUrls: string[] = [];
     for (const url of imageUrls){
@@ -141,9 +141,9 @@ export default function CreateVendors({onSuccess}:{onSuccess?: () => void}) {
                   <div className={cn(
                     "w-12 h-12 text-sm rounded-full flex items-center justify-center font-semibold transition-all duration-300",
                     currentStep > step.number 
-                      ? "bg-green-500 text-white" 
+                      ? "bg-amber-700 text-white" 
                       : currentStep === step.number 
-                        ? "bg-blue-600 text-white shadow-lg ring-4 ring-blue-100" 
+                        ? "bg-yellow-100 text-amber-700 shadow-lg ring-4 ring-amber-100" 
                         : "bg-gray-200 text-gray-400"
                   )}>
                     {currentStep > step.number ? <Check className="w-6 h-6" /> : step.number}
@@ -157,7 +157,7 @@ export default function CreateVendors({onSuccess}:{onSuccess?: () => void}) {
                 {index < steps.length - 1 && (
                   <div className={cn(
                     "h-1 flex-1 mx-4 rounded transition-colors duration-300",
-                    currentStep > step.number ? "bg-green-500" : "bg-gray-200"
+                    currentStep > step.number ? "bg-amber-700" : "bg-gray-200"
                   )} />
                 )}
               </div>
@@ -184,7 +184,7 @@ export default function CreateVendors({onSuccess}:{onSuccess?: () => void}) {
                           <FormLabel className="text-gray-700 font-medium">Vendor ID *</FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="e.g., VEN-001" 
+                              placeholder="e.g., 001" 
                               className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                               {...field} 
                             />
@@ -440,32 +440,31 @@ export default function CreateVendors({onSuccess}:{onSuccess?: () => void}) {
 
               {/* Navigation Buttons */}
               <div className="flex justify-between items-center pt-6 border-t">
-                <Button
+                <button
                   type="button"
-                  variant="outline"
                   onClick={prevStep}
                   disabled={currentStep === 1}
                   className="gap-2"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Previous
-                </Button>
+                </button>
 
                 {currentStep < 3 ? (
-                  <Button
+                  <button
                     type="button"
                     onClick={nextStep}
-                    className="gap-2 bg-blue-600 hover:bg-blue-700"
+                    className="gap-2 bg-amber-600 hover:bg-amber-700"
                   >
                     Next
                     <ChevronRight className="w-4 h-4" />
-                  </Button>
+                  </button>
                 ) : (
-                  <Button
+                  <button
                     type="button"
                     onClick={() => form.handleSubmit(onSubmit)()}
                     disabled={isPending}
-                    className="gap-2 bg-green-600 hover:bg-green-700 min-w-32"
+                    className="gap-2 bg-amber-600 hover:bg-amber-700 min-w-32"
                   >
                     {isPending ? (
                       <>
@@ -477,7 +476,7 @@ export default function CreateVendors({onSuccess}:{onSuccess?: () => void}) {
                         Create Vendor
                       </>
                     )}
-                  </Button>
+                  </button>
                 )}
               </div>
             </div>

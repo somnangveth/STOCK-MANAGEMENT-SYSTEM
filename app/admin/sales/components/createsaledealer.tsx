@@ -21,15 +21,6 @@ export default function CreateSaleDealer({ onAddSuccess }: CreateSaleDealerProps
 
   return (
     <div className="space-y-6">
-      {/* 点击按钮显示创建销售单表单 */}
-      {!sale && !showForm && (
-        <button
-          onClick={handleCreateSaleClick}
-          className="px-4 py-2 ring-1 ring-blue-200 text-green-500 rounded"
-        >
-          Add New Sale
-        </button>
-      )}
 
       {/* 创建销售单表单 */}
       {showForm && !sale && (

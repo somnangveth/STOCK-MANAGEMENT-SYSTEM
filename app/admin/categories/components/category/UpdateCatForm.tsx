@@ -1,7 +1,7 @@
 'use client';
 
 import DialogForm from "@/app/components/DialogForm";
-import { Button } from "@/components/ui/button";
+import { btnStyle } from "@/app/components/Icons";
 import { Categories } from "@/type/productType";
 
 
@@ -11,10 +11,10 @@ export default function UpdateCategoryForm({category}:{category: Categories}){
         id="category-update-trigger"
         title="Update Category"
         Trigger={
-            <Button
-            className="bg-blue-100 border border-blue-500 text-blue-500">
+            <button
+            className={btnStyle}>
                 Update
-            </Button>
+            </button>
         }
         form={<UpdateCategoryForm category = {category as Categories}/>}/>
     )
