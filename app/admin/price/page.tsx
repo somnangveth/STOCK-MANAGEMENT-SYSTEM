@@ -6,8 +6,8 @@ import { useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { RetryButton } from "@/app/components/error/error";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import PriceTableB2C from "./B2C/PriceTable";
-import PriceTableB2B from "./B2B/PriceTable";
+import PriceTableB2B from "./components/B2B/PriceTable";
+import PriceTableB2C from "./components/B2C/PriceTable";
 
 export default function PriceManagementPage() {
   const [selectedType, setSelectedType] = useState<'b2c' | 'b2b'>('b2c');
