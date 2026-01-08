@@ -4,25 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Loader2 } from "lucide-react";
 import ProfileButton from "@/app/components/Image/components/ProfileButton";
 import { createVendor } from "../actions/vendor";
 import { convertBlobUrlToFile } from "@/app/components/Image/actions/image";
@@ -91,17 +76,17 @@ export default function CreateVendors() {
   const steps = [
     {
       step: 1,
-      title: "Basic Information",
+      title: "Basic Info",
       fields: ["vendor_id", "vendor_name", "contact_person", "vendor_email", "vendor_type"],
     },
     {
       step: 2,
-      title: "Contact Details",
+      title: "Contact",
       fields: ["phone_number1", "phone_number2", "address", "city", "country"],
     },
     {
       step: 3,
-      title: "Additional Information",
+      title: "Additional",
       fields: ["source_link", "payment_terms", "notes"],
     },
   ];
@@ -110,7 +95,6 @@ export default function CreateVendors() {
   const nextStep = async () => {
     let isValid = false;
 
-    // Validate only current step fields
     if (currentStep === 1) {
       const data = form.getValues();
       const result = step1Schema.safeParse({
@@ -122,8 +106,7 @@ export default function CreateVendors() {
       });
 
       if (!result.success) {
-        // Set errors for step 1 fields
-        result.error.errors.forEach((err) => {
+        result.error.issues.forEach((err) => {
           form.setError(err.path[0] as any, {
             type: "manual",
             message: err.message,
@@ -143,8 +126,7 @@ export default function CreateVendors() {
       });
 
       if (!result.success) {
-        // Set errors for step 2 fields
-        result.error.errors.forEach((err) => {
+        result.error.issues.forEach((err) => {
           form.setError(err.path[0] as any, {
             type: "manual",
             message: err.message,
@@ -168,7 +150,6 @@ export default function CreateVendors() {
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     startTransition(async () => {
       try {
-        // Upload image if exists
         if (imageUrls.length > 0) {
           const file = await convertBlobUrlToFile(imageUrls[0]);
           const { imageUrl } = await uploadImage({
@@ -197,280 +178,236 @@ export default function CreateVendors() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Add New Vendor</h1>
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Progress Steps */}
-          <div className="flex items-center justify-between mb-8">
-            {steps.map((step, idx) => (
-              <div key={step.step} className="flex flex-col items-center flex-1">
-                <div
-                  className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors",
-                    currentStep >= step.step
-                      ? "bg-amber-700 text-white"
-                      : "bg-gray-200 text-gray-600"
-                  )}
-                >
-                  {currentStep > step.step ? <Check className="w-5 h-5" /> : step.step}
-                </div>
-                <span className="text-xs mt-2 text-center">{step.title}</span>
-                {idx < steps.length - 1 && (
-                  <div
-                    className={cn(
-                      "h-1 flex-1 mx-2 transition-colors",
-                      currentStep > step.step ? "bg-amber-700" : "bg-gray-200"
-                    )}
-                  />
+    <div className="w-full max-w-2xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-semibold">Add New Vendor</h2>
+      </div>
+
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Progress Steps */}
+        <div className="flex items-center justify-between mb-6">
+          {steps.map((step, idx) => (
+            <div key={step.step} className="flex flex-col items-center flex-1">
+              <div
+                className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors",
+                  currentStep >= step.step
+                    ? "bg-amber-700 text-white"
+                    : "bg-gray-200 text-gray-600"
                 )}
+              >
+                {currentStep > step.step ? <Check className="w-4 h-4" /> : step.step}
               </div>
-            ))}
+              <span className="text-xs mt-1 text-gray-600">{step.title}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* STEP 1: Basic Information */}
+        {currentStep === 1 && (
+          <div className="space-y-3">
+            <ProfileButton imageUrls={imageUrls} setImageUrls={setImageUrls} />
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Vendor ID *</label>
+              <input
+                {...form.register("vendor_id")}
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="Enter vendor ID"
+              />
+              {form.formState.errors.vendor_id && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.vendor_id.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Vendor Name *</label>
+              <input
+                {...form.register("vendor_name")}
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="Enter vendor name"
+              />
+              {form.formState.errors.vendor_name && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.vendor_name.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Contact Person *</label>
+              <input
+                {...form.register("contact_person")}
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="Enter contact person name"
+              />
+              {form.formState.errors.contact_person && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.contact_person.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Email *</label>
+              <input
+                {...form.register("vendor_email")}
+                type="email"
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="vendor@example.com"
+              />
+              {form.formState.errors.vendor_email && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.vendor_email.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Vendor Type *</label>
+              <select
+                {...form.register("vendor_type")}
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+              >
+                <option value="">Select vendor type</option>
+                <option value="local">Local</option>
+                <option value="non-local">Non-Local</option>
+              </select>
+              {form.formState.errors.vendor_type && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.vendor_type.message}</p>
+              )}
+            </div>
           </div>
+        )}
 
-          {/* STEP 1: Basic Information */}
-          {currentStep === 1 && (
-            <div className="space-y-4">
-              <ProfileButton imageUrls={imageUrls} setImageUrls={setImageUrls} />
-
-              <FormField
-                control={form.control}
-                name="vendor_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vendor ID *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter vendor ID" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+        {/* STEP 2: Contact Details */}
+        {currentStep === 2 && (
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium block mb-1">Primary Phone *</label>
+              <input
+                {...form.register("phone_number1")}
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="+1234567890"
               />
+              {form.formState.errors.phone_number1 && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.phone_number1.message}</p>
+              )}
+            </div>
 
-              <FormField
-                control={form.control}
-                name="vendor_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vendor Name *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter vendor name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="contact_person"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Contact Person *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter contact person name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="vendor_email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email *</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="vendor@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="vendor_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vendor Type *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select vendor type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="local">Local</SelectItem>
-                        <SelectItem value="non-local">Non-Local</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <div>
+              <label className="text-sm font-medium block mb-1">Secondary Phone</label>
+              <input
+                {...form.register("phone_number2")}
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="+1234567890 (Optional)"
               />
             </div>
-          )}
 
-          {/* STEP 2: Contact Details */}
-          {currentStep === 2 && (
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="phone_number1"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Primary Phone *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="+1234567890" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <div>
+              <label className="text-sm font-medium block mb-1">Address *</label>
+              <textarea
+                {...form.register("address")}
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                rows={3}
+                placeholder="Enter full address"
               />
+              {form.formState.errors.address && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.address.message}</p>
+              )}
+            </div>
 
-              <FormField
-                control={form.control}
-                name="phone_number2"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Secondary Phone</FormLabel>
-                    <FormControl>
-                      <Input placeholder="+1234567890 (Optional)" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address *</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Enter full address" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter city" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium block mb-1">City *</label>
+                <input
+                  {...form.register("city")}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                  placeholder="Enter city"
                 />
+                {form.formState.errors.city && (
+                  <p className="text-red-500 text-xs mt-1">{form.formState.errors.city.message}</p>
+                )}
+              </div>
 
-                <FormField
-                  control={form.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter country" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <div>
+                <label className="text-sm font-medium block mb-1">Country *</label>
+                <input
+                  {...form.register("country")}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                  placeholder="Enter country"
                 />
+                {form.formState.errors.country && (
+                  <p className="text-red-500 text-xs mt-1">{form.formState.errors.country.message}</p>
+                )}
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* STEP 3: Additional Information */}
-          {currentStep === 3 && (
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="source_link"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Website / Source Link</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="url"
-                        placeholder="https://example.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+        {/* STEP 3: Additional Information */}
+        {currentStep === 3 && (
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium block mb-1">Website / Source Link</label>
+              <input
+                {...form.register("source_link")}
+                type="url"
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="https://example.com"
               />
+              {form.formState.errors.source_link && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.source_link.message}</p>
+              )}
+            </div>
 
-              <FormField
-                control={form.control}
-                name="payment_terms"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Payment Terms</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Net 30, COD" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Additional information about the vendor"
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <div>
+              <label className="text-sm font-medium block mb-1">Payment Terms</label>
+              <input
+                {...form.register("payment_terms")}
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="e.g., Net 30, COD"
               />
             </div>
-          )}
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between pt-6 border-t">
-            <Button
+            <div>
+              <label className="text-sm font-medium block mb-1">Notes</label>
+              <textarea
+                {...form.register("notes")}
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                rows={4}
+                placeholder="Additional information about the vendor"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between pt-4 border-t">
+          <button
+            type="button"
+            onClick={prevStep}
+            disabled={currentStep === 1 || isPending}
+            className="px-4 py-2 text-sm border border-gray-200 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ← Previous
+          </button>
+
+          {currentStep < 3 ? (
+            <button
               type="button"
-              variant="outline"
-              onClick={prevStep}
-              disabled={currentStep === 1 || isPending}
+              onClick={nextStep}
+              disabled={isPending}
+              className="px-4 py-2 text-sm bg-amber-700 text-white rounded-md hover:bg-amber-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronLeft className="w-4 h-4 mr-2" />
-              Previous
-            </Button>
-
-            {currentStep < 3 ? (
-              <Button type="button" onClick={nextStep} disabled={isPending}>
-                Next
-                <ChevronRight className="w-4 h-4 ml-2" />
-              </Button>
-            ) : (
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Creating..." : "Create Vendor"}
-              </Button>
-            )}
-          </div>
-        </form>
-      </Form>
+              Next →
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={isPending}
+              className="px-4 py-2 text-sm bg-amber-700 text-white rounded-md hover:bg-amber-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isPending ? "Creating..." : "Create Vendor"}
+            </button>
+          )}
+        </div>
+      </form>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { Product, Vendors } from "@/type/productType";
 import { EnhancedLedger } from "@/type/membertype";
 import Updatevendor from "@/app/admin/vendors/components/editvendorform";
 import DeleteVendor from "@/app/admin/vendors/components/Deletevendorform";
+import { edit } from "@/app/components/ui";
 
 type TabKey = "Product" | "Ledger";
 
@@ -168,7 +169,7 @@ const ProductPanel = ({ products }: { products: Product[] }) => {
             <tr className="text-left text-sm text-gray-600 font-semibold">
               <th className="px-6 py-4">Product Name</th>
               <th className="px-6 py-4">SKU Code</th>
-              <th className="px-6 py-4">Unit Price</th>
+              <th className="px-6 py-4">Base Price</th>
               <th className="px-6 py-4">Stock Status</th>
             </tr>
           </thead>

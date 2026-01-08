@@ -12,20 +12,12 @@ export default function UpdateForm({ vendor }: { vendor: Vendors }) {
     <DialogForm
       id="update-trigger"
       Trigger={
-        <button
-          className="
-            flex items-center gap-1
-            px-3 py-2
-            text-sm font-medium
-            text-blue-600
-            rounded-lg
-            active:bg-blue-100
-            transition
-          "
-        >
-          Edit
-        </button>
-      }
+                <button
+                    className="
+                        w-10 h-5 text-sm bg-transparent text-blue-500 rounded-xl">
+                    {edit}
+                </button>
+            }
       form={<UpdateVendor vendors={vendor} />}
     />
   );

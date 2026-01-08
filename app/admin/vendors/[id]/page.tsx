@@ -4,6 +4,7 @@
 import { notFound } from "next/navigation";
 import VendorDetailCatalog from "@/app/components/catalog/vendorDetailCatalog";
 import { createSupabaseAdmin } from "@/lib/supbase/action";
+import { Edit } from "lucide-react";
 
 interface PageProps {
   params: Promise<{
@@ -50,7 +51,7 @@ export default async function VendorDetailPage({ params }: PageProps) {
       .order("product_name", { ascending: true });
 
     if (productsError) {
-      console.error("⚠️ 产品查询错误:", productsError);
+      console.error(" Error Searching Product:", productsError);
     }
 
     // ===== 3. 为每个产品获取最新的 base price =====
@@ -72,8 +73,8 @@ export default async function VendorDetailPage({ params }: PageProps) {
       })
     );
 
-    console.log("✅ 找到产品:", products.length, "个");
-    console.log("✅ 产品价格已加载");
+    console.log("✅ Product Found:", (products || []).length, "cases");
+    console.log("✅ Products with Price", productsWithPrice.length, "cases");
 
     // ===== 4. 获取账目 =====
     const { data: ledger = [] } = await supabase
@@ -87,23 +88,37 @@ export default async function VendorDetailPage({ params }: PageProps) {
       product_id: p.product_id,
       product_name: p.product_name || "Unknown",
       sku_code: p.sku_code || "N/A",
+      description: p.description || "",
       vendor_id: p.vendor_id,
       unit_price: p.basePrice,  // ✅ Base price from purchase_items
       product_image: p.product_image || null,
-      quantity_remaining: p.max_stock_level || 0,  // 使用库存上限作为参考
+      quantity_remaining: p.max_stock_level || 0, 
+      category_id: p.category_id || null,
+      subcategory_id: p.subcategory_id || null,
+      min_stock_level: p.min_stock_level || 0,
+      reorder_point: p.reorder_point || 0,
+      created_at: p.created_at || new Date().toISOString(),
+      updated_at: p.updated_at || new Date().toISOString(),
+      is_active: p.is_active ?? true,
+      barcode: p.barcode || null,
+      basePrice: p.basePrice || 0,
     }));
 
     // 格式化账目数据
-    const formattedLedger = (ledger || []).map((l: any) => ({
+    const formattedLedger = (ledger || []).map((l: any, index: number) => ({
+      key: `ledger-${l.ledger_id}-${index}`,
+      id: l.ledger_id,
       ledger_id: l.ledger_id,
       vendor_id: l.vendor_id,
       vendor_name: vendor.vendor_name,
       source_type: l.source_type || "N/A",
+      source_id: l.source_id || null,
       debit: Number(l.debit) || 0,
       credit: Number(l.credit) || 0,
       balance: Number(l.balance) || 0,
       note: l.note || "",
       created_at: l.created_at,
+      created_by: l.created_by || null,
       payment_duedate: l.payment_duedate,
       payment_status: l.payment_status || "unpaid",
       term_status: l.term_status || "normal",
@@ -117,7 +132,7 @@ export default async function VendorDetailPage({ params }: PageProps) {
       />
     );
   } catch (error) {
-    console.error("❌ 错误:", error);
+    console.error("Error:", error);
     notFound();
   }
 }
