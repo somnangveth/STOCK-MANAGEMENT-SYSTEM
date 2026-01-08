@@ -1,13 +1,9 @@
 "use client";
 
 import ProductTable from "@/app/components/Tables/productTable";
-import { fetchPricesB2B, fetchProducts } from "@/app/functions/admin/api/controller";
 import { Price, Product } from "@/type/productType";
-import { useQueries } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import UpdatePriceFormB2B from "./UpdateForm";
-import { RetryButton } from "@/app/components/error/error";
 import DiscountMultipleForm from "../components/DiscountForm";
 import { convertFromDollarToRiels } from "@/app/functions/admin/price/currency";
 import {
@@ -20,22 +16,15 @@ import {
 import ViewDiscountPage from "../components/ViewDiscount";
 import SearchBar from "@/app/components/SearchBar";
 
-export default function PriceTableB2B() {
+interface PriceTableB2BProps {
+  productData: Product[];
+  priceData: Price[];
+}
+
+export default function PriceTableB2B({ productData, priceData }: PriceTableB2BProps) {
   const [selectedProducts, setSelectedProducts] = useState<Price[]>([]);
   const [currency, setCurrency] = useState<"riel" | "dollar">("dollar");
   const [filteredData, setFilteredData] = useState<any[]>([]);
-
-  const result = useQueries({
-    queries: [
-      { queryKey: ["productQuery"], queryFn: fetchProducts },
-      { queryKey: ["priceQueryB2B"], queryFn: fetchPricesB2B },
-    ],
-  });
-
-  const productData = result[0].data;
-  const priceData = result[1].data;
-  const isLoading = result[0].isLoading || result[1].isLoading;
-  const hasError = result[0].error || result[1].error;
 
   const mergedData = useMemo(() => {
     if (!priceData || !productData) return [];
@@ -68,24 +57,12 @@ export default function PriceTableB2B() {
     });
   }, [productData, priceData, currency]);
 
-  // initialize search result
   useMemo(() => {
     setFilteredData(mergedData);
   }, [mergedData]);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center p-8">
-        <AiOutlineLoading3Quarters className="animate-spin text-2xl" />
-      </div>
-    );
-  }
-
-  if (hasError) return <RetryButton />;
-
   return (
     <div className="space-y-4">
-      {/* Top controls */}
       <div className="flex justify-between items-center">
         <SearchBar
           data={mergedData}
@@ -96,7 +73,7 @@ export default function PriceTableB2B() {
         />
 
         <div className="flex items-center gap-3">
-          <Select value={currency} onValueChange={(v:any) => setCurrency(v)}>
+          <Select value={currency} onValueChange={(v: any) => setCurrency(v)}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
@@ -123,7 +100,6 @@ export default function PriceTableB2B() {
           console.log("Selection changed:", selected);
           setSelectedProducts(selected);
         }}
-
       />
     </div>
   );

@@ -1,13 +1,9 @@
 "use client";
 
 import ProductTable from "@/app/components/Tables/productTable";
-import { fetchPricesB2C, fetchProducts } from "@/app/functions/admin/api/controller";
 import { Price, Product } from "@/type/productType";
-import { useQueries } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { RetryButton } from "@/app/components/error/error";
-import UpdatePriceFormB2C from "./UpdateForm";
+import UpdateSinglePriceB2C from "./UpdatePrice";
 import DiscountMultipleForm from "../components/DiscountForm";
 import SingleDiscountForm from "../components/SingleDiscountForm";
 import ViewDiscountPage from "../components/ViewDiscount";
@@ -21,22 +17,15 @@ import {
 } from "@/components/ui/select";
 import { convertFromDollarToRiels } from "@/app/functions/admin/price/currency";
 
-export default function PriceTableB2C() {
+interface PriceTableB2CProps {
+  productData: Product[];
+  priceData: Price[];
+}
+
+export default function PriceTableB2C({ productData, priceData }: PriceTableB2CProps) {
   const [selectedProducts, setSelectedProducts] = useState<Price[]>([]);
   const [currency, setCurrency] = useState<"riel" | "dollar">("dollar");
   const [filteredData, setFilteredData] = useState<any[]>([]);
-
-  const result = useQueries({
-    queries: [
-      { queryKey: ["priceQueryB2C"], queryFn: fetchPricesB2C },
-      { queryKey: ["productQuery"], queryFn: fetchProducts },
-    ],
-  });
-
-  const priceData = result[0].data;
-  const productData = result[1].data;
-  const isLoading = result[0].isLoading || result[1].isLoading;
-  const hasError = result[0].error || result[1].error;
 
   const mergedData = useMemo(() => {
     if (!priceData || !productData) return [];
@@ -72,16 +61,6 @@ export default function PriceTableB2C() {
   useMemo(() => {
     setFilteredData(mergedData);
   }, [mergedData]);
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center p-8">
-        <AiOutlineLoading3Quarters className="animate-spin text-2xl" />
-      </div>
-    );
-  }
-
-  if (hasError) return <RetryButton />;
 
   return (
     <div className="space-y-4">
@@ -119,7 +98,7 @@ export default function PriceTableB2C() {
         columns={["select", "product_name", "base_price", "profit_price", "shipping", "action"]}
         form={(item) => (
           <>
-            <UpdatePriceFormB2C priceData={item as Price} />
+            <UpdateSinglePriceB2C priceData={item as Price} />
             <SingleDiscountForm price={item as Price} />
           </>
         )}
