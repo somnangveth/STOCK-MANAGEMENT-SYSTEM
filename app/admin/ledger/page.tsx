@@ -1,11 +1,12 @@
+// app/admin/ledger/page.tsx
 'use client';
 
 import { useState, useCallback } from "react";
 import SearchBar from "@/app/components/SearchBar";
 import LedgerList from "./components/ledgerlist";
+import LedgerFromPurchase from "./components/addform";
 import { EnhancedLedger } from "@/type/membertype";
-import LedgerForm from "./components/ledgerform"; // 弹窗 + Add Ledger 按钮
-import { fetchLedgerAlert } from "./action/ledgerAlert";
+import LedgerForm from "./components/ledgerform";
 
 export default function LedgerManagement() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -31,10 +32,10 @@ export default function LedgerManagement() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* 标题 + 新增 Ledger 弹窗 */}
+      {/* 标题 + 新增 Ledger 按钮 */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Ledger Management</h1>
-        <LedgerForm onLedgerAdded={handleLedgerAdded} />
+        <LedgerFromPurchase onLedgerAdded={handleLedgerAdded} />
       </div>
 
       {/* 搜索栏 */}

@@ -4,14 +4,13 @@
 import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import UpdateVendor from "./editvendor"; // Import the actual form component
-import { edit } from "@/app/components/Icons";
-import { Vendor } from "@/type/membertype";
+import { edit } from "@/app/components/ui";
+import { Vendors } from "@/type/productType";
 
-export default function UpdateForm({ vendor }: { vendor: Vendor }) {
+export default function UpdateForm({ vendor }: { vendor: Vendors }) {
   return (
     <DialogForm
       id="update-trigger"
-      title="Edit Vendor"
       Trigger={
         <button
           className="
@@ -20,7 +19,6 @@ export default function UpdateForm({ vendor }: { vendor: Vendor }) {
             text-sm font-medium
             text-blue-600
             rounded-lg
-            hover:bg-blue-50
             active:bg-blue-100
             transition
           "
@@ -28,7 +26,7 @@ export default function UpdateForm({ vendor }: { vendor: Vendor }) {
           Edit
         </button>
       }
-      form={<UpdateVendor vendor={vendor} />}
+      form={<UpdateVendor vendors={vendor} />}
     />
   );
 }

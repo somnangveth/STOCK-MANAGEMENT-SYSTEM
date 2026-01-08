@@ -88,6 +88,11 @@ const items = [
     icon: FaUsersLine,
     subitems: [
       {
+        title :"Purchase Order",
+        url: "/admin/purchase",
+        icon: FaReceipt,
+      },
+      {
         title :"Ledger",
         url: "/admin/ledger",
         icon: FaUsers,

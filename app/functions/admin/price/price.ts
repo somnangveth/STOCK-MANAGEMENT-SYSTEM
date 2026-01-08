@@ -250,8 +250,7 @@ export async function fetchPricesB2C(){
 
   const {data: priceData, error: priceError} = await supabase
   .from("prices")
-  .select("*")
-  .not('total_price','is', null);
+  .select("*");
 
   if(priceError){
     console.error("Failed to fetch price data for B2C");

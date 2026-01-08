@@ -1,30 +1,31 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogFooter,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { trash } from "@/app/components/ui";
-import { DeleteLedger } from "../action/ledger";
-import { Ledger } from "@/type/membertype";
-import { id } from "date-fns/locale";
+import { btnStyle } from "@/app/components/ui";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { toast } from "sonner";
+import { deleteLedger } from "../action/ledger";
+import {Button} from "@/components/ui/button";
 
 interface DeleteLedgerProps {
-  ledger: Ledger;
+  ledger_id: string;
+  vendor_name: string;
   onSuccess?: () => void;
 }
 
 export default function DeleteLedger({
-  ledger,
+  ledger_id,
+  vendor_name,
   onSuccess,
 }: DeleteLedgerProps) {
   const [open, setOpen] = useState(false);
@@ -33,15 +34,20 @@ export default function DeleteLedger({
   const handleDelete = () => {
     startTransition(async () => {
       try {
-        // ✅ server action 直接 throw error，不返回 res
-        DeleteLedger(ledger.id);
+        const result = await deleteLedger(ledger_id);
 
-        toast.success("Ledger entry deleted successfully");
+        if (result.error) {
+          toast.error("Failed to delete ledger", {
+            description: result.error,
+          });
+          return;
+        }
+
+        toast.success("Ledger deleted successfully");
         setOpen(false);
         onSuccess?.();
       } catch (err: any) {
-        console.error(err);
-        toast.error("Failed to delete ledger entry", {
+        toast.error("Failed to delete ledger", {
           description: err?.message,
         });
       }
@@ -53,40 +59,37 @@ export default function DeleteLedger({
       <AlertDialogTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
-          className="text-red-500 hover:bg-red-50"
+          size="sm"
+          className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
         >
-          {trash}
+          🗑️
         </Button>
       </AlertDialogTrigger>
-
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-lg font-semibold text-red-700">
-            Confirm Deletion
-          </AlertDialogTitle>
-          <p className="text-sm text-gray-600">
-            Are you sure you want to delete{" "}
-            <span className="font-medium">
-              {ledger.note || "this ledger entry"}
-            </span>
-            ?
-          </p>
+          <AlertDialogTitle>Delete Ledger Entry</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this ledger entry for{" "}
+            <strong>{vendor_name}</strong>? This action cannot be undone.
+          </AlertDialogDescription>
         </AlertDialogHeader>
-
-        <AlertDialogFooter>
-          <AlertDialogCancel className="rounded-xl">
-            Cancel
-          </AlertDialogCancel>
-
+        <div className="flex gap-2 justify-end">
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isPending}
-            className="bg-red-200 border-2 border-red-700 rounded-xl text-red-700"
+            className="bg-red-600 hover:bg-red-700"
           >
-            {isPending ? "Deleting..." : "Delete"}
+            {isPending ? (
+              <>
+                <AiOutlineLoading3Quarters className="animate-spin mr-2" />
+                Deleting...
+              </>
+            ) : (
+              "Delete"
+            )}
           </AlertDialogAction>
-        </AlertDialogFooter>
+        </div>
       </AlertDialogContent>
     </AlertDialog>
   );

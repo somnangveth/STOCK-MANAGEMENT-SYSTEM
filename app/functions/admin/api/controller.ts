@@ -110,3 +110,43 @@ export async function fetchSaleItems(){
 
     return res.json();
 }
+
+//Fetch Ledger
+export async function fetchLedger(){
+    const res = await fetch('/api/admin/fetchLedger');
+    if(!res.ok){
+        console.error("Failed to fetch Ledger data");
+        throw new Error("Failed to fetch");
+    }
+    return res.json();
+}
+
+//Fetch Ledger Alert
+export async function fetchLedgerAlert(){
+    const res = await fetch('/api/admin/fetchLedgerAlert');
+    if(!res.ok){
+        console.error("Failed to fetch Ledger Alert data");
+        throw new Error("Failed to fetch");
+    }
+    return res.json();
+}
+
+//Fetch purchase orders
+export async function fetchPurchaseOrders(){
+    const res = await fetch('/api/admin/fetchPurchaseOrders');
+    if(!res.ok){
+        console.error("Failed to fetch Purchase Orders data");
+        throw new Error("Failed to fetch");
+    }
+    return res.json();
+}
+
+//Fetch return orders
+export async function fetchReceiveOrders(){
+    const res = await fetch('/api/admin/fetchReceiveOrders');
+    if(!res.ok){
+        console.error("Failed to fetch Receive Orders data");
+        throw new Error("Failed to fetch");
+    }
+    return res.json();
+}

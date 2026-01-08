@@ -1,6 +1,5 @@
 "use client";
 
-import { Vendor } from "@/type/membertype";
 import DisplayVendors from "./components/DisplayVendors";
 import VendorForm from "./components/VendorForm";
 import { useCallback, useState } from "react";

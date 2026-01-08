@@ -12,20 +12,20 @@ import {
     AlertDialogTitle, 
     AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Vendor } from "@/type/membertype";
+import { Vendors } from "@/type/productType";
 import { useState } from "react";
 import { toast } from "sonner";
 import { trash } from "@/app/components/ui";
 
-export default function DeleteVendor({ vendor }: { vendor: Vendor }) {
+export default function DeleteVendor({ vendor }: { vendor: Vendors }) {
     const [open, setOpen] = useState(false);
 
     async function handleDelete() {
         try {
-            const result = await deleteVendor(vendor.vendor_id);
+            const result = await deleteVendor(vendor.vendor_id.toString());
 
-            // deleteVendor 返回的是 { success: true, data } 风格
-            if (result?.success) {
+            // Check if deletion was successful
+            if (result) {
                 toast.success('Vendor deleted successfully');
                 setOpen(false);
             } else {

@@ -1,252 +1,362 @@
+// ✅ app/admin/vendors/components/editvendor.tsx
+// Client Component - 处理 UI 和表单交互
+
 'use client';
 
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { useEffect, useState, useTransition } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { updateVendor } from "../actions/vendor";
-import { deleteImage, uploadImage } from "@/app/components/Image/actions/upload";
-import { convertBlobUrlToFile } from "@/app/components/Image/actions/image";
 import { toast } from "sonner";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
+import { Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import UploadImageButton from "@/app/components/Image/components/ImageButton";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { Vendors } from "@/type/productType";
 
-const UpdateSchema = z.object({
-  vendor_id: z.string().min(1),
-  vendor_name: z.string().min(1),
-  contact_person: z.string().min(1),
-  phone_number1: z.string().min(1),
-  phone_number2: z.string().optional(),
-  vendor_email: z.string().email(),
-  vendor_image: z.string().optional(),
-  source_link: z.string().url().optional().or(z.literal("")),
-  vendor_type: z.enum(["local", "non-local"]),
-  address: z.string().min(1),
-  city: z.string().min(1),
-  country: z.string().min(1),
-  payment_terms: z.string().optional(),
-  notes: z.string().optional(),
+const FormSchema = z.object({
+  vendor_id: z.string().min(1, "Vendor ID is required"),
+  vendor_name: z.string().optional().or(z.literal("")),
+  contact_person: z.string().optional().or(z.literal("")),
+  vendor_email: z.string().email("Invalid email").optional().or(z.literal("")),
+  vendor_type: z.enum(["local", "non-local"]).optional(),
+  phone_number1: z.string().optional().or(z.literal("")),
+  phone_number2: z.string().optional().or(z.literal("")),
+  address: z.string().optional().or(z.literal("")),
+  city: z.string().optional().or(z.literal("")),
+  country: z.string().optional().or(z.literal("")),
+  source_link: z.string().url("Invalid URL").optional().or(z.literal("")),
+  payment_terms: z.string().optional().or(z.literal("")),
+  notes: z.string().optional().or(z.literal("")),
+  vendor_image: z.string().optional().or(z.literal("")),
 });
 
-export default function EditVendorPage({ vendor }: { vendor?: Vendors }) {
+interface UpdateVendorProps {
+  vendors?: any;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+}
+
+export default function UpdateVendor({ 
+  vendors, 
+  onSuccess,
+  onCancel 
+}: UpdateVendorProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [originalVendorId, setOriginalVendorId] = useState<string | number>("");
   const [isPending, startTransition] = useTransition();
 
-  // ✅ 关键：vendor 还没来之前不要渲染
-  if (!vendor) {
-    return <div className="p-6 text-gray-500">Loading vendor...</div>;
-  }
-
-  const form = useForm<z.infer<typeof UpdateSchema>>({
-    resolver: zodResolver(UpdateSchema),
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
     defaultValues: {
       vendor_id: "",
       vendor_name: "",
       contact_person: "",
+      vendor_email: "",
+      vendor_type: "local",
       phone_number1: "",
       phone_number2: "",
-      vendor_email: "",
-      vendor_image: "",
-      source_link: "",
       address: "",
       city: "",
       country: "",
+      source_link: "",
       payment_terms: "",
       notes: "",
-      vendor_type: "local",
+      vendor_image: "",
     },
   });
 
-  // ✅ 等 vendor 到了再灌数据
+  // 加载 vendor 数据
   useEffect(() => {
-    form.reset({
-      vendor_id: String(vendor.vendor_id),
-      vendor_name: vendor.vendor_name ?? "",
-      contact_person: vendor.contact_person ?? "",
-      phone_number1: vendor.phone_number1 ?? "",
-      phone_number2: vendor.phone_number2 ?? "",
-      vendor_email: vendor.vendor_email ?? "",
-      vendor_image: vendor.vendor_image ?? "",
-      source_link: vendor.source_link ?? "",
-      address: vendor.address ?? "",
-      city: vendor.city ?? "",
-      country: vendor.country ?? "",
-      payment_terms: vendor.payment_terms ?? "",
-      notes: vendor.notes ?? "",
-      vendor_type: vendor.vendortype as "local" | "non-local",
-    });
-  }, [vendor, form]);
+    if (vendors) {
+      console.log("📊 Loading vendor:", vendors);
+      
+      // ⭐ 保存原始 vendor_id
+      setOriginalVendorId(vendors.vendor_id);
 
-  async function uploadAllImages(oldImageUrl?: string) {
-    if (imageUrls.length === 0) return oldImageUrl;
+      form.reset({
+        vendor_id: String(vendors.vendor_id),
+        vendor_name: vendors.vendor_name || "",
+        contact_person: vendors.contact_person || "",
+        vendor_email: vendors.vendor_email || "",
+        vendor_type: vendors.vendor_type || "local",
+        phone_number1: vendors.phone_number1 || "",
+        phone_number2: vendors.phone_number2 || "",
+        address: vendors.address || "",
+        city: vendors.city || "",
+        country: vendors.country || "",
+        source_link: vendors.source_link || "",
+        payment_terms: vendors.payment_terms || "",
+        notes: vendors.notes || "",
+        vendor_image: vendors.vendor_image || "",
+      });
 
-    if (oldImageUrl) {
-      await deleteImage({ imageUrl: oldImageUrl, bucket: "images" });
+      if (vendors.vendor_image) {
+        setImageUrls([vendors.vendor_image]);
+      }
     }
+  }, [vendors, form]);
 
-    const file = await convertBlobUrlToFile(imageUrls[0]);
-    const { imageUrl } = await uploadImage({
-      file,
-      bucket: "images",
-    });
+  const steps = [
+    { step: 1, title: "Basic Info" },
+    { step: 2, title: "Contact" },
+    { step: 3, title: "Additional" },
+  ];
 
-    return imageUrl;
-  }
+  const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    console.log("📤 Form submitted:", data);
 
-  function onSubmit(data: z.infer<typeof UpdateSchema>) {
     startTransition(async () => {
       try {
-        const newImageUrl =
-          imageUrls.length > 0
-            ? await uploadAllImages(vendor.vendor_image)
-            : vendor.vendor_image;
-
-        const result = await updateVendor(vendor.vendor_id, {
+        // 构建提交数据 - 包含原始 vendor_id 用于定位
+        const submitData = {
           ...data,
-          vendor_image: newImageUrl,
-        });
+          vendor_id_original: originalVendorId, // ⭐ 关键：原始 ID 用于查找
+        };
 
-        if (result?.error) {
-          toast.error("Update failed", { description: result.error });
-        } else {
-          toast.success("Vendor updated successfully");
+        console.log("🚀 Sending to server:", submitData);
+
+        const result = await updateVendor(submitData);
+        console.log("📦 Raw result from server:", result);
+
+        if (!result) {
+          toast.error("No response from server");
+          return;
         }
-      } catch (err) {
-        console.error(err);
-        toast.error("Unexpected error");
+
+        if (result.success === false) {
+          console.error("❌ Server error:", result.error);
+          toast.error(result.error || "Failed to update vendor");
+        } else if (result.success === true) {
+          console.log("✅ Success:", result.data);
+          toast.success("Vendor updated successfully");
+          if (onSuccess) {
+            onSuccess();
+          }
+        } else {
+          console.error("Unexpected response format:", result);
+          toast.error("Unexpected response from server");
+        }
+      } catch (error) {
+        console.error("Client error:", error);
+        toast.error("An unexpected error occurred");
       }
     });
+  };
+
+  if (!vendors) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-700" />
+        <p className="text-sm text-gray-500">Loading vendor data...</p>
+      </div>
+    );
   }
 
-  const nextStep = async () => {
-    const valid = await form.trigger();
-    if (valid && currentStep < 3) setCurrentStep(s => s + 1);
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) setCurrentStep(s => s - 1);
-  };
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Progress */}
-        <div className="flex items-center mb-6">
-          {[1, 2, 3].map(step => (
-            <div key={step} className="flex items-center flex-1">
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">Update Vendor</h2>
+        {onCancel && (
+          <button onClick={onCancel} className="text-sm text-gray-500 hover:text-gray-700">
+            ✕
+          </button>
+        )}
+      </div>
+
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* 进度步骤 */}
+        <div className="flex items-center justify-between mb-6">
+          {steps.map((step, idx) => (
+            <div key={step.step} className="flex flex-col items-center flex-1">
               <div
                 className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center",
-                  currentStep >= step
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-300 text-gray-600"
+                  "w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors",
+                  currentStep >= step.step ? "bg-amber-700 text-white" : "bg-gray-200 text-gray-600"
                 )}
               >
-                {step}
+                {currentStep > step.step ? <Check className="w-4 h-4" /> : step.step}
               </div>
-              {step < 3 && (
-                <div
-                  className={cn(
-                    "flex-1 h-1 mx-2",
-                    currentStep > step ? "bg-blue-600" : "bg-gray-300"
-                  )}
-                />
-              )}
+              <span className="text-xs mt-1 text-gray-600">{step.title}</span>
             </div>
           ))}
         </div>
 
-        {/* STEP 1 */}
+        {/* Step 1: Basic Information */}
         {currentStep === 1 && (
-          <>
-            <UploadImageButton
-              imageUrls={imageUrls}
-              setImageUrls={setImageUrls}
-            />
-
-            <FormField
-              control={form.control}
-              name="vendor_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Vendor Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                </FormItem>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium block mb-1">Vendor ID</label>
+              <input
+                {...form.register("vendor_id")}
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="e.g., V001"
+              />
+              {form.formState.errors.vendor_id && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.vendor_id.message}</p>
               )}
-            />
-          </>
+              <p className="text-xs text-gray-500 mt-1">Original: {originalVendorId}</p>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Vendor Name</label>
+              <input 
+                {...form.register("vendor_name")} 
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm" 
+                placeholder="Enter vendor name"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Contact Person</label>
+              <input 
+                {...form.register("contact_person")} 
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="Enter contact person" 
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Email</label>
+              <input 
+                {...form.register("vendor_email")} 
+                type="email" 
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="vendor@example.com"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Vendor Type</label>
+              <select 
+                {...form.register("vendor_type")} 
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+              >
+                <option value="">Select type</option>
+                <option value="local">Local</option>
+                <option value="non-local">Non-Local</option>
+              </select>
+            </div>
+          </div>
         )}
 
-        {/* STEP 2 */}
+        {/* Step 2: Contact Details */}
         {currentStep === 2 && (
-          <>
-            <FormField
-              control={form.control}
-              name="phone_number1"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium block mb-1">Phone 1</label>
+              <input 
+                {...form.register("phone_number1")} 
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="+1234567890"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Phone 2</label>
+              <input 
+                {...form.register("phone_number2")} 
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="+1234567890 (Optional)"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Address</label>
+              <textarea 
+                {...form.register("address")} 
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm" 
+                rows={3}
+                placeholder="Enter full address"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium block mb-1">City</label>
+                <input 
+                  {...form.register("city")} 
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                  placeholder="Enter city"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium block mb-1">Country</label>
+                <input 
+                  {...form.register("country")} 
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                  placeholder="Enter country"
+                />
+              </div>
+            </div>
+          </div>
         )}
 
-        {/* STEP 3 */}
+        {/* Step 3: Additional Information */}
         {currentStep === 3 && (
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Notes</FormLabel>
-                <FormControl>
-                  <Textarea {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium block mb-1">Website / Source Link</label>
+              <input 
+                {...form.register("source_link")} 
+                type="url" 
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="https://example.com"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Payment Terms</label>
+              <input 
+                {...form.register("payment_terms")} 
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="e.g., Net 30, COD"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Notes</label>
+              <textarea 
+                {...form.register("notes")} 
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm" 
+                rows={4}
+                placeholder="Additional information about the vendor"
+              />
+            </div>
+          </div>
         )}
 
-        <div className="flex justify-between">
-          {currentStep > 1 && (
-            <Button type="button" variant="outline" onClick={prevStep}>
-              Previous
-            </Button>
-          )}
+        {/* 导航按钮 */}
+        <div className="flex justify-between pt-4 border-t">
+          <button
+            type="button"
+            onClick={() => setCurrentStep(s => Math.max(1, s - 1))}
+            disabled={currentStep === 1 || isPending}
+            className="px-4 py-2 text-sm border border-gray-200 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ← Previous
+          </button>
+
           {currentStep < 3 ? (
-            <Button type="button" onClick={nextStep}>
-              Next
-            </Button>
+            <button
+              type="button"
+              onClick={() => setCurrentStep(s => Math.min(3, s + 1))}
+              disabled={isPending}
+              className="px-4 py-2 text-sm bg-amber-700 text-white rounded-md hover:bg-amber-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next →
+            </button>
           ) : (
-            <Button type="submit" disabled={isPending}>
-              {isPending ? (
-                <AiOutlineLoading3Quarters className="animate-spin" />
-              ) : (
-                "Update Vendor"
-              )}
-            </Button>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="px-4 py-2 text-sm bg-amber-700 text-white rounded-md hover:bg-amber-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isPending ? "Updating..." : "Update Vendor"}
+            </button>
           )}
         </div>
       </form>
-    </Form>
+    </div>
   );
 }

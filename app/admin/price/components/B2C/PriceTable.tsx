@@ -11,7 +11,7 @@ import UpdatePriceFormB2C from "./UpdateForm";
 import DiscountMultipleForm from "../components/DiscountForm";
 
 export default function PriceTableB2C() {
-  const [selectedProducts, setSelectedProducts] = useState<PriceProductProps[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<Price[]>([]);
 
   const result = useQueries({
     queries: [
@@ -48,8 +48,6 @@ export default function PriceTableB2C() {
       return {
         ...product,
         ...price,
-        // Ensure price_id is explicitly included
-        price_id: price?.price_id || null,
       };
     });
     
@@ -100,7 +98,7 @@ export default function PriceTableB2C() {
               ))}
             </div>
           </div>
-          <DiscountMultipleForm prices={selectedProducts as PriceProductProps[]} />
+          <DiscountMultipleForm prices={selectedProducts as Price[]} />
         </div>
       )}
 
@@ -109,7 +107,7 @@ export default function PriceTableB2C() {
         itemsPerPage={10}
         columns={['select', 'product_name', 'base_price', 'profit_price', 'shipping', 'action']}
         form={(item) => <UpdatePriceFormB2C priceData={item as PriceProductProps} />}
-        onSelectionChange={(selected) => {
+        onSelectionChange={(selected: any) => {
           console.log("Selection changed:", selected);
           setSelectedProducts(selected);
         }}
