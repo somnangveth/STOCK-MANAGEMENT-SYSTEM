@@ -1,7 +1,7 @@
 "use client";
 
 import DialogForm from "@/app/components/DialogForm";
-import { PriceProductProps } from "../B2C/UpdateForm";
+import { PriceProductProps } from "../b2c/UpdateForm";
 import { Button } from "@/components/ui/button";
 import { edit, EditIconBtn } from "@/app/components/ui";
 import UpdateSinglePriceB2B from "./UpdatePrice";

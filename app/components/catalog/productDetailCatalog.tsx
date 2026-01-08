@@ -10,8 +10,8 @@ import {
 } from "@/type/productType";
 import Barcode from "react-barcode";
 import Image from "next/image";
-import UpdatePriceFormB2B from "@/app/admin/price/components/B2B/UpdateForm";
-import UpdatePriceFormB2C from "@/app/admin/price/components/B2C/UpdateForm";
+import UpdatePriceFormB2B from "@/app/admin/price/components/b2b/UpdateForm";
+import UpdatePriceFormB2C from "@/app/admin/price/components/b2c/UpdateForm";
 import UpdateForm from "@/app/admin/products/components/product/UpdateForm";
 import UpdateAttributeForm from "@/app/admin/products/components/attribute/UpdateAttributeForm";
 
