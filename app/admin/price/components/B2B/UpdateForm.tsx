@@ -5,8 +5,9 @@ import { PriceProductProps } from "../B2C/UpdateForm";
 import { Button } from "@/components/ui/button";
 import { edit, EditIconBtn } from "@/app/components/ui";
 import UpdateSinglePriceB2B from "./UpdatePrice";
+import { Price } from "@/type/productType";
 
-export default function UpdatePriceFormB2B({priceData}:{priceData: PriceProductProps}){
+export default function UpdatePriceFormB2B({priceData}:{priceData: Price}){
     return(
         <DialogForm
         id="update-price-b2b"

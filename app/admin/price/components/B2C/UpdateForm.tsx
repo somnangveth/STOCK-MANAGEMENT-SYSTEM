@@ -17,7 +17,7 @@ export interface PriceProductProps {
     base_price: number;
     product: Product,
 }
-export default function UpdatePriceFormB2C({priceData}: {priceData: PriceProductProps}){
+export default function UpdatePriceFormB2C({priceData}: {priceData: Price}){
     return(
         <DialogForm
         id="update-price"

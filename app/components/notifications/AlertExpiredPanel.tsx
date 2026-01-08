@@ -4,42 +4,40 @@ import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 export default function AlertExpiredPanel() {
-  async function fetchProducts() {
+  const fetchProducts = async () => {
     const res = await fetch("/api/admin/fetchProducts");
-    if (!res.ok) throw new Error("Failed to fetch");
+    if (!res.ok) throw new Error("Failed to fetch products");
     return res.json();
-  }
+  };
 
-  async function getExpiredProducts() {
+  const getExpiredProducts = async () => {
     const res = await fetch("/api/admin/getExpiredProducts");
-    if (!res.ok) throw new Error("Failed to fetch expired data");
+    if (!res.ok) throw new Error("Failed to fetch expired products");
     return res.json();
-  }
+  };
 
   const result = useQueries({
     queries: [
-      { queryKey: ["productsQuery"], queryFn: fetchProducts },
-      { queryKey: ["expiredQuery"], queryFn: getExpiredProducts },
+      { queryKey: ["products"], queryFn: fetchProducts },
+      { queryKey: ["expired"], queryFn: getExpiredProducts },
     ],
   });
 
   const productData = result[0].data;
   const expiredData = result[1].data;
-  const isLoading = result[0].isLoading || result[1].isLoading;
-  const hasError = result[0].error || result[1].error;
+
+  const isLoading = result.some(q => q.isLoading);
+  const hasError = result.some(q => q.isError);
 
   const expiredProducts = useMemo(() => {
-    if (!productData || !expiredData) return [];
-
     if (!Array.isArray(productData) || !Array.isArray(expiredData)) return [];
 
-    // Unique product IDs that have expired batches
-    const uniqueProductIds = [
-      ...new Set(expiredData.map((b: any) => b.product_id)),
-    ];
+    const expiredProductIds = new Set(
+      expiredData.map((b: any) => b.product_id)
+    );
 
     return productData.filter((p: any) =>
-      uniqueProductIds.includes(p.product_id)
+      expiredProductIds.has(p.product_id)
     );
   }, [productData, expiredData]);
 
@@ -51,23 +49,25 @@ export default function AlertExpiredPanel() {
       {expiredProducts.length === 0 ? (
         <div className="text-gray-500 text-sm">No expired products found</div>
       ) : (
-        expiredProducts.map((product: any) => {
-          const batches = expiredData.filter(
-            (batch: any) => batch.product_id === product.product_id
-          );
+        expiredProducts.map((product: any) => (
+          <div
+            key={product.product_id}
+            className="flex gap-2 p-2 border rounded-lg shadow-sm bg-white items-center"
+          >
+            <img
+              src={product.product_image || "/assets/product_default.jpg"}
+              alt={product.product_name || "No image"}
+              className="w-10 h-10 object-cover rounded"
+            />
 
-          return (
-            <div
-              key={product.product_id}
-              className="flex gap-2 p-2 border rounded-lg shadow-sm bg-white items-center"
-            >
-              <img src={product.product_image} alt={product.product_name}  className="w-10 h-10"/>
-              <h3 className="text-gray-500 text-sm">{product.product_name}</h3>
-
-              <p className="text-sm text-gray-600">{product.sku_code}</p>
+            <div className="flex flex-col">
+              <h3 className="text-gray-700 text-sm font-medium">
+                {product.product_name}
+              </h3>
+              <p className="text-xs text-gray-500">{product.sku_code}</p>
             </div>
-          );
-        })
+          </div>
+        ))
       )}
     </div>
   );

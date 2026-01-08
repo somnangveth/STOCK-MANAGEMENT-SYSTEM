@@ -1,96 +1,174 @@
 "use client";
 
 import MemberDetailCatalog from "@/app/components/catalog/memberDetailCatalog";
-import { Admin } from "@/type/membertype";
+import { Admin, Contact } from "@/type/membertype";
 import { useQueries } from "@tanstack/react-query";
-import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
+import { ArrowLeftIcon } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { fetchAdmins, fetchContact } from "@/app/functions/admin/api/controller";
+import EditMember from "../../EditMember";
+import DeleteMember from "../../DeleteMember";
+import UpdateContactForm from "../../UpdateContactForm";
 
-export default function AdminDetailPage(){
+const line = <div className="flex-1 border-b border-gray-300"></div>;
 
-    const param = useParams();
-    const id = param.id as string;
+function BasicInfoPanel({ adminData, contact }: { adminData: Admin, contact: Contact }) {
+  // Safely format date
+  const dob = adminData.date_of_birth
+    ? new Date(adminData.date_of_birth).toISOString().split("T")[0]
+    : "-";
 
-    //Fetch Admins Info
-    async function fetchAdmins(){
-        const res = await fetch('/api/admin/fetchMembers') ;
-        if(!res.ok){
-            console.error("Failed to fetch Admins Data");
-            throw new Error("Failed to fetch");
-        }
-        return res.json();
-    }
-
-    //Fetch Contacts Info
-    async function fetchContacts(){
-        const res = await fetch('/api/admin/fetchContact');
-        if(!res.ok){
-            console.error("Failed to fetch contact datas");
-            throw new Error("Failed to fetch");
-        }
-
-        return res.json();
-    }
-
-    const result = useQueries(
-        {
-            queries: [
-                {
-                    queryKey: ["admin-query"],
-                    queryFn: fetchAdmins,
-                },
-                {
-                    queryKey: ["contact-query"],
-                    queryFn: fetchContacts,
-                }
-            ]
-        }
-    );
-
-    const adminData = result[0].data;
-    const contactData = result[1].data;
-    const isLoading = result[0].isLoading || result[1].isLoading;
-    const hasError = result[0].error || result[1].error;
-
-    const currentAdmin = useMemo(() => {
-        if(!adminData || !id) return null;
-        return adminData.find((admin: Admin) => admin.admin_id === id);
-    }, [adminData, id]);
-
-    const currentContact = useMemo(() => {
-        if(!contactData || !currentAdmin) return null;
-        return contactData.find((contact: any) => contact.contact_id === currentAdmin.contact_id);
-    }, [contactData, currentAdmin]);
-
-    if(isLoading){
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <p>Loading...</p>
-            </div>
-        )
-    }
-
-    if(hasError){
-        return(
-        <div className="flex items-center justify-center min-h-screen">
-            <p className="text-red-600">Error loading data, please try again.</p>
+  return (
+    <>
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold">Basic Information</h2>
+        <div className="flex items-center gap-2">
+          <EditMember admin={adminData} />
+          <DeleteMember userId={adminData.admin_id}/>
         </div>
-        )
-    }
+      </div>
+      {line}
 
-    if(!currentAdmin){
-        return(
-            <div className="flex items-center justify-center min-h-screen">
-                <p>Admin not found.</p>
+      <div className="space-y-2 mt-2">
+        <div className="flex justify-between text-gray-600">
+          <span>Firstname:</span>
+          <span>{adminData.first_name || "-"}</span>
+        </div>
+        <div className="flex justify-between text-gray-600">
+          <span>Lastname:</span>
+          <span>{adminData.last_name || "-"}</span>
+        </div>
+        <div className="flex justify-between text-gray-600">
+          <span>Gender:</span>
+          <span>{adminData.gender || "-"}</span>
+        </div>
+        <div className="flex justify-between text-gray-600">
+          <span>Date of birth:</span>
+          <span>{dob}</span>
+        </div>
+        <div className="flex justify-between text-gray-600">
+          <span>Marital Status:</span>
+          <span>{adminData.martial_status || "-"}</span>
+        </div>
+        <div className="flex justify-between text-gray-600">
+          <span>Email Address:</span>
+          <span>{adminData.email || "-"}</span>
+        </div>
+        
+        <div className="mt-5">
+          <div className="flex justify-between mb-2">
+            <h2 className="font-bold text-lg">Contact Information</h2>
+            <div>
+              <UpdateContactForm contact={contact}/>
             </div>
-        )
-    }
+          </div>
+          {line}
+        </div>
+        
+        <div className="space-y-3">
+          <div className="flex justify-between text-gray-600">
+          <span>Primary email address:</span>
+          <span>{adminData.primary_email_address || "-"}</span>
+          </div>
 
+          <div className="flex justify-between text-gray-600">
+          <span>Personal email address:</span>
+          <span>{adminData.personal_email_address || "-"}</span>
+          </div>
+
+          <div className="flex justify-between text-gray-600">
+          <span>Primary phone number:</span>
+          <span>{adminData.primary_phone_number || "-"}</span>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default function AdminDetailPage() {
+  const param = useParams();
+  const id = param.id as string;
+
+  const results = useQueries({
+    queries: [
+      { queryKey: ["admin-query"], queryFn: fetchAdmins },
+      { queryKey: ["contact-query"], queryFn: fetchContact },
+    ],
+  });
+
+  const adminData = results[0].data || [];
+  const contactData = results[1].data || [];
+  const isLoading = results.some((r) => r.isLoading);
+  const hasError = results.some((r) => r.isError);
+
+  console.log('contact data', contactData)
+  const currentAdmin = useMemo(() => {
+    return adminData.find((a: Admin) => a.admin_id === id) || null;
+  }, [adminData, id]);
+
+  const currentContact = useMemo(() => {
+  if (!currentAdmin) return null;
+  return contactData.find((contact: any) => contact.contact_id === currentAdmin.contact_id) || null;
+}, [contactData, currentAdmin]);
+
+
+  console.log('current contact', currentContact);
+  if (isLoading) {
     return (
-    <div>
-        <MemberDetailCatalog admin={currentAdmin} contact={currentContact}/>
+      <div className="flex items-center justify-center min-h-screen">Loading...</div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-red-600">
+        Failed to load admin detail
+      </div>
+    );
+  }
+
+  if (!currentAdmin) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">Admin not found</div>
+    );
+  }
+
+  /* ================= MERGE CONTACT INTO ADMIN ================= */
+  const mergedAdmin = {
+    ...currentAdmin,
+    email: currentContact?.email || currentAdmin.email,
+    profile_image: currentContact?.profile_image || currentAdmin.profile_image,
+    phone_number1: currentContact?.phone_number1 || "",
+    phone_number2: currentContact?.phone_number2 || "",
+    address: currentContact?.address || "",
+    primary_email_address: currentContact?.primary_email_address || "-",
+    personal_email_address: currentContact?.personal_email_address || "-",
+    primary_phone_number: currentContact?.primary_phone_number || "-",
+  };
+
+  /* ================= EXTRA PANELS ================= */
+  const extraPanels = [
+    { key: "basic", label: "Basic Info", component: <BasicInfoPanel contact={currentContact} adminData={mergedAdmin} /> },
+    // Add other panels if needed
+  ];
+
+  /* ================= UI ================= */
+  return (
+    <div className="space-y-4">
+      {/* Back Button */}
+      <Link
+        href="/admin/user"
+        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+      >
+        <ArrowLeftIcon size={16} />
+        Back
+      </Link>
+
+      {/* Catalog */}
+      <MemberDetailCatalog admin={mergedAdmin} extraPanels={extraPanels} />
     </div>
-    )
+  );
 }

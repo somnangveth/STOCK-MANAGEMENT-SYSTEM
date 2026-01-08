@@ -2,7 +2,6 @@
 
 import { Categories, Product, Subcategories } from "@/type/productType";
 import { circleCross, faMinusCircle, faPlusCircle, trash } from "../ui";
-import { ReactNode, useState } from "react";
 
 // Product Card
 export function ProductCard({
@@ -15,8 +14,17 @@ export function ProductCard({
     return (
         <button
             onClick={() => onAddToCart(product)} 
-            className="flex flex-col space-y-2 border border-gray-500 p-2 bg-amber-100 hover:bg-amber-200 transition rounded-lg"
+            className="relative flex flex-col space-y-2 border border-gray-500 p-2 bg-white shadow-md hover:bg-gray-200 transition rounded-lg overflow-hidden"
         >
+            {/* Diagonal Discount Badge */}
+            {product.discount_price && (
+                <div className="absolute top-0 right-0 z-10">
+                    <div className="bg-red-600 text-white text-xs font-bold px-8 py-1 transform rotate-45 translate-x-6 -translate-y-5 shadow-md">
+                        {String(product.discount_percent)}%
+                    </div>
+                </div>
+            )}
+            
             {product.product_image ? (
                 <img 
                     src={product.product_image} 
@@ -30,9 +38,24 @@ export function ProductCard({
                     className="w-full h-32 object-cover rounded"
                 />
             )}
+            
             <div className="flex justify-between items-center">
-                <p className="truncate max-w-[120px] text-sm">{product.product_name}</p>
-                <span className="font-semibold text-green-600">${String(product.total_price)}</span>
+                <div className="truncate max-w-[120px] text-sm">{product.product_name}</div>
+                <div>
+                    {product.discount_price ? (
+                        <div className="flex flex-col items-end">
+                            <span className="font-semibold text-green-600">${String(product.discount_price)}</span>
+                            <span className="text-xs text-gray-500 line-through">${String(product.total_price)}</span>
+                        </div>
+                    ) : (
+                        <span className="font-semibold text-green-600">${String(product.total_price)}</span>
+                    )}
+                </div>
+            </div>
+            
+            <div className="flex justify-between">
+                <p className="text-xs">Qty: {product.current_quantity}</p>
+                <p className="text-xs">Pkg: {product.package_qty}</p>
             </div>
         </button>
     );
@@ -105,7 +128,11 @@ export function ProductOrderCard({
                 </div>
             </div>
             <div className="flex items-center gap-3">
-                <p className="font-semibold text-green-600">${totalPrice.toFixed(2)}</p>
+                {product.discount_price ? (
+                    <p className="font-semibold text-green-600">${product.discount_price.toFixed(2)}</p>
+                ):(
+                    <p className="font-semibold text-green-600">${totalPrice.toFixed(2)}</p>
+                )}
                 <button
                 type="button"
                 className="bg-transparent hover:bg-transparent text-red-700"

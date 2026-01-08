@@ -24,15 +24,23 @@ import { updateAdmin } from "../../actions";
 import { getLoggedInUser } from "@/app/auth/actions";
 import { createSupabaseBrowserClient } from "@/lib/storage/browser"; // Use browser client
 import { useRouter } from "next/navigation";
+import { SubmitBtnFull } from "@/app/components/ui";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const UpdateSchema = z.object({
   admin_id: z.string().optional(),
   first_name: z.string().optional(),
   last_name: z.string().optional(),
+  gender: z.string().optional(),
+  date_of_birth: z.date().optional(),
   email: z.string().optional(),
-  name: z.string().optional(),
-  password: z.string().optional(),
+  martial_status: z.string().optional(),
   profile_image: z.string().optional(),
+  nationality: z.string().optional(),
 });
 
 export default function EditAdmin({ admin }: { admin: Admin }) {
@@ -41,15 +49,23 @@ export default function EditAdmin({ admin }: { admin: Admin }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   
+  const genders = ['Male', 'Female'];
+  const martial_status = ["Single", "Married" , "Divorced", "Widowed"];
+
   const form = useForm<z.infer<typeof UpdateSchema>>({
     resolver: zodResolver(UpdateSchema),
     defaultValues: {
       admin_id: admin.admin_id,
       profile_image: admin.profile_image,
-      email: admin.email,
-      password: "",  
+      email: admin.email, 
       first_name: admin.first_name,
       last_name: admin?.last_name,
+      nationality: admin.nationality,
+      date_of_birth: admin.date_of_birth
+      ? new Date(admin.date_of_birth)
+      : undefined,
+      martial_status: admin.martial_status,
+      gender: admin.gender,
     },
   });
 
@@ -101,10 +117,9 @@ async function onSubmit(data: z.infer<typeof UpdateSchema>) {
         updateData.email = data.email;
       }
 
-      if (data.password && data.password.trim() !== "") {
-        updateData.password = data.password;
+      if (data.date_of_birth) {
+        updateData.date_of_birth = data.date_of_birth;
       }
-
       const result = await updateAdmin(admin.admin_id, updateData);
 
       if (!result.success) {
@@ -152,54 +167,16 @@ async function onSubmit(data: z.infer<typeof UpdateSchema>) {
               <FormItem className="flex-1">
                 <FormLabel>Admin ID:</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Enter admin ID" disabled />
+                  <Input {...field} 
+                  placeholder="Enter admin ID" 
+                  readOnly
+                  className="bg-muted cursor-not-allowed"/>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {/* First Name */}
-          <FormField
-            control={form.control}
-            name="first_name"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel>First Name:</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Enter first name"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Last Name */}
-        <FormField
-          control={form.control}
-          name="last_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Last Name:</FormLabel>
-              <FormControl>
-                <Input
-                  defaultValue={field.value}
-                  {...field}
-                  onChange={field.onChange}
-                  placeholder="Enter last name"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Email and Password */}
-        <div className="flex gap-2">
           {/* Email */}
           <FormField
             control={form.control}
@@ -212,54 +189,180 @@ async function onSubmit(data: z.infer<typeof UpdateSchema>) {
                     {...field}
                     type="email"
                     placeholder="Enter email"
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+        </div>
 
-          {/* Password */}
+        <div className="flex gap-2">
+          {/* First Name */}
           <FormField
             control={form.control}
-            name="password"
+            name="first_name"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>Password:</FormLabel>
+                <FormLabel>First Name:</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
-                    type="password"
-                    placeholder="Leave blank to keep current"
+                    placeholder="Enter first name"
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+        {/* Last Name */}
+        <FormField
+          control={form.control}
+          name="last_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Last Name:</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  onChange={field.onChange}
+                  placeholder="Enter last name"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        </div>
+
+        {/* Date of Birth and Nationality */}
+        <div className="flex gap-2">
+            <FormField
+        control={form.control}
+        name="date_of_birth"
+        render={({ field }) => (
+        <FormItem className="flex-1">
+            <FormLabel>Date of Birth</FormLabel>
+            <Popover>
+            <PopoverTrigger asChild>
+                <FormControl>
+                <Button
+                    variant="outline"
+                    className={cn(
+                    "w-full pl-3 text-left font-normal",
+                    !field.value && "text-muted-foreground"
+                    )}
+                >
+                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+                </FormControl>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                mode="single"
+                selected={field.value || undefined}
+                onSelect={(date) => field.onChange(date || undefined)}
+                captionLayout="dropdown"
+                />
+            </PopoverContent>
+            </Popover>
+            <FormMessage />
+        </FormItem>
+        )}
+        />
+
+        {/* Nationality */}
+        <FormField
+        control={form.control}
+        name="nationality"
+        render={({field})=> (
+            <FormItem>
+                <FormLabel>Nationality: </FormLabel>
+                <FormControl>
+                    <Input
+                    type="text"
+                    {...field}
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}/>
+                </FormControl>
+            </FormItem>
+        )}/>
+        </div>
+
+        {/* Marital Status and Gender */}
+        <div className="flex gap-4">
+            {/* Marital Status */}
+            <FormField
+            control={form.control}
+            name="martial_status"
+            render={({field}) => (
+                <FormItem className="flex-1">
+                    <FormLabel>Marital Status</FormLabel>
+                    <FormControl>
+                        <Select
+                        {...field}
+                        value={field.value || ""}
+                        onValueChange={(val) => field.onChange(val)}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select status"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {martial_status.map((status) => (
+                                    <SelectItem key={status} value={status}>
+                                        {status}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}/>
+            
+            {/* Gender */}
+            <FormField
+            control={form.control}
+            name="gender"
+            render={({field}) => (
+                <FormItem className="flex-1">
+                    <FormLabel>Gender</FormLabel>
+                    <FormControl>
+                        <Select
+                        value={field.value}
+                        onValueChange={field.onChange}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select gender"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {genders.map((gender) => (
+                                    <SelectItem key={gender} value={gender}>
+                                        {gender}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}/>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            onClick={() => document.getElementById("trigger")?.click()}
-            variant="outline"
-            className="border border-gray-500 rounded-xl"
-          >
-            Cancel
-          </Button>
           <Button
             type="submit"
             disabled={isPending}
-            className={cn("bg-blue-500 text-white rounded-xl")}
+            className={SubmitBtnFull}
           >
-            {isPending && (
-              <AiOutlineLoading3Quarters className="animate-spin mr-2 inline-block" />
+            {isPending ? (
+              "Updating"
+            ): (
+              "Update Staff"
             )}
-            Update
           </Button>
-        </div>
+        
       </form>
     </Form>
   );

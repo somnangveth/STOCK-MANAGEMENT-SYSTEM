@@ -35,7 +35,14 @@ type ColumnKey =
   | "city"
   | "country"
   | "payment_terms"
-  | "notes";
+  | "notes"
+
+  //Dealer
+  | "dealer_id"
+  | "business_name"
+  | "dealer_name"
+  | "email_address"
+  | "businesstype";
 
 type Member = {
   //Users
@@ -63,6 +70,13 @@ type Member = {
   country?: string;
   payment_terms?: string;
   note?: string;
+
+  //Dealer
+  dealer_id?: string;
+  business_name?: string;
+  dealer_name?: string;
+  email_address?: string;
+  businesstype?: string;
 };
 
 type MemberTableProps = {
@@ -102,9 +116,9 @@ export default function MemberTable({ members, columns, form, itemsPerPage}: Mem
 
 
   return (
-    <div>
-        <Table className="w-full border border-gray-300 rounded-xl">
-        <TableHeader className="bg-gray-100">
+    <div className="">
+        <Table className="w-full border border-gray-300">
+        <TableHeader className="bg-gray-200">
           <TableRow>
             {/* Users */}
             {columns.includes("admin_id") && <TableHead>ID</TableHead>}
@@ -124,6 +138,12 @@ export default function MemberTable({ members, columns, form, itemsPerPage}: Mem
             {columns.includes("vendor_type") && <TableHead>Vendor Type:</TableHead>}
             {columns.includes("phone_number1") && <TableHead>Phone Number 1: </TableHead>}
             {columns.includes("phone_number2") && <TableHead>Phone Number 2: </TableHead>}
+
+            {columns.includes("dealer_id") && <TableHead>ID </TableHead>}
+            {columns.includes("business_name") && <TableHead>Business Name</TableHead>}
+            {columns.includes("dealer_name") && <TableHead>Dealer Name</TableHead>}
+            {columns.includes("email_address") && <TableHead>Email Address </TableHead>}
+            {columns.includes("businesstype") && <TableHead>Business Type </TableHead>}
             {columns.includes("action") && <TableHead className="text-right">Action:</TableHead>}
           </TableRow>
         </TableHeader>
@@ -179,6 +199,26 @@ export default function MemberTable({ members, columns, form, itemsPerPage}: Mem
                 {columns.includes("vendor_type") && <TableCell>{member.vendortype}</TableCell>}
                 {columns.includes("phone_number1") && <TableCell>{member.phone_number1}</TableCell>}
                 {columns.includes("phone_number2") && <TableCell>{member.phone_number2}</TableCell>}
+
+                {/* Dealer */}
+                {columns.includes("dealer_id") && <TableCell>{member.dealer_id}</TableCell>}
+                {columns.includes("business_name") && <TableCell>{member.business_name || "_"}</TableCell>}
+                {columns.includes("dealer_name") && <TableCell>{member.dealer_name}</TableCell>}
+                {columns.includes("email_address") && <TableCell>{member.email_address}</TableCell>}
+                {columns.includes("businesstype") && 
+                <TableCell className={`inline-flex text-sm font-medium px-3 py-1 rounded-full 
+                ${member.businesstype === "retail"
+                  ? "text-green-700 bg-green-50"
+                  : member.businesstype === "wholesale"
+                  ? "text-purple-700 bg-purple-50"
+                  : member.businesstype === "mixed"
+                  ? "bg-yellow-100 text-amber-700"
+                  : member.businesstype === "online"
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-gray-100"
+                }`}>
+                  {member.businesstype}
+                </TableCell>}
                 {columns.includes("action") && <TableCell className="text-right">{actionContent}</TableCell>}
               </TableRow>
             );

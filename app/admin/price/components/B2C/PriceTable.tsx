@@ -1,29 +1,36 @@
 "use client";
-import { RetryButton } from "@/app/components/error/error";
+
 import ProductTable from "@/app/components/Tables/productTable";
 import { fetchPricesB2C, fetchProducts } from "@/app/functions/admin/api/controller";
 import { Price, Product } from "@/type/productType";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { PriceProductProps } from "../B2C/UpdateForm";
+import { RetryButton } from "@/app/components/error/error";
 import UpdatePriceFormB2C from "./UpdateForm";
 import DiscountMultipleForm from "../components/DiscountForm";
+import SingleDiscountForm from "../components/SingleDiscountForm";
+import ViewDiscountPage from "../components/ViewDiscount";
+import SearchBar from "@/app/components/SearchBar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { convertFromDollarToRiels } from "@/app/functions/admin/price/currency";
 
 export default function PriceTableB2C() {
   const [selectedProducts, setSelectedProducts] = useState<Price[]>([]);
+  const [currency, setCurrency] = useState<"riel" | "dollar">("dollar");
+  const [filteredData, setFilteredData] = useState<any[]>([]);
 
   const result = useQueries({
     queries: [
-      {
-        queryKey: ["priceQueryB2C"],
-        queryFn: fetchPricesB2C,
-      },
-      {
-        queryKey: ['productQuery'],
-        queryFn: fetchProducts,
-      }
-    ]
+      { queryKey: ["priceQueryB2C"], queryFn: fetchPricesB2C },
+      { queryKey: ["productQuery"], queryFn: fetchProducts },
+    ],
   });
 
   const priceData = result[0].data;
@@ -31,82 +38,91 @@ export default function PriceTableB2C() {
   const isLoading = result[0].isLoading || result[1].isLoading;
   const hasError = result[0].error || result[1].error;
 
-  // Debug: Log the raw data
-  console.log("Raw priceData:", priceData);
-  console.log("Raw productData:", productData);
-
-  // Merge product and price data
-  const ProductPriceData = useMemo(() => {
+  const mergedData = useMemo(() => {
     if (!priceData || !productData) return [];
-    
-    const merged = productData.map((product: Product) => {
-      const price = priceData.find((p: Price) => p.product_id === product.product_id);
-      
-      // Debug: Log each merge
-      console.log("Merging product:", product.product_id, "with price:", price);
-      
+
+    return productData.map((product: Product) => {
+      const price = priceData.find(
+        (p: Price) => p.product_id === product.product_id
+      );
+
+      if (!price) {
+        return { ...product, base_price: null, profit_price: null, shipping: null };
+      }
+
       return {
         ...product,
         ...price,
+        base_price:
+          currency === "riel"
+            ? convertFromDollarToRiels(price.base_price)
+            : price.base_price,
+        profit_price:
+          currency === "riel"
+            ? convertFromDollarToRiels(price.profit_price)
+            : price.profit_price,
+        shipping:
+          currency === "riel"
+            ? convertFromDollarToRiels(price.shipping)
+            : price.shipping,
       };
     });
-    
-    console.log("Merged ProductPriceData:", merged);
-    return merged;
-  }, [productData, priceData]);
+  }, [productData, priceData, currency]);
+
+  useMemo(() => {
+    setFilteredData(mergedData);
+  }, [mergedData]);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className="flex justify-center p-8">
         <AiOutlineLoading3Quarters className="animate-spin text-2xl" />
       </div>
     );
   }
 
-  if (hasError) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8">
-        <p className="text-red-500 mb-4">Error loading data</p>
-        <RetryButton />
-      </div>
-    );
-  }
-
-   if (!priceData || !productData) {
-  return <div>No product found</div>;
-}
-
-
-  // Debug: Log selected products
-  console.log("Selected products:", selectedProducts);
+  if (hasError) return <RetryButton />;
 
   return (
     <div className="space-y-4">
-      {/* Show discount button when products are selected */}
-      {selectedProducts.length > 0 && (
-        <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <div>
-            <span className="text-sm font-medium text-blue-900">
-              {selectedProducts.length} product(s) selected
-            </span>
-            {/* Debug info */}
-            <div className="text-xs text-gray-600 mt-1">
-              {selectedProducts.map((p: any, i) => (
-                <div key={i}>
-                  Product {i + 1}: price_id = {p.price_id || 'MISSING'}
-                </div>
-              ))}
-            </div>
-          </div>
-          <DiscountMultipleForm prices={selectedProducts as Price[]} />
+      <div className="flex justify-between items-center">
+        <SearchBar
+          data={mergedData}
+          onSearch={setFilteredData}
+          searchKeys={["product_name"]}
+          placeholder="Search product..."
+          className="w-[300px]"
+        />
+
+        <div className="flex items-center gap-3">
+          <Select value={currency} onValueChange={(v: any) => setCurrency(v)}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="dollar">USD ($)</SelectItem>
+              <SelectItem value="riel">Riel (៛)</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {selectedProducts.length > 0 && (
+            <DiscountMultipleForm prices={selectedProducts} />
+          )}
+
+          <ViewDiscountPage />
         </div>
-      )}
+      </div>
 
       <ProductTable
-        product={ProductPriceData}
+        product={filteredData}
         itemsPerPage={10}
-        columns={['select', 'product_name', 'base_price', 'profit_price', 'shipping', 'action']}
-        form={(item) => <UpdatePriceFormB2C priceData={item as PriceProductProps} />}
+        columns={["select", "product_name", "base_price", "profit_price", "shipping", "action"]}
+        form={(item) => (
+          <>
+            <UpdatePriceFormB2C priceData={item as Price} />
+            <SingleDiscountForm price={item as Price} />
+          </>
+        )}
         onSelectionChange={(selected: any) => {
           console.log("Selection changed:", selected);
           setSelectedProducts(selected);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { runApriori, runApriori2 } from "@/app/functions/admin/apriori/apriori";
+import { runApriori} from "@/app/functions/admin/apriori/apriori";
 
 export async function GET() {
   try {

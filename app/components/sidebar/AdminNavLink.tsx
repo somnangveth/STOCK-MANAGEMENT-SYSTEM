@@ -1,6 +1,6 @@
 import { LuLayoutGrid } from "react-icons/lu";
 import { FaArchive, FaDollarSign, FaChartBar, FaUsers, FaReceipt } from "react-icons/fa";
-import { FaCubesStacked,FaArrowRightFromBracket,FaUsersLine, FaBoxesStacked, FaDesktop  } from "react-icons/fa6";
+import { FaCubesStacked, FaArrowRightFromBracket, FaUsersLine, FaBoxesStacked, FaDesktop } from "react-icons/fa6";
 import { BsFillDiagram3Fill } from "react-icons/bs";
 import { ChevronRight, ChevronUp, User2 } from "lucide-react";
 import { 
@@ -15,7 +15,8 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
-  SidebarFooter
+  SidebarFooter,
+  SidebarHeader
 } from "@/components/ui/sidebar";
 import {
   Collapsible,
@@ -25,6 +26,7 @@ import {
 import Link from "next/link";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import SignOut from "@/app/auth/components/Signout";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 // Menu items
 const items = [
@@ -47,21 +49,21 @@ const items = [
         title: "Categories",
         url: "/admin/categories",
         icon: BsFillDiagram3Fill
-      },
-      {
-        title: "Stock",
-        url: "/admin/stock",
-        icon: FaCubesStacked
       }
     ]
   },
   {
-    title: "Price",
+    title: "Stock Management",
+    url: "/admin/stock",
+    icon: FaCubesStacked,
+  },
+  {
+    title: "Price Management",
     url: "/admin/price",
     icon: FaDollarSign,
   },
   {
-    title: "Sales",
+    title: "Sales Management",
     url: "/admin/sales",
     icon: FaChartBar,
     subitems: [
@@ -92,9 +94,20 @@ const items = [
 export function AppSideBar() {
   return (
     <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <div className="flex items-center gap-2">
+                <SidebarTrigger className="-ml-1" />
+                <span className="font-semibold">Admin Dashboard</span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Admin Dashboard</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -150,18 +163,19 @@ export function AppSideBar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <User2/>Username
-                  <ChevronUp className="ml-auto"/>
+                  <User2 />
+                  Username
+                  <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-              side="top"
-              className="w-[--radix-popper-anchor-width]"
+                side="top"
+                className="w-[--radix-popper-anchor-width]"
               >
                 <DropdownMenuItem>
-                  <span className="flex items-center">
-                    <FaArrowRightFromBracket/>
-                    <SignOut/>
+                  <span className="flex items-center gap-2">
+                    <FaArrowRightFromBracket />
+                    <SignOut />
                   </span>
                 </DropdownMenuItem>
               </DropdownMenuContent>

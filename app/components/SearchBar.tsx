@@ -3,7 +3,7 @@ import { Search, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 interface SearchBarProps<T> {
-  data: T[];
+  data: T[]; 
   onSearch: (results: T[]) => void;
   searchKeys: (keyof T)[];
   placeholder?: string;
@@ -11,7 +11,7 @@ interface SearchBarProps<T> {
   className?: string;
 }
 
-export default function SearchBar<T>({
+export default function SearchBar<T extends Record<string, any>>({
   data,
   onSearch,
   searchKeys,
@@ -22,13 +22,16 @@ export default function SearchBar<T>({
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    // If data is undefined or not array, fallback to empty array
+    const items = Array.isArray(data) ? data : [];
+
     const timer = setTimeout(() => {
       if (!searchTerm.trim()) {
-        onSearch(data);
+        onSearch(items);
         return;
       }
 
-      const filtered = data.filter((item) =>
+      const filtered = items.filter((item) =>
         searchKeys.some((key) => {
           const value = item[key];
           if (value == null) return false;
@@ -40,11 +43,11 @@ export default function SearchBar<T>({
     }, debounceMs);
 
     return () => clearTimeout(timer);
-  }, [searchTerm, data, searchKeys, debounceMs]);
+  }, [searchTerm, data, searchKeys, debounceMs, onSearch]);
 
   const handleClear = () => {
     setSearchTerm('');
-    onSearch(data);
+    onSearch(Array.isArray(data) ? data : []);
   };
 
   return (

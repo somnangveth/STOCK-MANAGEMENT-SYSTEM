@@ -55,6 +55,7 @@ export async function updateDealer(
         email_address: string;
         shop_address: string;
         delivery_address: string;
+        profile_image: string;
         businesstype: "retail" | "wholesale" | "mixed" | "online";
     }>
 ){
@@ -73,6 +74,7 @@ export async function updateDealer(
             shop_address: data.shop_address,
             delivery_address: data.delivery_address,
             businesstype: data.businesstype,
+            profile_image: data.profile_image,
         })
         .eq('dealer_id', dealer_id);
 

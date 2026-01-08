@@ -3,7 +3,7 @@ import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import { Admin } from "@/type/membertype";
 import EditAdmin from "./EditForm";
-import { edit } from "@/app/components/ui";
+import { edit, EditIconBtn } from "@/app/components/ui";
 
 export default function EditMember({admin}: {admin: Admin}){
     return(
@@ -11,8 +11,7 @@ export default function EditMember({admin}: {admin: Admin}){
         id="trigger"
         Trigger = {
             <Button
-            className="
-            w-10 h-5 text-sm bg-transparent text-blue-500 rounded-xl hover:bg-transparent hover:text-blue-500"
+            className={EditIconBtn}
             >
                 {edit}
             </Button>

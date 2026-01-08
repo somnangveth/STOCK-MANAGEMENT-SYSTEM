@@ -1,148 +1,163 @@
 "use client";
 
-import { Categories, Product, Subcategories, Vendors } from "@/type/productType";
-import { ArrowLeftIcon } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
+import {
+  Attribute,
+  Categories,
+  Price,
+  Product,
+  Subcategories,
+  Vendors,
+} from "@/type/productType";
+import Barcode from "react-barcode";
+import Image from "next/image";
+import UpdatePriceFormB2B from "@/app/admin/price/components/B2B/UpdateForm";
+import UpdatePriceFormB2C from "@/app/admin/price/components/B2C/UpdateForm";
+import UpdateForm from "@/app/admin/products/components/product/UpdateForm";
+import UpdateAttributeForm from "@/app/admin/products/components/attribute/UpdateAttributeForm";
 
+type Props = {
+  product: Product;
+  price: Price;
+  attribute: Attribute[];
+
+
+  categories: Categories[];
+  subcategories: Subcategories[];
+  vendors: Vendors[];
+
+  category: Categories;
+  subcategory: Subcategories;
+  vendor: Vendors;
+};
 
 export default function ProductDetailCatalog({
-    product,
-    category,
-    subcategory,
-    vendor
-}: {
-    product: Product;
-    category: Categories;
-    subcategory: Subcategories;
-    vendor: Vendors;
-}){
-    const[activeTab, setActiveTab] = useState<"basic" | "price" | "stock" >("basic");
+  product,
+  price,
+  attribute,
 
-    //Styling
-    const text = 'text-sm text-gray-500';
+  categories,
+  subcategories,
+  vendors,
 
-    const createAt = new Date(product.created_at).toISOString().split('T')[0];
-    const BasicInfoPanel = () => (
-        <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-2">
-            <div>
-                <p className={text}>Product Name:</p>
-                <p className={text}>{product.product_name}</p>
-            </div>
-            <div>
-                <p className={text}>SKU-Code: </p>
-                <p className={text}>{product.sku_code}</p>
-            </div>
-            <div>
-                <p>Category: </p>
-                <p>{category.category_name}</p>
-            </div>
-            <div>
-                <p>Subcategory: </p>
-                <p>{subcategory.subcategory_name}</p>
-            </div>
-            <div>
-                <p>Imported At: </p>
-                <p>{createAt}</p>
-            </div>
-            <div>
-                <p>Base Unit: </p>
-                <p>{product.base_unit}</p>
-            </div>
-            <div>
-                <p>Unit Per Package: </p>
-                <p>{product.units_per_package}</p>
-            </div>
-            <div>
-                <p>Package Type:</p>
-                <p>{product.package_type}</p>
-            </div>
-            <div>
-                <p>Description: </p>
-                <p>{product.description}</p>
-            </div>
-        </div>
-        </div>
-    );
+  category,
+  subcategory,
+  vendor,
+}: Props) {
+  const createdAt = new Date(product.created_at)
+    .toISOString()
+    .split("T")[0];
 
-    const PricePanel = () => (
-        <div className="text-gray-500 flex items-center justify-center">
-            <p>No Price Info</p>
-        </div>
-    );
+  return (
+    <div className="w-full h-[calc(100vh-80px)] flex flex-col lg:flex-row gap-6">
+      {/* Left Panel */}
+      <div className="lg:w-1/3 xl:w-1/4">
+        <div className="sticky top-6 bg-white rounded-lg shadow-sm p-4">
+          <div className="bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center">
+            <Image
+              src={product.product_image || "/assets/product_default.jpg"}
+              alt={product.product_name}
+              width={300}
+              height={300}
+              className="object-contain"
+            />
+          </div>
 
-    const StockPanel = () => (
-        <div className="text-gray-500 flex items-center justify-center">
-            <p>No Stock Info Info</p>
-        </div>
-    )
-
-return (
-    <div>
-        <div className="border-b border-gray-600 p-2 flex justify-between">
-            <Link href="/admin/products"><ArrowLeftIcon/></Link>
-            <p>{product.product_name} 's Info</p>
-        </div>
-        <div className="flex p-5 border border-gray-500 m-3 rounded-lg">
-            {product.product_image ? (
-                <img src={product.product_image} alt={product.product_name} className="w-[200px] h-[200px] " />
-            ):(
-                <img src="/assets/default.jpg" alt="default" className="w-[200px] h-[200px] " />
-            )}
-
-            <div className="flex flex-col p-4">
-            <h1 className="text-2xl font-bold ">{product.product_name}</h1>
-            <p className="text-gray-500 text-sm ">SKU-CODE: {product.sku_code}</p>
-            <p className="text-gray-500 text-sm ">Vendor Name: {vendor.vendor_name}</p>
-            <p className="text-gray-500 text-sm ">Description: {product.description}</p>
-            </div>
-
-        </div>
-
-        <div className="flex flex-col gap-5 border-gray-500 mt-10">
-            <div className="border-b border-gray-200">
-                <button 
-                onClick={() => setActiveTab("basic")}
-                className={`flex-1 px-6 py-3 text-sm font-medium transitio-colors 
-                    ${
-                        activeTab === "basic"
-                        ? "text-amber-600 border-b-2 border-amber-600 bg-amber-100"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-amber-50"
-                    }`}
-                >
-                    Basic Info
-                </button>
-                <button 
-                onClick={() => setActiveTab("price")}
-                className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
-                activeTab === "price"
-                  ? "text-amber-600 border-b-2 border-amber-600 bg-amber-50"
-                  : "text-gray-600 hover:text-amber-900 hover:bg-amber-50"
-              }`}
-                >
-                    Price Info
-                </button>
-
-                <button 
-                onClick={() => setActiveTab("stock")}
-                className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
-                activeTab === "stock"
-                ? "text-amber-600 border-b-2 border-amber-600 bg-amber-50"
-                : "text-gray-600 hover:text-amber-900 hover:bg-amber-50"
-                }`}
-                >
-                Stock Info
-                </button>
-            </div>
-
-            {/* Tab Content */}
-          <div className="min-h-[200px]">
-            {activeTab === "basic" && <BasicInfoPanel/>}
-            {activeTab === "price" && <PricePanel/>}
-            {activeTab === "stock" && <StockPanel/>}
+          <div className="mt-4 flex justify-center">
+            <Barcode
+              value={String(product.product_id)}
+              width={1}
+              height={40}
+              fontSize={12}
+            />
           </div>
         </div>
+      </div>
+
+      {/* Right Panel */}
+      <div className="flex-1 bg-white rounded-lg shadow-sm p-6 xl:overflow-y-auto space-y-8">
+        {/* Basic Info */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold border-b pb-2">
+            Basic Information
+          </h2>
+
+          <UpdateForm
+            product={product}
+            categories={categories}
+            subcategories={subcategories}
+            vendors={vendors}
+          />
+
+          <InfoRow label="Product Name" value={product.product_name} />
+          <InfoRow label="SKU Code" value={product.sku_code} />
+          <InfoRow label="Category" value={category.category_name} />
+          <InfoRow label="Subcategory" value={subcategory.subcategory_name} />
+          <InfoRow label="Vendor" value={vendor.vendor_name} />
+          <InfoRow label="Package Type" value={product.package_type} />
+          <InfoRow label="Description" value={product.description} />
+          <InfoRow label="Created At" value={createdAt} />
+        </section>
+
+        {/* Attributes */}
+        <section className="space-y-2">
+          <h2 className="text-lg font-semibold border-b">
+            Attributes
+          </h2>
+
+          <UpdateAttributeForm attributes={attribute}/>
+          {attribute.length > 0 ? (
+            attribute.map((a) => (
+              <InfoRow
+                key={a.attribute_id}
+                label={a.attribute_name}
+                value={a.value}
+              />
+            ))
+          ) : (
+            <p className="text-sm text-gray-500">No attributes available</p>
+          )}
+        </section>
+
+        {/* Price */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold border-b pb-2">
+            Price Information
+          </h2>
+
+          {price.total_amount && (
+            <>
+              <p className="font-semibold">General Customer</p>
+              <UpdatePriceFormB2C priceData={price} />
+              <InfoRow label="Sale Price" value={String(price.total_amount)} />
+            </>
+          )}
+
+          {price.b2b_price && (
+            <>
+              <p className="font-semibold">Dealer</p>
+              <UpdatePriceFormB2B priceData={price} />
+              <InfoRow label="Sale Price" value={String(price.b2b_price)} />
+            </>
+          )}
+        </section>
+      </div>
     </div>
-    )
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string;
+}) {
+  return (
+    <div className="grid grid-cols-3 gap-4 text-sm">
+      <span className="text-gray-500">{label}</span>
+      <span className="col-span-2 font-medium">
+        {value || "-"}
+      </span>
+    </div>
+  );
 }

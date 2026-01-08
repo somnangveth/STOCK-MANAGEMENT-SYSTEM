@@ -39,7 +39,8 @@ type ColumnKey =
   | "date"
   | "description"
 
-
+  | "current_quantity"
+  | "alert_type"
 
   // Expired Batch
   | "manufacture_date"
@@ -79,6 +80,9 @@ type Product = {
   quantity?: number;
   date?: string;
   description?: string;
+
+  current_quantity?: number;
+  alert_type?: string;
   manufacture_date?: string;
   expiry_date?: string;
   received_date?: string;
@@ -122,6 +126,13 @@ export default function ProductTable({
     return <p className="text-center p-4 text-gray-500">No products found matching your filters</p>;
   }
 
+  //Alert Type Labels 
+  const alertTypeLabels: Record<string, string> = {
+    active: "active",
+    overstock: "overstock",
+    low_stock: "low stock",
+    out_of_stock: "out of stock",
+  }
   const totalPages = Math.ceil(product.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -190,19 +201,6 @@ export default function ProductTable({
 
   return (
     <div className="space-y-4">
-      {/* Selection info */}
-      {selectedRows.size > 0 && (
-        
-          <button
-            onClick={() => {
-              setSelectedRows(new Set());
-              if (onSelectionChange) onSelectionChange([]);
-            }}
-            className="text-sm text-blue-700 hover:text-blue-900 underline"
-          >
-            Clear selection
-          </button>
-      )}
 
       <Table className="w-full border border-gray-300 rounded-xl">
         {/* Header */}
@@ -244,6 +242,10 @@ export default function ProductTable({
             {columns.includes("quantity") && <TableHead>Qty</TableHead>}
             {columns.includes("date") && <TableHead>Date</TableHead>}
             {columns.includes("description") && <TableHead>Description</TableHead>}
+
+            {columns.includes("current_quantity") && <TableHead className="text-center">Current Qty</TableHead>}
+            {columns.includes("alert_type") && <TableHead className="text-center">Status</TableHead>}
+
             {columns.includes("manufacture_date") && <TableHead>Manufacture Date</TableHead>}
             {columns.includes("recieved_date") && <TableHead>Received Date</TableHead>}
             {columns.includes("expiry_date") && <TableHead>Expiry Date</TableHead>}
@@ -305,14 +307,14 @@ export default function ProductTable({
               {columns.includes("product_name") && <TableCell>{products.product_name || "—"}</TableCell>}
               {columns.includes("category_id") && (
                 <TableCell className="text-center">
-                  <p className="bg-amber-100 text-amber-700 rounded-lg px-2 py-1">
+                  <p className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-amber-700">
                     {products.category_name || "—"}
                   </p>
                 </TableCell>
               )}
               {columns.includes("subcategory_id") && (
                 <TableCell className="text-center">
-                  <p className="bg-purple-100 text-purple-700 rounded-lg px-2 py-1">
+                  <p className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-yellow-700 ">
                     {products.subcategory_name || "—"}
                   </p>
                 </TableCell>
@@ -334,6 +336,25 @@ export default function ProductTable({
               {columns.includes("quantity") && <TableCell>{products.quantity ?? "—"}</TableCell>}
               {columns.includes("date") && <TableCell>{products.date || "—"}</TableCell>}
               {columns.includes("description") && <TableCell>{products.description || "—"}</TableCell>}
+
+              {columns.includes("current_quantity") && <TableCell className="text-center">{products.current_quantity || "-"}</TableCell>}
+              {columns.includes("alert_type") && (
+                <TableCell className="text-center">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                    products.alert_type === "active"
+                    ? "text-green-700 bg-green-300"
+                    : products.alert_type === "overstock"
+                      ? "text-orange-600 bg-yellow-300"
+                      : products.alert_type === "low_stock"
+                        ? "text-amber-700 bg-orange-300"
+                        : products.alert_type === "out_of_stock"
+                          ? "text-red-700 bg-red-300"
+                          : "bg-gray-100 text-gray-700"
+                  }`}>
+                    {alertTypeLabels[products.alert_type as string] || "-"}
+                  </span>
+                </TableCell>
+              )}
               {columns.includes("manufacture_date") && (
                 <TableCell>{formatDate(products.manufacture_date)}</TableCell>
               )}

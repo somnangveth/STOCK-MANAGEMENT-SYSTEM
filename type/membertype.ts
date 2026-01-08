@@ -3,6 +3,7 @@ export type Member = {
   auth_id: string;
   admin_id: string;
   staff_id: string;
+  contact_id: string;
 
 
   first_name: string;
@@ -33,6 +34,7 @@ export type Admin = {
   date_of_birth: Date;
   phone_number1: string;
   phone_number2: string;
+  nationality: string;
   martial_status: string;
   primary_email_address: string;
   personal_email_address: string;
@@ -57,6 +59,7 @@ export type Staff = {
   personal_email_address: string;
   primary_phone_number: string;
   contact: Contact;
+  nationality: string;
 }
 
 export type Contact = {
@@ -90,4 +93,6 @@ export type Dealer = {
   shop_address: string;
   delivery_address: string;
   businesstype: "retail" | "wholesale" | "mixed" | "online";
+  payment_duedate: string;
+  profile_image: string;
 }

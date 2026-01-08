@@ -2,9 +2,9 @@
 
 import { useState, useCallback } from "react";
 import SearchBar from "@/app/components/SearchBar";
-import ProductForm from "./components/ProductForm";
-import ProductList, { EnhancedProduct } from "./components/ProductLists";
 import { Product } from "@/type/productType";
+import ProductList, { EnhancedProduct } from "./components/product/ProductLists";
+import ProductForm from "./components/product/ProductForm";
 
 export default function ProductManagement() {
   const [refreshKey, setRefreshKey] = useState(0);

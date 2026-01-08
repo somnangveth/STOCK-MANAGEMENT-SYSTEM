@@ -4,11 +4,14 @@ import { Product, Sale } from "@/type/productType";
 import Barcode from "react-barcode";
 
 export type SaleItem = {
+  product_id: string;
+  sale_id: any;
   product: Product;
   quantity: number;
   unit_price: number;
   subtotal: number;
   total: number;
+  package_qty: number;
 };
 
 export interface ReceiptCardProps {

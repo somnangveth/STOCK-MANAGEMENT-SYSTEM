@@ -1,5 +1,6 @@
 "use client";
 
+import { btnStyle } from "@/app/components/ui";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
@@ -9,7 +10,7 @@ export default function AddDealerForm(){
     return(
         <Button
         onClick={() => router.push('/admin/salesb2b/components/addDealer')}
-        className="px-3 py-1 hover:bg-gray-300 ">
+        className={btnStyle}>
             Add Dealer
         </Button>
     )

@@ -3,24 +3,23 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { PriceProductProps } from "../B2C/UpdateForm";
 import { updatePriceB2B } from "@/app/functions/admin/price/price";
 import { styledToast } from "@/app/components/Toast";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CancelBtn, SubmitBtn } from "@/app/components/ui";
+import { Price } from "@/type/productType";
 
 const UpdateSchema = z.object({
     base_price: z.number().min(0, "Must be greater than 0"),
     profit_price: z.number().min(0, "Must be greater than 0"),
     tax: z.number().min(0, "Must be greater than 0"),
     shipping: z.number().min(0, "Must be greater than 0"),
-    discount: z.number().min(0, "Must be greater than 0"),
     b2b_price: z.number().min(0, "Must be greater than 0"),
 });
 
-export default function UpdateSinglePriceB2B({priceData}:{priceData: PriceProductProps}){
+export default function UpdateSinglePriceB2B({priceData}:{priceData: Price}){
     const [isPending, startTransition] = useTransition();
 
     const form = useForm<z.infer<typeof UpdateSchema>>({
@@ -30,7 +29,6 @@ export default function UpdateSinglePriceB2B({priceData}:{priceData: PriceProduc
             profit_price: priceData.profit_price,
             tax: priceData.tax,
             shipping: priceData.shipping,
-            discount: priceData.discount,
             b2b_price: priceData.total_price,
         }
     });
@@ -44,20 +42,18 @@ export default function UpdateSinglePriceB2B({priceData}:{priceData: PriceProduc
     //Auto Calculating the Price
     useEffect(() => {
         const subscription = form.watch((value, { name }) => {
-            const priceFields = ['base_price', 'tax', 'profit_price', 'shipping', 'discount'];
+            const priceFields = ['base_price', 'tax', 'profit_price', 'shipping'];
             
             if (priceFields.includes(name as string)) {
                 const base_price = value.base_price || 0;
                 const tax_percent = value.tax || 0;
                 const profit_price = value.profit_price || 0;
                 const shipping = value.shipping || 0;
-                const discount_percent = value.discount || 0;
                 
                 const subtotal = base_price + profit_price + shipping;
                 const taxAmount = (subtotal * tax_percent) / 100;
                 const totalBeforeDiscount = subtotal + taxAmount;
-                const discountAmount = (totalBeforeDiscount * discount_percent) / 100;
-                const total = totalBeforeDiscount - discountAmount;
+                const total = totalBeforeDiscount;
                 
                 form.setValue('b2b_price', Math.max(0, total));
             }
@@ -158,25 +154,6 @@ export default function UpdateSinglePriceB2B({priceData}:{priceData: PriceProduc
                     render={({field}) => (
                         <FormItem>
                             <FormLabel className={text}>Shipping: </FormLabel>
-                            <FormControl>
-                                <Input
-                                type="number"
-                                step="0.01"
-                                {...field}
-                                value={field.value}
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                />
-                            </FormControl>
-                        </FormItem>
-                    )}/>
-
-                    {/* Discount Percent */}
-                    <FormField
-                    control={form.control}
-                    name="discount"
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel className={text}>Discount (%): </FormLabel>
                             <FormControl>
                                 <Input
                                 type="number"

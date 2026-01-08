@@ -1,7 +1,7 @@
 "use server";
 
 //1. Fetch Permission
-export async function fetchProducts(){
+export async function fetchStaffProducts(){
     const res = await fetch('/api/staff/fetchProducts');
     if(!res.ok){
         throw new Error("Error to fetch");
@@ -11,7 +11,7 @@ export async function fetchProducts(){
 }
 
 //2. Fetch Product Batch
-export async function fetchBatch(){
+export async function fetchStaffBatch(){
     const res = await fetch('/api/staff/fetchBatch');
     if(!res.ok){
         throw new Error("Error to fetch");
@@ -21,7 +21,7 @@ export async function fetchBatch(){
 }
 
 //3. Fetch Category
-export async function fetchCategory(){
+export async function fetchStaffCategory(){
     const res = await fetch('/api/staff/fetchCategory');
     if(!res.ok){
         throw new Error("Error to fetch");
@@ -31,7 +31,7 @@ export async function fetchCategory(){
 }
 
 //4. Fetch Subcategory
-export async function fetchSubcategory(){
+export async function fetchStaffSubcategory(){
     const res = await fetch('/api/staff/fetchSubcategory');
     if(!res.ok){
         throw new Error('Error to fetch');
@@ -41,7 +41,7 @@ export async function fetchSubcategory(){
 }
 
 //5. fetch Vendors
-export async function fetchVendors(){
+export async function fetchStaffVendors(){
     const res = await fetch('/api/staff/fetchVendors');
     if(!res.ok){
         throw new Error("Error to fetch");

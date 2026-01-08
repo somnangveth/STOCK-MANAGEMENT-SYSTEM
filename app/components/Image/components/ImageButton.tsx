@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { ChangeEvent, useRef } from "react";
@@ -9,49 +10,59 @@ interface UploadImageButtonProps {
   setImageUrls: (urls: string[]) => void;
 }
 
-export default function UploadImageButton({ imageUrls, setImageUrls }: UploadImageButtonProps) {
+export default function UploadImageButton({
+  imageUrls,
+  setImageUrls,
+}: UploadImageButtonProps) {
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      // Take only the first selected image (replace mode)
-      const file = e.target.files[0];
-      const newImageUrl = URL.createObjectURL(file);
+    if (!e.target.files || e.target.files.length === 0) return;
 
-      // Replace the old image with the new one
-      setImageUrls([newImageUrl]);
-    }
+    const file = e.target.files[0];
+    const previewUrl = URL.createObjectURL(file);
+
+    // Replace mode (single image)
+    setImageUrls([previewUrl]);
   };
 
+  const hasImage = imageUrls.length > 0;
+
   return (
-    <div className="flex gap-5 items-center">
+    <div className="flex items-center">
       <input
+        ref={imageInputRef}
         type="file"
         accept="image/*"
         hidden
-        ref={imageInputRef}
         onChange={handleImageChange}
       />
 
       <Button
         type="button"
         onClick={() => imageInputRef.current?.click()}
-        className="w-35 h-35 p-2 bg-gray-300 flex items-center justify-center hover:bg-gray-400 transition-colors"
+        className="relative w-32 h-32 p-0 rounded-lg border border-gray-400 bg-gray-200 overflow-hidden group"
       >
-        <FaPlus className="text-gray-700 text-5xl" />
-      </Button>
-
-      <div>
-        {imageUrls.length > 0 && (
+        {/* Image */}
+        {hasImage && (
           <Image
             src={imageUrls[0]}
-            className="border border-gray-500 rounded-md"
-            width={100}
-            height={100}
-            alt="uploaded-image"
+            alt="Uploaded image"
+            fill
+            className="object-cover transition-transform duration-200 group-hover:scale-105"
           />
         )}
-      </div>
+
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+        {/* Plus Icon */}
+        <FaPlus
+          className={`absolute text-white text-4xl transition-opacity ${
+            hasImage ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+          }`}
+        />
+      </Button>
     </div>
   );
 }

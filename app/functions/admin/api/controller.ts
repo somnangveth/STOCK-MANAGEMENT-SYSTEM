@@ -1,3 +1,23 @@
+//Fetch Admins
+export async function fetchAdmins(){
+    const res = await fetch("/api/admin/fetchAdmins");
+    if(!res.ok){
+        throw new Error("Failed to fetch");
+    }
+    return res.json();
+}
+
+//Fetch Staffs
+export async function fetchStaffs(){
+    const res = await fetch("/api/admin/fetchStaffs");
+    if(!res.ok){
+        throw new Error("Failed to fetch");
+    }
+    return res.json();
+}
+
+
+
 //Fetch Products
 export async function fetchProducts(){
     const res = await fetch("/api/admin/fetchProducts");
@@ -106,6 +126,59 @@ export async function fetchSaleItems(){
 
     if(!res.ok){
         console.error("Failed to fetch sale items");
+    }
+
+    return res.json();
+}
+
+//Fetch Discounts
+export async function fetchDiscount(){
+    const res = await fetch("/api/admin/fetchDiscount");
+    if(!res.ok){
+        console.error("Failed to fetch discounts data");
+    }
+
+    return res.json();
+}
+
+
+//Fetch Attribute
+export async function fetchAttribute(){
+    const res = await fetch("/api/admin/fetchAttribute");
+    if(!res.ok){
+        console.error("Failed to fetch attribute data");
+    }
+
+    return res.json();
+}
+
+//Fetch Product Attribute
+export async function fetchProductAttribute(){
+    const res = await fetch("/api/admin/fetchProductAttribute");
+    if(!res.ok){
+        console.error("Failed to fetch product attribute data");
+    }
+
+    return res.json();
+}
+
+
+//Fetch Stock Alert 
+export async function fetchStockAlert(){
+    const res = await fetch("/api/admin/fetchStockAlert");
+    if(!res.ok){
+        console.error("Failed to fetch stock alert data");
+    }
+
+    return res.json();
+}
+
+
+//Fetch Stock movement
+export async function fetchStockMovement(){
+    const res = await fetch("/api/admin/fetchStockMovement");
+    if(!res.ok){
+        console.error("Failed to fetch stock movement data");
     }
 
     return res.json();

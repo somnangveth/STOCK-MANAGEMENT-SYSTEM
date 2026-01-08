@@ -1,23 +1,32 @@
 import { checkUserRole } from "@/lib/auth/roles";
 import { redirect } from "next/navigation";
-import SignOut from "../auth/components/Signout";
+import { StaffSideBar } from "../components/sidebar/StaffNavLink";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 export default async function StaffLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const {authorized, user} = await checkUserRole(['staff', 'admin']);
-
-  if(!authorized){
+  const { authorized, user } = await checkUserRole(['staff', 'admin']);
+  
+  if (!authorized) {
     redirect('/auth');
   }
+
   return (
-    <div className="min-h-screen flex">
-      <main className="flex-1 p-6">
-        {children}
-        <SignOut/>
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <StaffSideBar />
+        <main className="flex-1 flex flex-col">
+          <header className="sticky top-0 z-10 border-b bg-background p-4">
+            <SidebarTrigger />
+          </header>
+          <div className="flex-1 p-6">
+            {children}
+          </div>
+        </main>
+      </div>
+    </SidebarProvider>
   );
 }

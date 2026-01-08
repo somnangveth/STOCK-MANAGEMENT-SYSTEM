@@ -1,8 +1,7 @@
 "use client";
-
-import ProductCardList from "./components/ProductCardList";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import ProductCardListB2B from "./components/ProductCardList";
 
 export default function POSPage(){
     const router = useRouter();
@@ -17,7 +16,7 @@ export default function POSPage(){
                     Back to main page
                 </button>
             </div>
-            <ProductCardList/>
+            <ProductCardListB2B/>
         </div>
     )
 }

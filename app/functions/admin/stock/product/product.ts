@@ -17,12 +17,13 @@ export async function createProduct(data: Partial<{
   product_image?: string;
   min_stock_level: number;
   max_stock_level: number;
-  default_shelf_life_days: number;
-  base_unit: string;
   units_per_package: number;
   package_type: "box" | "case";
 
-
+  attributes?: Array<{
+  attribute_id: string;
+  value: string;
+  }>
   //Price
   base_price: number;
   profit_price: number;
@@ -69,8 +70,6 @@ export async function createProduct(data: Partial<{
       product_image: data.product_image,
       min_stock_level: data.min_stock_level,
       max_stock_level: data.max_stock_level,
-      default_shelf_life_days: data.default_shelf_life_days,
-      base_unit: data.base_unit,
       units_per_package: data.units_per_package,
       package_type: data.package_type,
       created_by: createdBy,
@@ -88,6 +87,25 @@ export async function createProduct(data: Partial<{
   if (!productId) {
     throw new Error("No product ID returned from product insert.");
   }
+  
+  // Insert attributes
+if (data.attributes && data.attributes.length > 0) {
+  const attributeRecord = data.attributes.map((item) => ({
+    product_id: productId,
+    attribute_id: item.attribute_id,
+    value: item.value,
+  }));
+
+  const { data: productAttributeData, error: productAttributeError } =
+    await supabase.from("product_attribute").insert(attributeRecord).select();
+
+  if (productAttributeError) {
+    console.error("Failed to insert product attribute: ", productAttributeError);
+    throw new Error(productAttributeError.message);
+  }
+  // <-- no return here! continue to insert prices, batch, alerts
+}
+
 
 
   //Insert into Price table for B2C
@@ -156,7 +174,47 @@ export async function createProduct(data: Partial<{
     throw new Error(batchError.message);
   }
 
-  return { productData, batchData, priceB2CData, priceB2BData};
+  const batchId = batchData?.batch_id;
+
+  //Insert into expiry_alert table
+  const {data: expiryAlertData, error: expiryAlertError} = await supabase
+  .from("expiry_alert")
+  .insert({
+    batch_id: batchId,
+    product_id: productId,
+    expiry_date: data.expiry_date
+  });
+
+  if(expiryAlertError){
+    console.error("Failed to insert into expiry_alert table", expiryAlertError);
+    throw new Error(expiryAlertError.message);
+  }
+
+  //Insert into stock alert
+  const {data: stockAlertData, error: stockAlertError} = await supabase
+  .from("stock_alert")
+  .insert({
+     product_id: productId,
+     threshold_quantity: data.min_stock_level,
+     max_stock_level: data.max_stock_level,
+     current_quantity: data.quantity,
+     package_qty: data.packages_recieved,
+     package_type: data.package_type,
+     units_per_package: data.units_per_package,
+  });
+
+  if(stockAlertError){
+    console.error("Failed to insert into stock alert", stockAlertError);
+    throw new Error(stockAlertError.message);
+  }
+
+  return { 
+    productData, 
+    batchData,
+    priceB2CData, 
+    priceB2BData,
+    expiryAlertData,
+    stockAlertData};
 }
 
 
@@ -165,19 +223,13 @@ export async function createProduct(data: Partial<{
 export async function updateProduct(
   product_id: string,
   data: Partial<{
-    sku_code: string | null;
-    product_name: string | null;
-    slug: string | null;
-    category_id: string | null;
-    subcategory_id: string | null;
-    vendor_id: string | null;
+    sku_code: string;
+    product_name: string;
+    category_id: string;
+    subcategory_id: string;
+    vendor_id: string;
     description: string | null;
     product_image: string | null;
-    min_stock_level: number | null;
-    max_stock_level: number | null;
-    default_shelf_life_days: number | null;
-    base_unit: string | null;
-    units_per_package: number | null;
     package_type: 'box' | 'case' | null;
   }>
 ) {

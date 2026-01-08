@@ -2,7 +2,6 @@
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Price } from "@/type/productType";
 import { useEffect, useTransition } from "react";
 import { updatePriceB2C } from "@/app/functions/admin/price/price";
 import { styledToast } from "@/app/components/Toast";
@@ -10,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PriceProductProps } from "./UpdateForm";
+import { Price } from "@/type/productType";
 
 
 const UpdateSchema = z.object({
@@ -17,11 +17,10 @@ const UpdateSchema = z.object({
     profit_price: z.number().min(0, "Must be greater than 0"),
     tax: z.number().min(0, "Must be greater than 0"),
     shipping: z.number().min(0, "Must be greater than 0"),
-    discount: z.number().min(0, "Must be greater than 0"),
     total: z.number().min(0, "Must be greater than 0"),
 });
 
-export default function UpdateSinglePriceB2C({priceData}: {priceData: PriceProductProps}){
+export default function UpdateSinglePriceB2C({priceData}: {priceData: Price}){
 
     //--Hooks--
     const [isPending, startTransition] = useTransition();
@@ -37,7 +36,6 @@ export default function UpdateSinglePriceB2C({priceData}: {priceData: PriceProdu
             tax: priceData.tax || 0,
             profit_price: priceData.profit_price || 0,
             shipping: priceData.shipping || 0,
-            discount: priceData.discount || 0,
             total: priceData.total_price || 0,
         }
     });
@@ -54,13 +52,11 @@ export default function UpdateSinglePriceB2C({priceData}: {priceData: PriceProdu
                 const tax_percent = value.tax || 0;
                 const profit_price = value.profit_price || 0;
                 const shipping = value.shipping || 0;
-                const discount_percent = value.discount || 0;
                 
                 const subtotal = base_price + profit_price + shipping;
                 const taxAmount = (subtotal * tax_percent) / 100;
                 const totalBeforeDiscount = subtotal + taxAmount;
-                const discountAmount = (totalBeforeDiscount * discount_percent) / 100;
-                const total = totalBeforeDiscount - discountAmount;
+                const total = totalBeforeDiscount;
                 
                 form.setValue('total', Math.max(0, total));
             }
@@ -159,25 +155,6 @@ export default function UpdateSinglePriceB2C({priceData}: {priceData: PriceProdu
                     render={({field}) => (
                         <FormItem>
                             <FormLabel className={text}>Shipping: </FormLabel>
-                            <FormControl>
-                                <Input
-                                type="number"
-                                step="0.01"
-                                {...field}
-                                value={field.value}
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                />
-                            </FormControl>
-                        </FormItem>
-                    )}/>
-
-                    {/* Discount Percent */}
-                    <FormField
-                    control={form.control}
-                    name="discount"
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel className={text}>Discount (%): </FormLabel>
                             <FormControl>
                                 <Input
                                 type="number"

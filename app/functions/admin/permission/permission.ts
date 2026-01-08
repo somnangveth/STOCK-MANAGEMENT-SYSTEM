@@ -63,79 +63,63 @@ export async function fetchStaffPermissions(staff_id: string){
     }
 }
 // Updating staff permission for all staffs
-export async function updateAllStaffPermission(){
+export async function updateAllStaffPermission(selectedPermissionIds: string[]){
     const supabase = await createSupabaseAdmin();
-
     try{
-        //1. fetch all permission defaults 
-        const {data: permissionDefaults, error: fetchError} = await supabase
-        .from("permission_default")
-        .select("permission_id");
-
-        if(fetchError){
-            console.error("Failed to fetch permission defaults: ", fetchError);
-            throw new Error("Error fetching permission defaults");
-        }
-
-        if(!permissionDefaults || permissionDefaults.length === 0){
-            console.warn("No permission defaults found");
-            return[];
-        }
-
-        //2. Get all staff IDs 
+        //1. Get all staff IDs 
         const {data: allStaff, error: staffError} = await supabase
-        .from("staff")
-        .select("staff_id");
-
-
+            .from("staff")
+            .select("staff_id");
+        
         if(staffError){
             console.error("Failed to fetch staff: ", staffError);
             throw new Error("Error fetching staff");
         }
 
-        //3. delete all existing staff permissions
+        if(!allStaff || allStaff.length === 0){
+            console.warn("No staff found");
+            return [];
+        }
+        
+        //2. Delete ALL existing staff permissions (complete wipe)
         const {error: deleteError} = await supabase
-        .from("staff_permission")
-        .delete()
-        .eq('staff', "00000000-0000-0000-0000-000000000000");
-
+            .from("staff_permission")
+            .delete()
+            .neq('staff_permission_id', '00000000-0000-0000-0000-000000000000'); // Deletes all rows
+        
         if(deleteError){
             console.error("Failed to delete existing staff permissions: ", deleteError);
             throw new Error("Error deleting existing permissions");
         }
-
-        const {data: permissionTable, error: permissionError} = await supabase
-        .from('permission_table')
-        .select("permission_id");
-
-        if(permissionError){
-            console.error("Failed to fetch permission_table data");
-            throw new Error("Failed to fetch");
+        
+        //3. Prepare new staff permission records
+        //For each staff member, insert only the SELECTED permission_ids
+        const newStaffPermissions = allStaff.flatMap((staff) => 
+            selectedPermissionIds.map((permissionId) => ({
+                staff_id: staff.staff_id,
+                permission_id: permissionId,
+            }))
+        );
+        
+        //4. Insert new staff permissions (only if there are selections)
+        if(newStaffPermissions.length === 0){
+            console.log("No permissions selected - all staff permissions cleared");
+            return [];
         }
 
-        //4. Prepare new staff permission records
-        //For each staff member, insert all permission_ids from permission_table
-        const newStaffPermissions = allStaff.flatMap((staff) => 
-        permissionTable.map((perm) => ({
-            staff_id: staff.staff_id,
-            permission_id: perm.permission_id,
-        })));
-
-        //5. Insert new staff permissions
-        const {data: insertedPermissios, error: insertError} = await supabase
-        .from("staff_permission")
-        .insert(newStaffPermissions)
-        .select();
-
+        const {data: insertedPermissions, error: insertError} = await supabase
+            .from("staff_permission")
+            .insert(newStaffPermissions)
+            .select();
+        
         if(insertError){
             console.error("Failed to insert new staff permissions: ", insertError);
             throw new Error("Error inserting new permissions");
         }
-
-        console.log(`Successfully updated permissions for ${allStaff.length} staff members`);
-        return insertedPermissios;
-
-    }catch(error){
+        
+        console.log(`Successfully updated permissions for ${allStaff.length} staff members with ${selectedPermissionIds.length} permissions each`);
+        return insertedPermissions;
+    } catch(error){
         console.error("Failed to update staff permissions: ", error);
         throw error;
     }

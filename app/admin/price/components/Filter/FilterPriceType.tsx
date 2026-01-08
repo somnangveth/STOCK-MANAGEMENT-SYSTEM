@@ -9,8 +9,9 @@ export default function FilterPriceType(){
 const [selected, setSelected] = useState('b2c');
 
 return(
-    <div>
+    <div className="">
         <div className="flex justify-end p-4">
+            
             <Select value={selected} onValueChange={setSelected}>
             <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder = "Select member type"/>

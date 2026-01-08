@@ -230,8 +230,10 @@ export async function updateAdmin(
     email: string;
     first_name: string;
     last_name: string;
-    password: string;
-    name: string;
+    nationality: string;
+    date_of_birth: Date;
+    martial_status: string;
+    gender: string;
   }>
 ) {
   try {
@@ -272,9 +274,6 @@ export async function updateAdmin(
     if (data.email) {
       authUpdate.email = data.email;
     }
-    if (data.password) {
-      authUpdate.password = data.password;
-    }
 
     const user_metadata: any = {};
     if (data.first_name !== undefined) user_metadata.first_name = data.first_name;
@@ -310,11 +309,17 @@ export async function updateAdmin(
     if (data.email !== undefined) profileData.email = data.email;
     if (data.first_name !== undefined) profileData.first_name = data.first_name;
     if (data.last_name !== undefined) profileData.last_name = data.last_name;
+    if (data.nationality !== undefined) profileData.nationality = data.nationality;
+    if (data.date_of_birth !== undefined) profileData.date_of_birth = data.date_of_birth;
+    if (data.martial_status !== undefined) profileData.martial_status = data.martial_status;
+    if (data.gender !== undefined) profileData.gender = data.gender;
 
     if (data.first_name !== undefined || data.last_name !== undefined) {
       const firstName = data.first_name || '';
       const lastName = data.last_name || '';
     }
+
+    console.log("Updating martial_status:", data.martial_status);
 
     if (Object.keys(profileData).length > 0) {
       const { error: profileError } = await supabase
@@ -380,7 +385,33 @@ export async function updateStaff(
 
 }
 
+//Update Contact Info
+export async function updateContact(
+  contact_id: string,
+  data: Partial<{
+    primary_email_address: string;
+    personal_email_address: string;
+    primary_phone_number: string;
+  }>
+){
+  const supabase = await createSupabaseAdmin();
 
+  const {data: contactData, error: contactError} = await supabase
+  .from("contact_info")
+  .update({
+    primary_email_address: data.primary_email_address,
+    personal_email_address: data.personal_email_address,
+    primary_phone_number: data.primary_phone_number,
+  })
+  .eq('contact_id', contact_id);
+
+  if(contactError){
+    console.error("Failed to update contact data");
+    throw new Error(`Error updating... ${contactError.message}`);
+  }
+
+  return contactData;
+}
 //Fetch Contact Info
 export async function fetchContacts(){
   const supabase = await createSupabaseAdmin();
