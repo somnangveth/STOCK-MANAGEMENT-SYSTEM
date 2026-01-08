@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { convertFromDollarToRiels } from "@/app/functions/admin/price/currency";
+import UpdatePriceFormB2C from "./UpdateForm";
 
 interface PriceTableB2CProps {
   productData: Product[];
@@ -98,7 +99,7 @@ export default function PriceTableB2C({ productData, priceData }: PriceTableB2CP
         columns={["select", "product_name", "base_price", "profit_price", "shipping", "action"]}
         form={(item) => (
           <>
-            <UpdateSinglePriceB2C priceData={item as Price} />
+            <UpdatePriceFormB2C priceData={item as Price} />
             <SingleDiscountForm price={item as Price} />
           </>
         )}

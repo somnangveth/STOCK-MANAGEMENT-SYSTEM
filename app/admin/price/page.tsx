@@ -1,16 +1,16 @@
 "use client";
 
-import { fetchPricesB2C, fetchPricesB2B, fetchProducts } from "@/app/functions/admin/api/controller";
-import { useQueries } from "@tanstack/react-query";
 import { useState } from "react";
+import { useQueries } from "@tanstack/react-query";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { RetryButton } from "@/app/components/error/error";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import PriceTableB2B from "./components/B2B/PriceTable";
+import { fetchPricesB2C, fetchPricesB2B, fetchProducts } from "@/app/functions/admin/api/controller";
+import { RetryButton } from "@/app/components/error/error";
 import PriceTableB2C from "./components/B2C/PriceTable";
+import PriceTableB2B from "./components/B2B/PriceTable";
 
 export default function PriceManagementPage() {
-  const [selectedType, setSelectedType] = useState<'b2c' | 'b2b'>('b2c');
+  const [selectedType, setSelectedType] = useState("b2c");
 
   const result = useQueries({
     queries: [
@@ -34,12 +34,14 @@ export default function PriceManagementPage() {
     );
   }
 
-  if (hasError) return <RetryButton />;
+  if (hasError) {
+    return <RetryButton />;
+  }
 
   return (
     <div className="flex flex-col">
       <div className="flex justify-end p-4">
-        <Select value={selectedType} onValueChange={(v: any) => setSelectedType(v)}>
+        <Select value={selectedType} onValueChange={setSelectedType}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select member type" />
           </SelectTrigger>
@@ -50,7 +52,7 @@ export default function PriceManagementPage() {
         </Select>
       </div>
 
-      {selectedType === 'b2c' ? (
+      {selectedType === "b2c" ? (
         <div className="mt-5">
           <PriceTableB2C 
             productData={productData || []} 
