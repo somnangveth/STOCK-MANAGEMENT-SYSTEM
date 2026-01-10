@@ -3,6 +3,7 @@ import DialogForm from "@/app/components/DialogForm";
 import { Button } from "@/components/ui/button";
 import { Staff } from "@/type/membertype";
 import EditForm from "./EditForm";
+import { FaPen } from "react-icons/fa";
 
 export default function EditStaff({staff}: {staff: Staff}){
     return(
@@ -11,9 +12,9 @@ export default function EditStaff({staff}: {staff: Staff}){
         title="Edit Staff Info"
         Trigger ={ 
             <Button
-            className="border border-blue-700 bg-blue-100 text-blue-700 rounded-xl"
+            className="w-10 h-5 text-sm  bg-transparent text-blue-500 rounded-xl"
             >
-                Edit
+               <FaPen/>
             </Button>
         }
 
